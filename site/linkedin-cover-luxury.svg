@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4200 700" role="img" aria-label="Arasense LinkedIn cover">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#081117"/>
+      <stop offset="50%" stop-color="#0b1820"/>
+      <stop offset="100%" stop-color="#0f1f27"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f1dfba"/>
+      <stop offset="100%" stop-color="#b78e4b"/>
+    </linearGradient>
+    <linearGradient id="emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97c7b6"/>
+      <stop offset="100%" stop-color="#4f8677"/>
+    </linearGradient>
+  </defs>
+  <rect width="4200" height="700" fill="url(#bg)"/>
+  <circle cx="3750" cy="-40" r="420" fill="#c09a57" opacity="0.08"/>
+  <circle cx="3320" cy="640" r="520" fill="#6ea08e" opacity="0.08"/>
+  <g transform="translate(180 110)">
+    <rect x="0" y="0" width="480" height="480" rx="108" fill="none" stroke="url(#gold)" stroke-width="6"/>
+    <circle cx="240" cy="240" r="152" fill="none" stroke="url(#emerald)" stroke-width="6"/>
+    <path d="M240 82 345 326h-44l-23-57h-76l-23 57h-44Zm0 66-33 78h66Z" fill="url(#gold)"/>
+    <path d="M204 257h73" stroke="url(#emerald)" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(820 180)">
+    <text x="0" y="140" fill="#f5efe4" font-size="174" font-family="Georgia, 'Times New Roman', serif" letter-spacing="18">ARASENSE</text>
+    <path d="M5 186h1320" stroke="url(#gold)" stroke-width="6" stroke-linecap="round" opacity="0.96"/>
+    <text x="0" y="276" fill="#d1b276" font-size="48" font-family="'Segoe UI', Arial, sans-serif" letter-spacing="16">CLIMATE INTELLIGENCE</text>
+    <text x="0" y="370" fill="#9bb1ac" font-size="44" font-family="'Segoe UI', Arial, sans-serif">Validated analytics for infrastructure, flood, and risk decisions.</text>
+  </g>
+</svg>

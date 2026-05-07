@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Arasense LinkedIn logo">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f1dfba"/>
+      <stop offset="100%" stop-color="#b78e4b"/>
+    </linearGradient>
+    <linearGradient id="emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#97c7b6"/>
+      <stop offset="100%" stop-color="#4f8677"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="84" fill="#081117"/>
+  <rect x="30" y="30" width="340" height="340" rx="68" fill="none" stroke="url(#gold)" stroke-width="4"/>
+  <circle cx="200" cy="200" r="108" fill="none" stroke="url(#emerald)" stroke-width="4" opacity="0.95"/>
+  <path d="M200 88 275 260h-31l-17-40h-54l-17 40h-31Zm0 46-24 57h48Z" fill="url(#gold)"/>
+  <path d="M174 212h52" stroke="url(#emerald)" stroke-width="8" stroke-linecap="round"/>
+</svg>

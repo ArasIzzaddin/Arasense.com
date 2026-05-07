@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" role="img" aria-label="Arasense logo">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f6e5bc"/>
+      <stop offset="100%" stop-color="#c8a15b"/>
+    </linearGradient>
+    <linearGradient id="emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b0dece"/>
+      <stop offset="100%" stop-color="#5da592"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="180" rx="28" fill="#08131a"/>
+  <g transform="translate(24 24)">
+    <rect width="132" height="132" rx="28" fill="#08131a"/>
+    <rect x="8" y="8" width="116" height="116" rx="24" fill="none" stroke="url(#gold)" stroke-width="2"/>
+    <circle cx="66" cy="66" r="36" fill="none" stroke="url(#emerald)" stroke-width="2"/>
+    <path d="M66 30 91 86h-10.6L75 72.2H57L51.6 86H41Zm0 15.8-7.7 18.8h15.4Z" fill="url(#gold)"/>
+    <path d="M57.7 70h16" stroke="url(#emerald)" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(188 56)">
+    <text x="0" y="42" fill="#f4efe2" font-size="56" font-family="Georgia, 'Times New Roman', serif" letter-spacing="4">ARASENSE</text>
+    <text x="2" y="82" fill="#a7beb7" font-size="18" font-family="'Segoe UI', Arial, sans-serif" letter-spacing="5">CLIMATE INTELLIGENCE</text>
+    <path d="M2 100h286" stroke="url(#gold)" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+earthengine-api
+fastapi
+folium
+geemap
+gunicorn
+kaleido
+matplotlib
+numpy
+pandas
+plotly
+scikit-learn
+streamlit
+streamlit-folium
+torch
+torch-geometric
+uvicorn
