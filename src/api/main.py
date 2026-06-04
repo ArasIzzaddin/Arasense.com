@@ -2187,6 +2187,8 @@ def climate_projection(payload: ClimateProjectionRequest) -> dict:
                 "historical": [payload.hist_start.isoformat(), payload.hist_end.isoformat()],
                 "future": [payload.future_start.isoformat(), payload.future_end.isoformat()],
             },
+            "n_models_scored": len(engine.reports),
+            "trust_models": engine.reports,
             "projection": proj,
         }
     except HTTPException:
