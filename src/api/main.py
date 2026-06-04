@@ -6,6 +6,7 @@ from typing import Literal, Optional
 
 import ee
 import numpy as np
+import pandas as pd
 import torch
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
@@ -13,6 +14,7 @@ from pydantic import BaseModel, Field
 
 from climate.aras_eval import ArasDiagram
 from climate.trust_engine import ModelTrustEngine
+from climate.projection import ClimateProjection, weighted_projection
 from climate.data_fetcher import ArasenseDataFetcher
 from climate.gnn_bias_corrector import ClimateBiasCorrector
 from common.gee import get_earth_engine_status, get_project_id, initialize_earth_engine
@@ -62,6 +64,19 @@ class ClimateDiagnosticRequest(BaseModel):
     end_date: date
     variable: Literal["temperature", "precipitation", "all_euro_cordex"] = "temperature"
     ref_dataset: str = "ERA5-Land"
+    fast_mode: bool = True
+
+
+class ClimateProjectionRequest(BaseModel):
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    radius_km: float = Field(50, gt=0, le=500)
+    variable: Literal["temperature", "precipitation"] = "precipitation"
+    metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac"] = "mean"
+    hist_start: date = date(1995, 1, 1)
+    hist_end: date = date(2014, 12, 31)
+    future_start: date = date(2040, 1, 1)
+    future_end: date = date(2059, 12, 31)
     fast_mode: bool = True
 
 
@@ -748,6 +763,38 @@ def root() -> str:
                 <button class="secondary" type="button" id="snap-rome">Reset to Rome</button>
               </div>
             </form>
+
+            <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px;">
+              <h3 style="margin:0 0 6px;">Forward Projection ★</h3>
+              <p style="color:var(--muted);font-size:13px;margin:0 0 10px;">Trust-weighted change by mid-century (2040&ndash;2059 vs 1995&ndash;2014), using only models that pass skill screening. Uses the map point above.</p>
+              <form id="projection-form">
+                <div class="row">
+                  <label>Variable
+                    <select name="variable" id="proj-variable">
+                      <option value="precipitation">precipitation</option>
+                      <option value="temperature">temperature</option>
+                    </select>
+                  </label>
+                  <label>Metric
+                    <select name="metric" id="proj-metric">
+                      <option value="rx1day">max 1-day rain (rx1day)</option>
+                      <option value="heavy_precip_frac">heavy-rain-day frequency</option>
+                      <option value="p95">p95 extreme intensity</option>
+                      <option value="mean">mean</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="row">
+                  <label>Models
+                    <select name="fast_mode" id="proj-fast">
+                      <option value="true">Fast (5 models)</option>
+                      <option value="false">Full ensemble (~34)</option>
+                    </select>
+                  </label>
+                  <button type="submit" id="proj-submit" style="align-self:end;">Project to 2050</button>
+                </div>
+              </form>
+            </div>
           </div>
 
           <div class="control-card" id="flood-card" style="display:none;">
@@ -862,12 +909,25 @@ def root() -> str:
           <div class="panel-header">
             <div>
               <h2>Model Trust Report</h2>
-              <p>Which models to trust here, and why. Tiers and skill weights come from the Aras Diagram via the Model Trust Engine; rejected models (KGE &le; &minus;0.41) earn zero weight.</p>
+              <p>Which models to trust here, and why. Tiers and skill weights come from the Aras Diagram via the Model Trust Engine; models with no skill at this location earn zero weight.</p>
             </div>
             <div class="badge" id="trust-headline">Awaiting run</div>
           </div>
           <div class="table-shell" id="trust-shell">
             <div class="diagram-placeholder" style="min-height:220px;">Run a climate diagnostic to score model trust.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Forward Climate Projection</h2>
+              <p>Trust-weighted change by mid-century (2040&ndash;2059 vs 1995&ndash;2014), driven only by models that earned trust. Extremes (rx1day, heavy-rain days) are the forward-looking flood-risk driver.</p>
+            </div>
+            <div class="badge" id="proj-headline">Awaiting run</div>
+          </div>
+          <div id="proj-shell">
+            <div class="diagram-placeholder" style="min-height:200px;">Pick a metric and press &ldquo;Project to 2050&rdquo;. Mean takes ~40s; extremes ~2&ndash;3 min (server-side daily aggregation).</div>
           </div>
         </div>
 
@@ -945,6 +1005,8 @@ def root() -> str:
     const rankingShell = document.getElementById('ranking-shell');
     const trustShell = document.getElementById('trust-shell');
     const trustHeadline = document.getElementById('trust-headline');
+    const projShell = document.getElementById('proj-shell');
+    const projHeadline = document.getElementById('proj-headline');
     const seriesShell = document.getElementById('series-shell');
     const seriesLegend = document.getElementById('series-legend');
     const seriesNote = document.getElementById('series-note');
@@ -1258,6 +1320,55 @@ def root() -> str:
       `;
     }
 
+    const METRIC_LABEL = {
+      mean: 'Mean', p95: 'p95 extreme intensity',
+      rx1day: 'Max 1-day', heavy_precip_frac: 'Heavy-rain-day frequency'
+    };
+
+    function fmtVal(v, variable) {
+      if (v === null || v === undefined) return '–';
+      if (variable === 'temperature') return Number(v).toFixed(2) + ' K';
+      return Number(v).toFixed(3) + ' mm';
+    }
+
+    function renderProjection(data, variable) {
+      const p = data && data.projection;
+      if (!p) {
+        projShell.innerHTML = '<div class="diagram-placeholder" style="min-height:200px;">No projection available.</div>';
+        projHeadline.textContent = 'No data';
+        return;
+      }
+      const up = p.change > 0;
+      const arrow = up ? '▲' : (p.change < 0 ? '▼' : '▬');
+      const color = up ? '#ff8f8f' : (p.change < 0 ? '#8bf0c7' : '#9bc9c0');
+      const pct = (p.pct_change === null || p.pct_change === undefined) ? '–' : (p.pct_change >= 0 ? '+' : '') + Number(p.pct_change).toFixed(1) + '%';
+      const agree = Math.round((p.agreement_on_increase || 0) * 100);
+      projHeadline.textContent = `${p.n_models_trusted}/${p.n_models_total} trusted`;
+
+      const rows = (p.per_model || []).map((m) => `
+        <tr>
+          <td>${m.name}</td>
+          <td>${Math.round((m.weight||0)*100)}%</td>
+          <td>${fmtVal(m.historical, variable)}</td>
+          <td>${fmtVal(m.future, variable)}</td>
+          <td style="color:${m.change>0?'#ff8f8f':'#8bf0c7'};">${m.change>=0?'+':''}${fmtVal(m.change, variable)}</td>
+        </tr>`).join('');
+
+      projShell.innerHTML = `
+        <div class="metric-grid" style="margin:0 0 14px;">
+          <div class="metric"><strong style="color:${color};">${arrow} ${pct}</strong><span>${METRIC_LABEL[p.metric]||p.metric} change by 2050</span></div>
+          <div class="metric"><strong>${fmtVal(p.historical_level, variable)} → ${fmtVal(p.future_level, variable)}</strong><span>Historical → future</span></div>
+          <div class="metric"><strong>${agree}%</strong><span>Model weight agreeing on ${up?'increase':'change'}</span></div>
+        </div>
+        <div class="series-note" style="margin:0 0 10px;">Uncertainty band (±1σ across trusted models): ${fmtVal(p.change_low, variable)} to ${fmtVal(p.change_high, variable)}.</div>
+        <div class="table-shell">
+          <table>
+            <thead><tr><th>Model</th><th>Weight</th><th>Historical</th><th>Future</th><th>Change</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    }
+
     function renderTrustReport(trust) {
       if (!trust || !trust.models || !trust.models.length) {
         trustShell.innerHTML = '<div class="diagram-placeholder" style="min-height:220px;">No trust report available.</div>';
@@ -1279,7 +1390,7 @@ def root() -> str:
           <tr>
             <td>${m.name}</td>
             <td><span class="chip" style="color:${color};border-color:${color};background:rgba(255,255,255,0.03);text-transform:capitalize;">${m.trust_tier}</span></td>
-            <td>${Number(m.kge).toFixed(2)}</td>
+            <td>${Number(m.error_total_pct).toFixed(0)}%</td>
             <td>
               <div style="display:flex;align-items:center;gap:8px;">
                 <div style="flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;">
@@ -1295,7 +1406,7 @@ def root() -> str:
       trustShell.innerHTML = `
         <table>
           <thead>
-            <tr><th>Model</th><th>Trust</th><th>KGE</th><th>Skill weight</th><th>Fix first</th></tr>
+            <tr><th>Model</th><th>Trust</th><th>Total Aras error</th><th>Skill weight</th><th>Fix first</th></tr>
           </thead>
           <tbody>${body}</tbody>
         </table>
@@ -1607,6 +1718,49 @@ def root() -> str:
         ref_dataset: form.get('ref_dataset'),
         fast_mode: form.get('fast_mode') === 'true'
       }, 'climate');
+    });
+
+    document.getElementById('projection-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const variable = document.getElementById('proj-variable').value;
+      const metric = document.getElementById('proj-metric').value;
+      const fastMode = document.getElementById('proj-fast').value === 'true';
+      const submitBtn = document.getElementById('proj-submit');
+      const isExtreme = metric !== 'mean';
+      const eta = !fastMode && isExtreme ? '~5–10 min (full ensemble, daily aggregation)'
+                : (!fastMode ? '~2–3 min (full ensemble)'
+                : (isExtreme ? '~2–3 min (daily aggregation)' : '~40s'));
+      projHeadline.textContent = 'Running…';
+      submitBtn.disabled = true;
+      const original = submitBtn.textContent;
+      submitBtn.textContent = 'Projecting…';
+      projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:200px;">Scoring model trust and projecting to mid-century… ${eta}. Please keep this tab open.</div>`;
+      try {
+        const response = await fetch('/api/climate/projection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lat: Number(climateLat.value),
+            lon: Number(climateLon.value),
+            radius_km: Number(climateRadius.value),
+            variable: variable,
+            metric: metric,
+            fast_mode: fastMode
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data && data.detail ? data.detail : `HTTP ${response.status}`);
+        responseBox.value = JSON.stringify(data, null, 2);
+        renderProjection(data, variable);
+        setStatus('Projection complete', 'ok');
+      } catch (err) {
+        projHeadline.textContent = 'Error';
+        projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:160px;color:var(--danger);">${err.message}</div>`;
+        setStatus('Projection failed', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = original;
+      }
     });
 
     document.getElementById('flood-form').addEventListener('submit', (event) => {
@@ -1952,6 +2106,100 @@ def climate_trust_report(payload: ClimateDiagnosticRequest) -> dict:
             "input": model_to_dict(payload),
             "summary": engine.summary(),
             "models": engine.reports,
+        }
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/climate/projection")
+def climate_projection(payload: ClimateProjectionRequest) -> dict:
+    """
+    Forward-looking, trust-weighted climate projection — the defensible hazard
+    layer. Scores CMIP6 models against the observed historical climatology with
+    the Model Trust Engine, keeps the trusted ones, and projects the change in a
+    hazard metric (mean / p95 / heavy-precip fraction) into a future scenario
+    window, with an across-model uncertainty band.
+    """
+    if payload.hist_start > payload.hist_end or payload.future_start > payload.future_end:
+        raise HTTPException(status_code=400, detail="start dates must precede end dates.")
+
+    try:
+        project_id = initialize_earth_engine()
+        roi = ee.Geometry.Point([payload.lon, payload.lat]).buffer(payload.radius_km * 1000)
+        fetcher = ArasenseDataFetcher(project_id)
+
+        # 1. Historical monthly climatology -> score model trust (which models are
+        #    skilful at this location's seasonal cycle and magnitude).
+        ref_hist, hist_models = fetcher.get_monthly_series(
+            geometry=roi,
+            start_date=payload.hist_start.isoformat(),
+            end_date=payload.hist_end.isoformat(),
+            variable=payload.variable,
+            fast_mode=payload.fast_mode,
+            include_reference=True,
+        )
+        if ref_hist is None or ref_hist.empty or not hist_models:
+            raise HTTPException(status_code=404, detail="No historical climate data returned.")
+        hist_df = pd.DataFrame({"reference": ref_hist, **hist_models}).dropna()
+        if hist_df.shape[0] < 6:
+            raise HTTPException(status_code=404, detail="Too few overlapping months for a robust climatology.")
+        model_names = [c for c in hist_df.columns if c != "reference"]
+
+        engine = ModelTrustEngine(hist_df["reference"].values,
+                                  [hist_df[n].values for n in model_names], model_names)
+        trusted = [r for r in engine.reports if r["weight"] > 0]
+        if not trusted:
+            raise HTTPException(status_code=400, detail="No model is trustworthy here (all KGE <= -0.41).")
+        trusted_names = [r["name"] for r in trusted]
+        report_by = {r["name"]: r for r in trusted}
+
+        # 2. Historical vs future value of the chosen metric, for trusted models.
+        #    "mean" uses the (fast) monthly series; extremes (p95/rx1day/heavy
+        #    precip) are computed server-side from DAILY data — where the real
+        #    Mediterranean signal lives.
+        if payload.metric == "mean":
+            _, fut_m = fetcher.get_monthly_series(
+                geometry=roi, start_date=payload.future_start.isoformat(),
+                end_date=payload.future_end.isoformat(), variable=payload.variable,
+                models=trusted_names, fast_mode=payload.fast_mode)
+            hist_val = {n: float(hist_df[n].mean()) for n in trusted_names}
+            fut_val = {n: float(fut_m[n].mean()) for n in trusted_names
+                       if n in fut_m and not fut_m[n].empty}
+        else:
+            stat = {"p95": "p95", "rx1day": "rx1day", "heavy_precip_frac": "heavy_frac"}[payload.metric]
+            hist_val = fetcher.get_extreme_stat(
+                geometry=roi, start_date=payload.hist_start.isoformat(),
+                end_date=payload.hist_end.isoformat(), variable=payload.variable,
+                models=trusted_names, stat=stat)
+            fut_val = fetcher.get_extreme_stat(
+                geometry=roi, start_date=payload.future_start.isoformat(),
+                end_date=payload.future_end.isoformat(), variable=payload.variable,
+                models=trusted_names, stat=stat)
+
+        per_model = [
+            {"name": n, "weight": report_by[n]["weight"], "trust_tier": report_by[n]["trust_tier"],
+             "historical": hist_val[n], "future": fut_val[n]}
+            for n in trusted_names if n in hist_val and n in fut_val
+        ]
+        if not per_model:
+            raise HTTPException(status_code=404, detail="No trusted models present in both windows.")
+
+        proj = weighted_projection(per_model, payload.metric, len(engine.reports), engine.summary())
+
+        return {
+            "project_id": project_id,
+            "input": model_to_dict(payload),
+            "windows": {
+                "historical": [payload.hist_start.isoformat(), payload.hist_end.isoformat()],
+                "future": [payload.future_start.isoformat(), payload.future_end.isoformat()],
+            },
+            "n_models_scored": len(engine.reports),
+            "trust_models": engine.reports,
+            "projection": proj,
         }
     except HTTPException:
         raise
