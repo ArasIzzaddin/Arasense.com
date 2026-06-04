@@ -2139,6 +2139,9 @@ def flood_validate_pilot(payload: FloodValidationRequest) -> dict:
             "error_pct": round(climate["error_pct"], 2),
             "precip_mean": round(climate["precip_mean"], 3),
             "precip_anomaly": round(climate["precip_anomaly"], 4),
+            "precip_spread": round(climate["precip_spread"], 3),
+            "trusted_models": climate["models_used"],
+            "trust_weights": [round(w, 4) for w in climate["weights"]],
             "grid_shape": [rows, cols],
             "graph_nodes": int(graph.x.shape[0]),
             "graph_edges": int(graph.edge_index.shape[1]),
@@ -2173,11 +2176,13 @@ def flood_validate_pilot(payload: FloodValidationRequest) -> dict:
 @app.post("/api/flood/climate-driven")
 def flood_climate_driven(payload: FloodClimateDrivenRequest) -> dict:
     """
-    Integrated endpoint: Aras climate diagnostic → climate-enriched flood graph.
+    Integrated endpoint: Aras model-trust scoring → climate-enriched flood graph.
 
     1. Fetches ERA5-Land + CMIP6 precipitation for the ROI and date range.
-    2. Runs the Aras diagram to identify the best CMIP6 model.
-    3. Injects best-model precip features into the hydrological graph nodes.
+    2. Scores the ensemble with the Model Trust Engine; drops models below the
+       mean-flow benchmark (KGE <= -0.41).
+    3. Injects the SKILL-WEIGHTED ENSEMBLE precip features (mean + spread) of the
+       trusted models into the hydrological graph nodes.
     4. Optionally runs GNN flood inference if arasense_flood_gnn.pth exists.
     """
     if payload.start_date > payload.end_date:
@@ -2217,7 +2222,11 @@ def flood_climate_driven(payload: FloodClimateDrivenRequest) -> dict:
             "error_pct"     : round(climate["error_pct"], 2),
             "precip_mean"   : round(climate["precip_mean"], 3),
             "precip_anomaly": round(climate["precip_anomaly"], 4),
+            "precip_spread" : round(climate["precip_spread"], 3),
             "era5_mean"     : round(climate["era5_mean"], 3),
+            "trusted_models": climate["models_used"],
+            "trust_weights" : [round(w, 4) for w in climate["weights"]],
+            "trust_summary" : climate["trust_summary"],
             "graph_nodes"   : int(graph.x.shape[0]),
             "graph_edges"   : int(graph.edge_index.shape[1]),
             "grid_shape"    : [rows, cols],
