@@ -215,10 +215,13 @@ class ArasenseDataFetcher:
 
         out = {}
         for m_name in models:
-            s = self._monthly_means(cmip6.filter(ee.Filter.eq("model", m_name)),
-                                    mod_band, mod_scale, geometry, start_date, end_date)
-            if not s.empty:
-                out[m_name] = s
+            try:
+                s = self._monthly_means(cmip6.filter(ee.Filter.eq("model", m_name)),
+                                        mod_band, mod_scale, geometry, start_date, end_date)
+                if not s.empty:
+                    out[m_name] = s
+            except Exception as exc:  # skip a failing model rather than 500 the run
+                print(f"  [monthly {m_name}] skipped: {exc}")
         return ref_series, out
 
     def get_extreme_stat(self, geometry, start_date, end_date,
@@ -252,22 +255,25 @@ class ArasenseDataFetcher:
 
         out = {}
         for m_name in models:
-            coll = base.filter(ee.Filter.eq("model", m_name)) \
-                       .map(lambda img: img.multiply(scale))
-            if stat == "p95":
-                img = coll.reduce(ee.Reducer.percentile([95]))
-            elif stat == "rx1day":
-                img = coll.max()
-            elif stat == "heavy_frac":
-                img = coll.map(lambda i: i.gte(threshold_mm)).mean()
-            else:
-                raise ValueError(f"Unknown stat '{stat}'.")
-            val = img.rename("v").reduceRegion(
-                reducer=ee.Reducer.mean(), geometry=geometry,
-                scale=27830, bestEffort=True, maxPixels=int(1e9),
-            ).get("v").getInfo()
-            if val is not None:
-                out[m_name] = float(val)
+            try:
+                coll = base.filter(ee.Filter.eq("model", m_name)) \
+                           .map(lambda img: img.multiply(scale))
+                if stat == "p95":
+                    img = coll.reduce(ee.Reducer.percentile([95]))
+                elif stat == "rx1day":
+                    img = coll.max()
+                elif stat == "heavy_frac":
+                    img = coll.map(lambda i: i.gte(threshold_mm)).mean()
+                else:
+                    raise ValueError(f"Unknown stat '{stat}'.")
+                val = img.rename("v").reduceRegion(
+                    reducer=ee.Reducer.mean(), geometry=geometry,
+                    scale=27830, bestEffort=True, maxPixels=int(1e9),
+                ).get("v").getInfo()
+                if val is not None:
+                    out[m_name] = float(val)
+            except Exception as exc:  # one bad model must not kill the ensemble
+                print(f"  [extreme {m_name}] skipped: {exc}")
         return out
 
     def get_model_series(self, geometry, start_date, end_date,
