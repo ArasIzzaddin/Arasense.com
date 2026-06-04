@@ -858,6 +858,19 @@ def root() -> str:
           </div>
         </div>
 
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Model Trust Report</h2>
+              <p>Which models to trust here, and why. Tiers and skill weights come from the Aras Diagram via the Model Trust Engine; rejected models (KGE &le; &minus;0.41) earn zero weight.</p>
+            </div>
+            <div class="badge" id="trust-headline">Awaiting run</div>
+          </div>
+          <div class="table-shell" id="trust-shell">
+            <div class="diagram-placeholder" style="min-height:220px;">Run a climate diagnostic to score model trust.</div>
+          </div>
+        </div>
+
         <div class="subpanel-grid">
           <div class="panel">
             <div class="panel-header">
@@ -930,6 +943,8 @@ def root() -> str:
     const diagramShell = document.getElementById('diagram-shell');
     const diagramPlaceholder = document.getElementById('diagram-placeholder');
     const rankingShell = document.getElementById('ranking-shell');
+    const trustShell = document.getElementById('trust-shell');
+    const trustHeadline = document.getElementById('trust-headline');
     const seriesShell = document.getElementById('series-shell');
     const seriesLegend = document.getElementById('series-legend');
     const seriesNote = document.getElementById('series-note');
@@ -1243,6 +1258,51 @@ def root() -> str:
       `;
     }
 
+    function renderTrustReport(trust) {
+      if (!trust || !trust.models || !trust.models.length) {
+        trustShell.innerHTML = '<div class="diagram-placeholder" style="min-height:220px;">No trust report available.</div>';
+        trustHeadline.textContent = 'No data';
+        return;
+      }
+      const tierColor = { trusted: '#27ae60', usable: '#8bf0c7', weak: '#e67e22', reject: '#ff8f8f' };
+      const summary = trust.summary || {};
+      const rows = [...trust.models].sort((a, b) => b.weight - a.weight);
+
+      trustHeadline.textContent = `${summary.n_kept || 0}/${summary.n_models || rows.length} kept · best ${summary.best_model || '-'}`;
+
+      const body = rows.map((m) => {
+        const color = tierColor[m.trust_tier] || '#9bc9c0';
+        const pct = Math.round((Number(m.weight) || 0) * 100);
+        const attr = m.error_attribution || {};
+        const dom = m.trust_tier === 'reject' ? '—' : (attr.dominant || '-');
+        return `
+          <tr>
+            <td>${m.name}</td>
+            <td><span class="chip" style="color:${color};border-color:${color};background:rgba(255,255,255,0.03);text-transform:capitalize;">${m.trust_tier}</span></td>
+            <td>${Number(m.kge).toFixed(2)}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;">
+                  <div style="width:${pct}%;height:100%;background:${color};"></div>
+                </div>
+                <span style="min-width:34px;text-align:right;">${pct}%</span>
+              </div>
+            </td>
+            <td style="text-transform:capitalize;">${dom}</td>
+          </tr>`;
+      }).join('');
+
+      trustShell.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>Model</th><th>Trust</th><th>KGE</th><th>Skill weight</th><th>Fix first</th></tr>
+          </thead>
+          <tbody>${body}</tbody>
+        </table>
+        <div class="series-note" style="padding:12px 14px;">${summary.recommendation || ''}</div>
+      `;
+    }
+
     function renderRankingTable(metrics) {
       if (!metrics || !metrics.length) {
         rankingShell.innerHTML = '<div class="diagram-placeholder" style="min-height:260px;">No model ranking available.</div>';
@@ -1414,6 +1474,7 @@ def root() -> str:
           biasCorrectionToggle.disabled = !best;
           biasCorrectionToggle.textContent = 'Apply Bias Correction';
           renderArasDiagram(data.metrics);
+          renderTrustReport(data.trust);
           renderRankingTable(data.metrics);
           rerenderClimateSeries();
           setMetrics([
@@ -1802,6 +1863,7 @@ def climate_diagnostic(payload: ClimateDiagnosticRequest) -> dict:
         aligned_ref = results[model_names[0]]["reference"].values
         model_series = [results[name]["model"].values for name in model_names]
         aras = ArasDiagram(aligned_ref, model_series, model_names)
+        trust = ModelTrustEngine(aras=aras)
 
         metrics = []
         for item in aras.results:
@@ -1824,6 +1886,10 @@ def climate_diagnostic(payload: ClimateDiagnosticRequest) -> dict:
             "reference_points": int(len(reference_series)),
             "models": model_names,
             "metrics": metrics,
+            "trust": {
+                "summary": trust.summary(),
+                "models": trust.reports,
+            },
             "reference_series": {
                 idx.strftime("%Y-%m-%d"): float(value) for idx, value in reference_series.items()
             },

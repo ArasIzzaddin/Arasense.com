@@ -108,8 +108,16 @@ class ModelTrustEngine:
         weight on the best models; 1.0 is linear in skill above the benchmark.
     """
 
-    def __init__(self, reference_data, model_data, model_names=None, sharpness: float = 1.0):
-        self.aras = ArasDiagram(reference_data, model_data, model_names)
+    def __init__(self, reference_data=None, model_data=None, model_names=None,
+                 sharpness: float = 1.0, aras: ArasDiagram | None = None):
+        if aras is None:
+            if reference_data is None or model_data is None:
+                raise ValueError(
+                    "Provide either an existing `aras` ArasDiagram or "
+                    "reference_data + model_data."
+                )
+            aras = ArasDiagram(reference_data, model_data, model_names)
+        self.aras = aras
         self.sharpness = float(sharpness)
         self.reports = self._build_reports()
 
