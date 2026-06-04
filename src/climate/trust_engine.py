@@ -182,8 +182,8 @@ class ModelTrustEngine:
         mode = best["error_attribution"]["dominant_label"]
         return (
             f"Project from the {len(kept)} skill-weighted model(s). Best model "
-            f"'{best['name']}' (KGE={best['kge']:.2f}); its residual error is dominated by "
-            f"{mode}, which is the priority target for bias correction."
+            f"'{best['name']}' (total Aras error {best['error_total_pct']:.0f}%); its residual "
+            f"error is dominated by {mode}, which is the priority target for bias correction."
         )
 
     # ── skill-weighted projection ────────────────────────────────────

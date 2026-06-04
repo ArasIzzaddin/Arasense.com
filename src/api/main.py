@@ -903,7 +903,7 @@ def root() -> str:
           <div class="panel-header">
             <div>
               <h2>Model Trust Report</h2>
-              <p>Which models to trust here, and why. Tiers and skill weights come from the Aras Diagram via the Model Trust Engine; rejected models (KGE &le; &minus;0.41) earn zero weight.</p>
+              <p>Which models to trust here, and why. Tiers and skill weights come from the Aras Diagram via the Model Trust Engine; models with no skill at this location earn zero weight.</p>
             </div>
             <div class="badge" id="trust-headline">Awaiting run</div>
           </div>
@@ -1384,7 +1384,7 @@ def root() -> str:
           <tr>
             <td>${m.name}</td>
             <td><span class="chip" style="color:${color};border-color:${color};background:rgba(255,255,255,0.03);text-transform:capitalize;">${m.trust_tier}</span></td>
-            <td>${Number(m.kge).toFixed(2)}</td>
+            <td>${Number(m.error_total_pct).toFixed(0)}%</td>
             <td>
               <div style="display:flex;align-items:center;gap:8px;">
                 <div style="flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;">
@@ -1400,7 +1400,7 @@ def root() -> str:
       trustShell.innerHTML = `
         <table>
           <thead>
-            <tr><th>Model</th><th>Trust</th><th>KGE</th><th>Skill weight</th><th>Fix first</th></tr>
+            <tr><th>Model</th><th>Trust</th><th>Total Aras error</th><th>Skill weight</th><th>Fix first</th></tr>
           </thead>
           <tbody>${body}</tbody>
         </table>
