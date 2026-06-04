@@ -785,7 +785,13 @@ def root() -> str:
                   </label>
                 </div>
                 <div class="row">
-                  <button type="submit" id="proj-submit">Project to 2050</button>
+                  <label>Models
+                    <select name="fast_mode" id="proj-fast">
+                      <option value="true">Fast (5 models)</option>
+                      <option value="false">Full ensemble (~34)</option>
+                    </select>
+                  </label>
+                  <button type="submit" id="proj-submit" style="align-self:end;">Project to 2050</button>
                 </div>
               </form>
             </div>
@@ -1718,13 +1724,17 @@ def root() -> str:
       event.preventDefault();
       const variable = document.getElementById('proj-variable').value;
       const metric = document.getElementById('proj-metric').value;
+      const fastMode = document.getElementById('proj-fast').value === 'true';
       const submitBtn = document.getElementById('proj-submit');
-      const slow = metric !== 'mean';
+      const isExtreme = metric !== 'mean';
+      const eta = !fastMode && isExtreme ? '~5–10 min (full ensemble, daily aggregation)'
+                : (!fastMode ? '~2–3 min (full ensemble)'
+                : (isExtreme ? '~2–3 min (daily aggregation)' : '~40s'));
       projHeadline.textContent = 'Running…';
       submitBtn.disabled = true;
       const original = submitBtn.textContent;
       submitBtn.textContent = 'Projecting…';
-      projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:200px;">Scoring model trust and projecting to mid-century… ${slow ? 'extremes use server-side daily aggregation (~2–3 min)' : '(~40s)'}.</div>`;
+      projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:200px;">Scoring model trust and projecting to mid-century… ${eta}. Please keep this tab open.</div>`;
       try {
         const response = await fetch('/api/climate/projection', {
           method: 'POST',
@@ -1735,7 +1745,7 @@ def root() -> str:
             radius_km: Number(climateRadius.value),
             variable: variable,
             metric: metric,
-            fast_mode: true
+            fast_mode: fastMode
           })
         });
         const data = await response.json();
