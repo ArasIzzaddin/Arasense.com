@@ -59,16 +59,16 @@ class ValidationCase:
         }
 
 
-# The 2023 Emilia-Romagna flood, centred on Bologna. Dates are sensible defaults
-# to CONFIRM against the official event chronology before publishing numbers.
+# The 2023 Emilia-Romagna flood, centred on Bologna. Dates confirmed by the
+# founder (hydrologist) for the May 2023 event.
 EMILIA_ROMAGNA_2023 = ValidationCase(
     name="Emilia-Romagna / Bologna — May 2023 flood",
     lat=44.494, lon=11.343, radius_km=60,
-    start_date="2011-10-01", end_date="2011-11-30",      # CMIP6 historical precip window — CONFIRM
-    sentinel_start_date="2023-05-16", sentinel_end_date="2023-05-26",  # post-event S1 — CONFIRM
+    start_date="2023-05-01", end_date="2023-05-18",      # rainfall window through the 16-17 May peak
+    sentinel_start_date="2023-05-17", sentinel_end_date="2023-05-27",  # post-event Sentinel-1 mask
     scale=1000, threshold=0.5, fast_mode=True,
-    notes="Validation-stage screening pilot. Confirm event window against the "
-          "official Protezione Civile chronology before quoting numbers.",
+    notes="Validation-stage screening pilot for the May 2023 Emilia-Romagna flood "
+          "(main flooding 16-17 May 2023).",
 )
 
 
