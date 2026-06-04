@@ -59,6 +59,11 @@ class ArasDiagram:
         • Concentric circles at 10 %, 25 %, 50 % total error
     """
 
+    # Denominators below these magnitudes make the bias/variability ratios
+    # unstable; see the guards in __init__.
+    MEAN_EPS = 1e-6
+    STD_EPS  = 1e-9
+
     def __init__(self, reference_data, model_data, model_names=None):
         self.ref   = np.array(reference_data)
         self.models = [np.array(m) for m in model_data]
@@ -67,6 +72,29 @@ class ArasDiagram:
 
         self.ref_mean = np.mean(self.ref)
         self.ref_std  = np.std(self.ref, ddof=0)   # population std, consistent with KGE
+
+        # ── divide-by-zero guards ────────────────────────────────────
+        # The bias ratio  β = μ_model / μ_obs  and variability ratio
+        # α = σ_model / σ_obs  are both ratios. They are undefined when the
+        # reference (observed) denominator is ≈ 0:
+        #   • μ_obs ≈ 0  → zero-centred variables: temperature in °C, anomalies.
+        #                  Temperature MUST be supplied in Kelvin (μ_obs ≈ 273–300),
+        #                  never Celsius, so the bias ratio stays well-conditioned.
+        #   • σ_obs ≈ 0  → a flat/constant reference series, no variability to match.
+        # We fail loudly with an actionable message instead of emitting ±inf / NaN.
+        if abs(self.ref_mean) < self.MEAN_EPS:
+            raise ValueError(
+                "Aras diagram bias ratio β = mean(model) / mean(obs) is undefined "
+                f"because the reference mean ≈ 0 (mean(obs) = {self.ref_mean:.3e}). "
+                "Supply temperature in Kelvin rather than Celsius, or use a variable "
+                "that is not zero-centred. For anomaly fields, switch to a "
+                "standardized-difference bias term instead of the ratio."
+            )
+        if self.ref_std < self.STD_EPS:
+            raise ValueError(
+                "Aras diagram variability ratio α = std(model) / std(obs) is undefined "
+                f"because the reference series is (near) constant (std(obs) = {self.ref_std:.3e})."
+            )
 
         self.results = []
         self._calculate_metrics()

@@ -13,3 +13,8 @@ env/
 # OS/editor noise
 .DS_Store
 Thumbs.db
+
+# Local runtime logs
+*.log
+uvicorn.out.log
+uvicorn.err.log

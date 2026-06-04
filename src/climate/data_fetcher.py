@@ -48,11 +48,17 @@ class ArasenseDataFetcher:
             <model_name>       : pd.DataFrame with columns ['reference','model']
                                  for every successfully fetched CMIP6 model
         """
+        # NOTE on temperature units:
+        #   ERA5-Land 'temperature_2m' and CMIP6 'tas' are both native KELVIN.
+        #   We keep scale 1.0 (no Celsius conversion) on purpose: the Aras diagram
+        #   bias ratio β = μ_model/μ_obs is unstable when μ_obs ≈ 0, which is exactly
+        #   what happens around 0 °C. In Kelvin μ_obs ≈ 273–300, so β stays
+        #   well-conditioned. Do NOT convert temperature to Celsius here.
         vars_map = {
             'temperature'    : {'era5': 'temperature_2m',
                                 'cmip6': 'tas',
-                                'scale_era5': 1.0,
-                                'scale_mod' : 1.0},
+                                'scale_era5': 1.0,   # Kelvin, do not change
+                                'scale_mod' : 1.0},  # Kelvin, do not change
             'precipitation'  : {'era5': 'total_precipitation_sum',
                                 'cmip6': 'pr',
                                 'scale_era5': 1000.0,
@@ -72,6 +78,20 @@ class ArasenseDataFetcher:
         ref_series = self.extract_series(ref_col, v['era5'],
                                          v['scale_era5'], "Reference",
                                          geometry)
+
+        # Enforce the Kelvin invariant for temperature. ERA5/CMIP6 are native
+        # Kelvin, so a sub-100 mean means something converted to Celsius upstream —
+        # which would make the Aras bias ratio β unstable near 0 °C. Fail early
+        # with a clear message rather than producing a broken diagram downstream.
+        if variable == 'temperature' and not ref_series.empty:
+            ref_mean_k = float(ref_series.mean())
+            if ref_mean_k < 100.0:
+                raise ValueError(
+                    f"Temperature reference mean {ref_mean_k:.2f} is not in Kelvin range "
+                    "(expected ~273–300 K). ERA5 'temperature_2m' and CMIP6 'tas' are "
+                    "native Kelvin — do not convert to Celsius, as it destabilises the "
+                    "Aras bias ratio β around 0 °C."
+                )
 
         # 2. CMIP6 ensemble fetch
         # Scenario is determined by date: historical=1950-2014, ssp245=2015-2100

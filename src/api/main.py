@@ -5,18 +5,21 @@ from pathlib import Path
 from typing import Literal, Optional
 
 import ee
+import numpy as np
 import torch
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
 from climate.aras_eval import ArasDiagram
+from climate.trust_engine import ModelTrustEngine
 from climate.data_fetcher import ArasenseDataFetcher
 from climate.gnn_bias_corrector import ClimateBiasCorrector
 from common.gee import get_earth_engine_status, get_project_id, initialize_earth_engine
 from flood.graph_builder import ArasenseGraphBuilder
 from flood.climate_pipeline import FloodClimatePipeline
 from flood.gnn_model import ArasenseFloodGNN
+from flood.s1_flood_fetcher import ArasenseFloodFetcher
 
 
 app = FastAPI(
@@ -32,6 +35,23 @@ def model_to_dict(model: BaseModel) -> dict:
     if hasattr(model, "model_dump"):
         return model.model_dump(mode="json")
     return model.dict()
+
+
+def mask_to_cells(mask: np.ndarray, west: float, south: float, east: float, north: float) -> list[dict]:
+    rows, cols = mask.shape
+    lat_step = (north - south) / max(rows, 1)
+    lon_step = (east - west) / max(cols, 1)
+    cells = []
+    for r, c in np.argwhere(mask > 0).tolist():
+        cells.append(
+            {
+                "south": round(north - (r + 1) * lat_step, 6),
+                "west": round(west + c * lon_step, 6),
+                "north": round(north - r * lat_step, 6),
+                "east": round(west + (c + 1) * lon_step, 6),
+            }
+        )
+    return cells
 
 
 class ClimateDiagnosticRequest(BaseModel):
@@ -66,6 +86,29 @@ class FloodClimateDrivenRequest(BaseModel):
     start_date: date
     end_date: date
     scale: int = Field(1000, ge=250, le=10000)
+    fast_mode: bool = True
+
+
+class SentinelFloodRequest(BaseModel):
+    west: float = Field(..., ge=-180, le=180)
+    south: float = Field(..., ge=-90, le=90)
+    east: float = Field(..., ge=-180, le=180)
+    north: float = Field(..., ge=-90, le=90)
+    start_date: date
+    end_date: date
+    scale: int = Field(2000, ge=250, le=10000)
+
+
+class FloodValidationRequest(BaseModel):
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    radius_km: float = Field(50, gt=0, le=500)
+    start_date: date
+    end_date: date
+    sentinel_start_date: date
+    sentinel_end_date: date
+    scale: int = Field(2000, ge=250, le=10000)
+    threshold: float = Field(0.5, ge=0.05, le=0.95)
     fast_mode: bool = True
 
 
@@ -600,8 +643,8 @@ def root() -> str:
         <div class="eyebrow">Spatial intelligence workbench</div>
         <h1>Next-level climate tech, running directly on your machine.</h1>
         <p class="lead">
-          This console combines a live geospatial map, climate model diagnostics, and flood topology
-          summaries in one interface. Click the map to set a climate point, drag a box for flood analysis,
+          This console combines a live geospatial map, climate model diagnostics, and flood screening
+          summaries in one interface. Click the map to set a climate point, drag a box for flood graph analysis,
           and inspect structured outputs without leaving the page.
         </p>
         <div class="hero-stats">
@@ -615,7 +658,7 @@ def root() -> str:
         <p>Use the interface in this order for the cleanest results.</p>
         <ul>
           <li>Click the map to position the climate ROI center and radius.</li>
-          <li>Shift-drag on the map to define a flood bounding box.</li>
+          <li>Shift-drag on the map to define a flood-screening bounding box.</li>
           <li>Run diagnostics and inspect structured metrics in the console below.</li>
         </ul>
         <div class="meta-line">
@@ -631,7 +674,7 @@ def root() -> str:
         <div class="panel-header">
           <div>
             <h2>Spatial Command Map</h2>
-            <p>Single click sets the climate analysis point. Hold <strong>Shift</strong> and drag to draw a flood bounding box.</p>
+            <p>Single click sets the climate analysis point. Hold <strong>Shift</strong> and drag to draw a flood-screening bounding box.</p>
           </div>
           <div class="badge" id="map-status">Map ready</div>
         </div>
@@ -666,7 +709,7 @@ def root() -> str:
           <div class="control-card">
             <div class="mode-tabs">
               <div class="mode-tab top-tab active" data-target="climate-card">Climate Engine</div>
-              <div class="mode-tab top-tab" data-target="flood-card">Flood Engine</div>
+              <div class="mode-tab top-tab" data-target="flood-card">Flood Pilot</div>
             </div>
           </div>
 
@@ -714,7 +757,7 @@ def root() -> str:
             </div>
 
             <div id="flood-basic-fields">
-              <h3>Flood Graph Summary</h3>
+              <h3>Flood Graph Screening</h3>
               <form id="flood-form">
                 <div class="row">
                   <label>West<input name="west" id="flood-west" type="number" step="any" value="11.0"></label>
@@ -725,15 +768,25 @@ def root() -> str:
                   <label>North<input name="north" id="flood-north" type="number" step="any" value="44.4"></label>
                 </div>
                 <div class="row">
-                  <label>Scale (m)<input name="scale" type="number" step="1" value="4000"></label>
-                  <button type="submit" style="align-self:end;">Run Flood Summary</button>
+                  <label>Scale (m)<input name="scale" id="flood-scale" type="number" step="1" value="4000"></label>
+                  <button type="submit" style="align-self:end;">Run Graph Screening</button>
+                </div>
+              </form>
+              <div style="height:10px;"></div>
+              <form id="sentinel-live-form">
+                <div class="row">
+                  <label>Sentinel-1 Start<input name="start_date" id="sentinel-start-date" type="date"></label>
+                  <label>Sentinel-1 End<input name="end_date" id="sentinel-end-date" type="date"></label>
+                </div>
+                <div class="row">
+                  <button type="submit" style="align-self:end;">Load Sentinel-1 Live</button>
                 </div>
               </form>
             </div>
 
             <div id="flood-climate-fields" style="display:none;">
-              <h3>Climate-Driven Flood Analysis</h3>
-              <p style="color:var(--muted);font-size:13px;margin:0 0 12px;">Identifies the best CMIP6 precipitation model via the Aras diagram, then injects its signal into the flood graph.</p>
+              <h3>Climate-Driven Flood Pilot</h3>
+              <p style="color:var(--muted);font-size:13px;margin:0 0 12px;">Validation-stage workflow for Emilia-Romagna style pilots: identifies the best CMIP6 precipitation model, injects its signal into the terrain graph, and compares outputs with satellite evidence where available.</p>
               <form id="flood-climate-form">
                 <div class="row">
                   <label>Latitude<input name="lat" id="flood-climate-lat" type="number" step="any" value="44.5"></label>
@@ -748,13 +801,21 @@ def root() -> str:
                   <label>End Date<input name="end_date" type="date" value="2011-11-30"></label>
                 </div>
                 <div class="row">
+                  <label>Observed Start<input name="sentinel_start_date" type="date" value="2023-05-15"></label>
+                  <label>Observed End<input name="sentinel_end_date" type="date" value="2023-05-25"></label>
+                </div>
+                <div class="row">
                   <label>Fast Mode
                     <select name="fast_mode">
                       <option value="true">true</option>
                       <option value="false">false</option>
                     </select>
                   </label>
-                  <button type="submit" style="align-self:end;">Run Climate-Driven Flood</button>
+                  <label>Threshold<input name="threshold" type="number" min="0.05" max="0.95" step="0.05" value="0.50"></label>
+                </div>
+                <div class="row">
+                  <button type="submit" style="align-self:end;">Run Flood Pilot</button>
+                  <button class="secondary" type="button" id="run-validation-case" style="align-self:end;">Run Validation Case</button>
                 </div>
               </form>
             </div>
@@ -854,6 +915,8 @@ def root() -> str:
         <span class="chip">POST /api/climate/diagnostic</span>
         <span class="chip">POST /api/flood/graph-summary</span>
         <span class="chip">POST /api/flood/climate-driven</span>
+        <span class="chip">POST /api/flood/validate-pilot</span>
+        <span class="chip">POST /api/flood/sentinel-live</span>
       </div>
     </section>
   </main>
@@ -882,6 +945,9 @@ def root() -> str:
     const floodSouth = document.getElementById('flood-south');
     const floodEast = document.getElementById('flood-east');
     const floodNorth = document.getElementById('flood-north');
+    const floodScale = document.getElementById('flood-scale');
+    const sentinelStartDate = document.getElementById('sentinel-start-date');
+    const sentinelEndDate = document.getElementById('sentinel-end-date');
     const mapFallback = document.getElementById('map-fallback');
     const climateViewState = {
       latestClimateData: null,
@@ -890,12 +956,25 @@ def root() -> str:
       biasCorrectionResult: null
     };
 
+    if (sentinelStartDate && sentinelEndDate) {
+      const today = new Date();
+      const end = new Date(today);
+      end.setDate(today.getDate() - 1);
+      const start = new Date(end);
+      start.setDate(end.getDate() - 13);
+      const toIsoDate = (value) => value.toISOString().slice(0, 10);
+      sentinelStartDate.value = toIsoDate(start);
+      sentinelEndDate.value = toIsoDate(end);
+    }
+
+    let map = null;
+
     if (typeof window.L === 'undefined') {
       document.getElementById('map').style.display = 'none';
       mapFallback.style.display = 'grid';
       mapStatus.textContent = 'Map library unavailable';
     } else {
-      const map = L.map('map', { zoomControl: true }).setView([42.5, 12.8], 5);
+      map = L.map('map', { zoomControl: true }).setView([42.5, 12.8], 5);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '&copy; OpenStreetMap contributors'
@@ -1348,6 +1427,37 @@ def root() -> str:
             { title: 'Coverage', text: `Variable ${payload.variable} from ${payload.start_date} to ${payload.end_date}.` }
           ]);
         } else {
+          if (mode === 'sentinel') {
+            setMetrics([
+              { value: String(data.image_count || 0), label: 'S1 scenes' },
+              { value: String(data.flooded_cells_count || 0), label: 'Flooded cells' },
+              { value: `${data.rows || 0} x ${data.cols || 0}`, label: 'Mask grid' }
+            ]);
+            setInsights([
+              { title: 'Sentinel-1 live mask', text: `${data.image_count || 0} SAR scenes processed from ${payload.start_date} to ${payload.end_date}.` },
+              { title: 'Flood extent', text: `${Number(data.flooded_fraction_pct || 0).toFixed(2)}% of sampled cells flagged as flooded within the selected bounding box.` },
+              { title: 'Selected extent', text: `West ${payload.west}, South ${payload.south}, East ${payload.east}, North ${payload.north}.` }
+            ]);
+            renderSentinelFloodMask(data.flooded_cells || []);
+          } else {
+          if (mode === 'flood-validation') {
+            const counts = data.counts || {};
+            const metrics = data.metrics || {};
+            setMetrics([
+              { value: `${(Number(metrics.iou || 0) * 100).toFixed(1)}%`, label: 'IoU overlap' },
+              { value: `${(Number(metrics.recall || 0) * 100).toFixed(1)}%`, label: 'Sentinel recall' },
+              { value: String(data.sentinel_image_count || 0), label: 'S1 scenes' }
+            ]);
+            setInsights([
+              { title: 'Validation case completed', text: `${counts.true_positive || 0} overlap cells, ${counts.false_positive || 0} screening-only cells, ${counts.false_negative || 0} Sentinel-only cells.` },
+              { title: 'Screening threshold', text: `GNN nodes were flagged at p >= ${Number(data.threshold || 0).toFixed(2)}. Precision ${(Number(metrics.precision || 0) * 100).toFixed(1)}%, agreement ${(Number(metrics.agreement || 0) * 100).toFixed(1)}%.` },
+              { title: 'Climate context', text: `${data.best_model || '-'} selected with KGE=${Number(data.kge || 0).toFixed(3)} and precip anomaly ${Number(data.precip_anomaly || 0).toFixed(3)}.` }
+            ]);
+            if (data.node_flood_probs && data.node_flood_probs.length) {
+              renderFloodRiskMap(data.node_flood_probs, data.grid_shape);
+            }
+            renderSentinelFloodMask(data.sentinel_flooded_cells || []);
+          } else {
           if (mode === 'flood-climate') {
             setMetrics([
               { value: String(data.graph_nodes || 0), label: 'Graph nodes' },
@@ -1357,15 +1467,19 @@ def root() -> str:
             setInsights([
               { title: 'Best precipitation model', text: `${data.best_model} selected by Aras diagram (KGE=${Number(data.kge||0).toFixed(3)}, E=${Number(data.error_pct||0).toFixed(1)}%).` },
               { title: 'Climate signal injected', text: `Precip mean ${Number(data.precip_mean||0).toFixed(2)} mm/day, anomaly ${Number(data.precip_anomaly||0).toFixed(3)} vs ERA5 mean ${Number(data.era5_mean||0).toFixed(2)} mm/day.` },
-              { title: 'Flood graph', text: `${data.graph_nodes||0} nodes, ${data.graph_edges||0} edges. Grid ${(data.grid_shape||[0,0])[0]} × ${(data.grid_shape||[0,0])[1]}.${data.flood_risk_pct !== undefined ? ' GNN flood risk: ' + Number(data.flood_risk_pct).toFixed(1) + '% of nodes.' : ''}` }
+              { title: 'Flood graph', text: `${data.graph_nodes||0} nodes, ${data.graph_edges||0} edges. Grid ${(data.grid_shape||[0,0])[0]} × ${(data.grid_shape||[0,0])[1]}.${data.flood_risk_pct !== undefined ? ' GNN screening flag: ' + Number(data.flood_risk_pct).toFixed(1) + '% of nodes.' : ''}` }
             ]);
             if (data.all_metrics && data.all_metrics.length) {
               renderArasDiagram(data.all_metrics);
               renderRankingTable(data.all_metrics);
             }
-            // Render flood risk nodes on the Leaflet map
+            // Render flood screening nodes on the Leaflet map
             if (data.node_flood_probs && data.node_flood_probs.length) {
               renderFloodRiskMap(data.node_flood_probs, data.grid_shape);
+            } else {
+              mapStatus.textContent = data.gnn_error
+                ? `Flood map unavailable: ${data.gnn_error}`
+                : 'Flood map unavailable: no node probabilities returned';
             }
           } else {
             setMetrics([
@@ -1378,6 +1492,8 @@ def root() -> str:
               { title: 'Terrain summary', text: `Mean normalized elevation ${Number(data.mean_normalized_elevation || 0).toFixed(3)}, slope ${Number(data.mean_normalized_slope || 0).toFixed(3)}.` },
               { title: 'Selected extent', text: `West ${payload.west}, South ${payload.south}, East ${payload.east}, North ${payload.north}.` }
             ]);
+          }
+          }
           }
         }
         setStatus('Success', 'ok');
@@ -1444,6 +1560,22 @@ def root() -> str:
       }, 'flood');
     });
 
+    const sentinelLiveForm = document.getElementById('sentinel-live-form');
+    if (sentinelLiveForm) {
+      sentinelLiveForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        submitJson('/api/flood/sentinel-live', {
+          west: Number(floodWest.value),
+          south: Number(floodSouth.value),
+          east: Number(floodEast.value),
+          north: Number(floodNorth.value),
+          start_date: sentinelStartDate.value,
+          end_date: sentinelEndDate.value,
+          scale: Number(floodScale.value)
+        }, 'sentinel');
+      });
+    }
+
     // Flood mode toggle
     function setFloodMode(mode) {
       window._lastFloodMode = mode;
@@ -1453,10 +1585,15 @@ def root() -> str:
       document.getElementById('flood-mode-climate').classList.toggle('active', mode === 'climate');
     }
 
-    // ── Flood risk map renderer ──────────────────────────────────
+    // Flood screening map renderer.
     let floodRiskLayer = null;
+    let sentinelFloodLayer = null;
 
     function renderFloodRiskMap(nodeProbs, gridShape) {
+      if (!map) {
+        mapStatus.textContent = 'Flood map unavailable: map is not initialized';
+        return;
+      }
       // Remove previous flood layer
       if (floodRiskLayer) {
         map.removeLayer(floodRiskLayer);
@@ -1499,13 +1636,14 @@ def root() -> str:
           fillOpacity: fillOpacity,
           weight     : 0,
         }).bindTooltip(
-          `<b>Flood risk: ${(p * 100).toFixed(1)}%</b><br>` +
+          `<b>Screening probability: ${(p * 100).toFixed(1)}%</b><br>` +
           `${p >= 0.80 ? '🔴 Very high' : p >= 0.60 ? '🟠 High' : p >= 0.35 ? '🟡 Moderate' : '🟢 Low'}`,
           { sticky: true }
         );
       });
 
       floodRiskLayer = L.layerGroup(layers).addTo(map);
+      mapStatus.textContent = `Rendered flood screening layer for ${nodeProbs.length} nodes`;
 
       // Zoom to show the flood area at a useful zoom level (zoom 9-10)
       map.fitBounds(
@@ -1522,19 +1660,69 @@ def root() -> str:
         const hi = nodeProbs.filter(n=>n.p>=0.60).length;
         const med = nodeProbs.filter(n=>n.p>=0.35&&n.p<0.60).length;
         div.innerHTML = `
-          <b style="font-size:13px">🌊 Flood Risk Map</b><br>
+          <b style="font-size:13px">Flood Screening Map</b><br>
           <span style="color:#c0392b">●</span> Very high ≥80% <br>
           <span style="color:#e67e22">●</span> High 60–80%<br>
           <span style="color:#f39c12">●</span> Moderate 35–60%<br>
           <span style="color:#27ae60">●</span> Low &lt;35%<br>
           <hr style="border-color:rgba(255,255,255,0.2);margin:4px 0">
           <span style="font-size:10px;color:#aaa">
-            ${hi} high-risk nodes (${(hi/nodeProbs.length*100).toFixed(0)}%)<br>
+            ${hi} high-screening nodes (${(hi/nodeProbs.length*100).toFixed(0)}%)<br>
             ${nodeProbs.length} total nodes • 2 km grid
           </span>`;
         return div;
       };
       legend.addTo(map);
+    }
+
+    function renderSentinelFloodMask(floodedCells) {
+      if (!map) {
+        mapStatus.textContent = 'Sentinel-1 overlay unavailable: map is not initialized';
+        return;
+      }
+      if (sentinelFloodLayer) {
+        map.removeLayer(sentinelFloodLayer);
+        sentinelFloodLayer = null;
+      }
+      const existingLegend = document.getElementById('sentinel-legend');
+      if (existingLegend) existingLegend.remove();
+      if (!floodedCells || !floodedCells.length) {
+        mapStatus.textContent = 'Sentinel-1 loaded: no flooded cells detected for the selected window';
+        return;
+      }
+
+      const layers = floodedCells.map((cell) => L.rectangle(
+        [[cell.south, cell.west], [cell.north, cell.east]],
+        {
+          color: '#5fd2ff',
+          fillColor: '#1e90ff',
+          fillOpacity: 0.34,
+          weight: 0.6,
+        }
+      ));
+      sentinelFloodLayer = L.layerGroup(layers).addTo(map);
+
+      const lats = floodedCells.flatMap((cell) => [cell.south, cell.north]);
+      const lons = floodedCells.flatMap((cell) => [cell.west, cell.east]);
+      map.fitBounds(
+        [[Math.min(...lats), Math.min(...lons)], [Math.max(...lats), Math.max(...lons)]],
+        { padding: [20, 20], maxZoom: 11 }
+      );
+
+      const legend = L.control({ position: 'bottomleft' });
+      legend.onAdd = () => {
+        const div = L.DomUtil.create('div', '');
+        div.id = 'sentinel-legend';
+        div.style.cssText = 'background:rgba(0,0,0,0.78);padding:10px 14px;border-radius:8px;color:white;font-size:12px;line-height:1.7;font-family:sans-serif;min-width:170px';
+        div.innerHTML = `
+          <b style="font-size:13px">Sentinel-1 Live</b><br>
+          <span style="color:#5fd2ff">■</span> SAR-derived flood mask<br>
+          <span style="font-size:10px;color:#aaa">${floodedCells.length} flooded cells rendered</span>
+        `;
+        return div;
+      };
+      legend.addTo(map);
+      mapStatus.textContent = `Rendered Sentinel-1 overlay with ${floodedCells.length} flooded cells`;
     }
     // ─────────────────────────────────────────────────────────────
 
@@ -1554,6 +1742,25 @@ def root() -> str:
           fast_mode:  form.get('fast_mode') === 'true'
         }, 'flood-climate');
       });
+
+      const validationButton = document.getElementById('run-validation-case');
+      if (validationButton) {
+        validationButton.addEventListener('click', () => {
+          const form = new FormData(floodClimateForm);
+          submitJson('/api/flood/validate-pilot', {
+            lat:                 Number(form.get('lat')),
+            lon:                 Number(form.get('lon')),
+            radius_km:           Number(form.get('radius_km')),
+            start_date:          form.get('start_date'),
+            end_date:            form.get('end_date'),
+            sentinel_start_date: form.get('sentinel_start_date'),
+            sentinel_end_date:   form.get('sentinel_end_date'),
+            scale:               Number(form.get('scale')),
+            threshold:           Number(form.get('threshold')),
+            fast_mode:           form.get('fast_mode') === 'true'
+          }, 'flood-validation');
+        });
+      }
     }
   </script>
 </body>
@@ -1630,6 +1837,60 @@ def climate_diagnostic(payload: ClimateDiagnosticRequest) -> dict:
         }
     except HTTPException:
         raise
+    except ValueError as exc:
+        # Domain guards (e.g. Aras bias ratio β undefined for a zero-mean / non-Kelvin
+        # variable, or a constant reference series) raise ValueError. These are caused
+        # by the request inputs, not a server fault, so return 400 with the reason.
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/climate/trust-report")
+def climate_trust_report(payload: ClimateDiagnosticRequest) -> dict:
+    """
+    Arasense Model Trust Engine: for the requested location/variable, score the
+    CMIP6 ensemble with the Aras Diagram, classify each model (trusted/usable/
+    weak/reject), attribute its dominant error mode, and return skill weights
+    plus an ensemble-level recommendation. This is the 'which models do I
+    trust here, and why' decision layer.
+    """
+    if payload.start_date > payload.end_date:
+        raise HTTPException(status_code=400, detail="start_date must be on or before end_date.")
+
+    try:
+        project_id = initialize_earth_engine()
+        roi = ee.Geometry.Point([payload.lon, payload.lat]).buffer(payload.radius_km * 1000)
+        fetcher = ArasenseDataFetcher(project_id)
+        results = fetcher.get_climate_data(
+            geometry=roi,
+            start_date=payload.start_date.isoformat(),
+            end_date=payload.end_date.isoformat(),
+            variable=payload.variable,
+            ref_dataset=payload.ref_dataset,
+            fast_mode=payload.fast_mode,
+        )
+        if not results:
+            raise HTTPException(status_code=404, detail="No climate data returned for the selected inputs.")
+
+        model_names = [k for k in results.keys() if k != "reference"]
+        if not model_names:
+            raise HTTPException(status_code=404, detail="No CMIP6 model data returned.")
+
+        aligned_ref = results[model_names[0]]["reference"].values
+        model_series = [results[name]["model"].values for name in model_names]
+        engine = ModelTrustEngine(aligned_ref, model_series, model_names)
+
+        return {
+            "project_id": project_id,
+            "input": model_to_dict(payload),
+            "summary": engine.summary(),
+            "models": engine.reports,
+        }
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
@@ -1705,6 +1966,210 @@ def flood_graph_summary(payload: FloodGraphRequest) -> dict:
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
+
+@app.post("/api/flood/sentinel-live")
+def flood_sentinel_live(payload: SentinelFloodRequest) -> dict:
+    if payload.start_date > payload.end_date:
+        raise HTTPException(status_code=400, detail="start_date must be on or before end_date.")
+    if payload.west >= payload.east or payload.south >= payload.north:
+        raise HTTPException(status_code=400, detail="Bounding box is invalid.")
+
+    try:
+        project_id = initialize_earth_engine()
+        region = ee.Geometry.Rectangle([payload.west, payload.south, payload.east, payload.north])
+
+        image_count = int(
+            ee.ImageCollection("COPERNICUS/S1_GRD")
+            .filterBounds(region)
+            .filter(ee.Filter.eq("instrumentMode", "IW"))
+            .filterDate(payload.start_date.isoformat(), payload.end_date.isoformat())
+            .size()
+            .getInfo()
+        )
+        if image_count == 0:
+            return {
+                "project_id": project_id,
+                "input": model_to_dict(payload),
+                "image_count": 0,
+                "rows": 0,
+                "cols": 0,
+                "flooded_cells_count": 0,
+                "flooded_fraction_pct": 0.0,
+                "flooded_cells": [],
+            }
+
+        fetcher = ArasenseFloodFetcher(project_id)
+        flood_mask = fetcher.get_flood_mask(
+            region=region,
+            start_date=payload.start_date.isoformat(),
+            end_date=payload.end_date.isoformat(),
+            scale=payload.scale,
+        )
+
+        rows, cols = flood_mask.shape
+        flooded_cells = mask_to_cells(
+            flood_mask,
+            payload.west,
+            payload.south,
+            payload.east,
+            payload.north,
+        )
+
+        total_cells = int(rows * cols)
+        flooded_count = int(len(flooded_cells))
+        flooded_fraction_pct = round((flooded_count / total_cells) * 100, 3) if total_cells else 0.0
+
+        return {
+            "project_id": project_id,
+            "input": model_to_dict(payload),
+            "image_count": image_count,
+            "rows": rows,
+            "cols": cols,
+            "flooded_cells_count": flooded_count,
+            "flooded_fraction_pct": flooded_fraction_pct,
+            "flooded_cells": flooded_cells,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/flood/validate-pilot")
+def flood_validate_pilot(payload: FloodValidationRequest) -> dict:
+    if payload.start_date > payload.end_date:
+        raise HTTPException(status_code=400, detail="start_date must be on or before end_date.")
+    if payload.sentinel_start_date > payload.sentinel_end_date:
+        raise HTTPException(status_code=400, detail="sentinel_start_date must be on or before sentinel_end_date.")
+
+    try:
+        project_id = initialize_earth_engine()
+        geometry = ee.Geometry.Point([payload.lon, payload.lat]).buffer(payload.radius_km * 1000)
+        bounds = geometry.bounds(maxError=1).getInfo()["coordinates"][0]
+        west = min(c[0] for c in bounds)
+        east = max(c[0] for c in bounds)
+        south = min(c[1] for c in bounds)
+        north = max(c[1] for c in bounds)
+
+        pipeline = FloodClimatePipeline(project_id)
+        climate = pipeline.get_best_model_precipitation(
+            geometry=geometry,
+            start_date=payload.start_date.isoformat(),
+            end_date=payload.end_date.isoformat(),
+            fast_mode=payload.fast_mode,
+        )
+
+        builder = ArasenseGraphBuilder(project_id)
+        graph, (rows, cols) = builder.build_hydrological_graph(
+            region=geometry,
+            scale=payload.scale,
+            precip_mean=climate["precip_mean"],
+            precip_anomaly=climate["precip_anomaly"],
+        )
+
+        gnn_path = "arasense_flood_gnn.pth"
+        if not os.path.exists(gnn_path):
+            raise HTTPException(status_code=404, detail="arasense_flood_gnn.pth was not found.")
+
+        checkpoint = torch.load(gnn_path, map_location="cpu")
+        gnn = ArasenseFloodGNN(
+            num_node_features=checkpoint.get(
+                "num_node_features",
+                ArasenseGraphBuilder.NUM_NODE_FEATURES,
+            )
+        )
+        gnn.load_state_dict(checkpoint["model_state_dict"])
+        gnn.eval()
+        with torch.no_grad():
+            probs = gnn(graph).squeeze().numpy()
+
+        prob_grid = np.asarray(probs, dtype=np.float32).reshape(rows, cols)
+        predicted_mask = prob_grid >= payload.threshold
+
+        fetcher = ArasenseFloodFetcher(project_id)
+        sentinel_collection, sentinel_count = fetcher.get_s1_collection(
+            geometry,
+            payload.sentinel_start_date.isoformat(),
+            payload.sentinel_end_date.isoformat(),
+        )
+        observed_mask = fetcher.get_flood_mask(
+            region=geometry,
+            start_date=payload.sentinel_start_date.isoformat(),
+            end_date=payload.sentinel_end_date.isoformat(),
+            scale=payload.scale,
+            grid_shape=(rows, cols),
+        ) > 0
+
+        tp = int(np.logical_and(predicted_mask, observed_mask).sum())
+        fp = int(np.logical_and(predicted_mask, ~observed_mask).sum())
+        fn = int(np.logical_and(~predicted_mask, observed_mask).sum())
+        tn = int(np.logical_and(~predicted_mask, ~observed_mask).sum())
+        predicted_count = int(predicted_mask.sum())
+        observed_count = int(observed_mask.sum())
+        total = int(rows * cols)
+
+        precision = tp / (tp + fp) if (tp + fp) else 0.0
+        recall = tp / (tp + fn) if (tp + fn) else 0.0
+        iou = tp / (tp + fp + fn) if (tp + fp + fn) else 0.0
+        agreement = (tp + tn) / total if total else 0.0
+
+        node_data = []
+        lat_step = (north - south) / max(rows - 1, 1)
+        lon_step = (east - west) / max(cols - 1, 1)
+        for idx, prob in enumerate(probs.tolist()):
+            r = idx // cols
+            c = idx % cols
+            node_data.append(
+                {
+                    "lat": round(north - r * lat_step, 5),
+                    "lon": round(west + c * lon_step, 5),
+                    "p": round(float(prob), 3),
+                    "observed": bool(observed_mask[r, c]),
+                    "predicted": bool(predicted_mask[r, c]),
+                }
+            )
+
+        return {
+            "project_id": project_id,
+            "input": model_to_dict(payload),
+            "module_stage": "validation-stage flood screening pilot",
+            "scope_note": "Validation metrics compare GNN screening flags with a Sentinel-1 threshold mask. They are useful for pilot evaluation, not final operational accuracy claims.",
+            "best_model": climate["best_model"],
+            "kge": round(climate["kge"], 4),
+            "error_pct": round(climate["error_pct"], 2),
+            "precip_mean": round(climate["precip_mean"], 3),
+            "precip_anomaly": round(climate["precip_anomaly"], 4),
+            "grid_shape": [rows, cols],
+            "graph_nodes": int(graph.x.shape[0]),
+            "graph_edges": int(graph.edge_index.shape[1]),
+            "sentinel_image_count": int(sentinel_count),
+            "threshold": payload.threshold,
+            "counts": {
+                "total_cells": total,
+                "predicted_screening_cells": predicted_count,
+                "observed_sentinel_cells": observed_count,
+                "true_positive": tp,
+                "false_positive": fp,
+                "false_negative": fn,
+                "true_negative": tn,
+            },
+            "metrics": {
+                "precision": round(precision, 4),
+                "recall": round(recall, 4),
+                "iou": round(iou, 4),
+                "agreement": round(agreement, 4),
+            },
+            "gnn_trained_on_model": checkpoint.get("best_model", "unknown"),
+            "node_flood_probs": node_data,
+            "sentinel_flooded_cells": mask_to_cells(observed_mask, west, south, east, north),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
 @app.post("/api/flood/climate-driven")
 def flood_climate_driven(payload: FloodClimateDrivenRequest) -> dict:
     """
@@ -1745,6 +2210,8 @@ def flood_climate_driven(payload: FloodClimateDrivenRequest) -> dict:
         response = {
             "project_id"    : project_id,
             "input"         : model_to_dict(payload),
+            "module_stage"  : "validation-stage flood screening pilot",
+            "scope_note"    : "GNN flood probabilities are exploratory screening outputs and should be validated against local events, Sentinel-1 evidence, and hydraulic or field data before operational use.",
             "best_model"    : climate["best_model"],
             "kge"           : round(climate["kge"], 4),
             "error_pct"     : round(climate["error_pct"], 2),
@@ -1777,6 +2244,7 @@ def flood_climate_driven(payload: FloodClimateDrivenRequest) -> dict:
                 response["flood_risk_pct"]       = round(
                     flood_nodes / graph.x.shape[0] * 100, 2
                 )
+                response["gnn_output_type"] = "screening_probability"
                 response["gnn_trained_on_model"] = checkpoint.get(
                     "best_model", "unknown"
                 )
