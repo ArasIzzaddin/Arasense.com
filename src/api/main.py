@@ -763,6 +763,32 @@ def root() -> str:
                 <button class="secondary" type="button" id="snap-rome">Reset to Rome</button>
               </div>
             </form>
+
+            <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px;">
+              <h3 style="margin:0 0 6px;">Forward Projection ★</h3>
+              <p style="color:var(--muted);font-size:13px;margin:0 0 10px;">Trust-weighted change by mid-century (2040&ndash;2059 vs 1995&ndash;2014), using only models that pass skill screening. Uses the map point above.</p>
+              <form id="projection-form">
+                <div class="row">
+                  <label>Variable
+                    <select name="variable" id="proj-variable">
+                      <option value="precipitation">precipitation</option>
+                      <option value="temperature">temperature</option>
+                    </select>
+                  </label>
+                  <label>Metric
+                    <select name="metric" id="proj-metric">
+                      <option value="rx1day">max 1-day rain (rx1day)</option>
+                      <option value="heavy_precip_frac">heavy-rain-day frequency</option>
+                      <option value="p95">p95 extreme intensity</option>
+                      <option value="mean">mean</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="row">
+                  <button type="submit" id="proj-submit">Project to 2050</button>
+                </div>
+              </form>
+            </div>
           </div>
 
           <div class="control-card" id="flood-card" style="display:none;">
@@ -886,6 +912,19 @@ def root() -> str:
           </div>
         </div>
 
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Forward Climate Projection</h2>
+              <p>Trust-weighted change by mid-century (2040&ndash;2059 vs 1995&ndash;2014), driven only by models that earned trust. Extremes (rx1day, heavy-rain days) are the forward-looking flood-risk driver.</p>
+            </div>
+            <div class="badge" id="proj-headline">Awaiting run</div>
+          </div>
+          <div id="proj-shell">
+            <div class="diagram-placeholder" style="min-height:200px;">Pick a metric and press &ldquo;Project to 2050&rdquo;. Mean takes ~40s; extremes ~2&ndash;3 min (server-side daily aggregation).</div>
+          </div>
+        </div>
+
         <div class="subpanel-grid">
           <div class="panel">
             <div class="panel-header">
@@ -960,6 +999,8 @@ def root() -> str:
     const rankingShell = document.getElementById('ranking-shell');
     const trustShell = document.getElementById('trust-shell');
     const trustHeadline = document.getElementById('trust-headline');
+    const projShell = document.getElementById('proj-shell');
+    const projHeadline = document.getElementById('proj-headline');
     const seriesShell = document.getElementById('series-shell');
     const seriesLegend = document.getElementById('series-legend');
     const seriesNote = document.getElementById('series-note');
@@ -1271,6 +1312,55 @@ def root() -> str:
           <span style="color:#c0392b">— 50%</span>
         </div>
       `;
+    }
+
+    const METRIC_LABEL = {
+      mean: 'Mean', p95: 'p95 extreme intensity',
+      rx1day: 'Max 1-day', heavy_precip_frac: 'Heavy-rain-day frequency'
+    };
+
+    function fmtVal(v, variable) {
+      if (v === null || v === undefined) return '–';
+      if (variable === 'temperature') return Number(v).toFixed(2) + ' K';
+      return Number(v).toFixed(3) + ' mm';
+    }
+
+    function renderProjection(data, variable) {
+      const p = data && data.projection;
+      if (!p) {
+        projShell.innerHTML = '<div class="diagram-placeholder" style="min-height:200px;">No projection available.</div>';
+        projHeadline.textContent = 'No data';
+        return;
+      }
+      const up = p.change > 0;
+      const arrow = up ? '▲' : (p.change < 0 ? '▼' : '▬');
+      const color = up ? '#ff8f8f' : (p.change < 0 ? '#8bf0c7' : '#9bc9c0');
+      const pct = (p.pct_change === null || p.pct_change === undefined) ? '–' : (p.pct_change >= 0 ? '+' : '') + Number(p.pct_change).toFixed(1) + '%';
+      const agree = Math.round((p.agreement_on_increase || 0) * 100);
+      projHeadline.textContent = `${p.n_models_trusted}/${p.n_models_total} trusted`;
+
+      const rows = (p.per_model || []).map((m) => `
+        <tr>
+          <td>${m.name}</td>
+          <td>${Math.round((m.weight||0)*100)}%</td>
+          <td>${fmtVal(m.historical, variable)}</td>
+          <td>${fmtVal(m.future, variable)}</td>
+          <td style="color:${m.change>0?'#ff8f8f':'#8bf0c7'};">${m.change>=0?'+':''}${fmtVal(m.change, variable)}</td>
+        </tr>`).join('');
+
+      projShell.innerHTML = `
+        <div class="metric-grid" style="margin:0 0 14px;">
+          <div class="metric"><strong style="color:${color};">${arrow} ${pct}</strong><span>${METRIC_LABEL[p.metric]||p.metric} change by 2050</span></div>
+          <div class="metric"><strong>${fmtVal(p.historical_level, variable)} → ${fmtVal(p.future_level, variable)}</strong><span>Historical → future</span></div>
+          <div class="metric"><strong>${agree}%</strong><span>Model weight agreeing on ${up?'increase':'change'}</span></div>
+        </div>
+        <div class="series-note" style="margin:0 0 10px;">Uncertainty band (±1σ across trusted models): ${fmtVal(p.change_low, variable)} to ${fmtVal(p.change_high, variable)}.</div>
+        <div class="table-shell">
+          <table>
+            <thead><tr><th>Model</th><th>Weight</th><th>Historical</th><th>Future</th><th>Change</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
     }
 
     function renderTrustReport(trust) {
@@ -1622,6 +1712,45 @@ def root() -> str:
         ref_dataset: form.get('ref_dataset'),
         fast_mode: form.get('fast_mode') === 'true'
       }, 'climate');
+    });
+
+    document.getElementById('projection-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const variable = document.getElementById('proj-variable').value;
+      const metric = document.getElementById('proj-metric').value;
+      const submitBtn = document.getElementById('proj-submit');
+      const slow = metric !== 'mean';
+      projHeadline.textContent = 'Running…';
+      submitBtn.disabled = true;
+      const original = submitBtn.textContent;
+      submitBtn.textContent = 'Projecting…';
+      projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:200px;">Scoring model trust and projecting to mid-century… ${slow ? 'extremes use server-side daily aggregation (~2–3 min)' : '(~40s)'}.</div>`;
+      try {
+        const response = await fetch('/api/climate/projection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lat: Number(climateLat.value),
+            lon: Number(climateLon.value),
+            radius_km: Number(climateRadius.value),
+            variable: variable,
+            metric: metric,
+            fast_mode: true
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data && data.detail ? data.detail : `HTTP ${response.status}`);
+        responseBox.value = JSON.stringify(data, null, 2);
+        renderProjection(data, variable);
+        setStatus('Projection complete', 'ok');
+      } catch (err) {
+        projHeadline.textContent = 'Error';
+        projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:160px;color:var(--danger);">${err.message}</div>`;
+        setStatus('Projection failed', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = original;
+      }
     });
 
     document.getElementById('flood-form').addEventListener('submit', (event) => {
