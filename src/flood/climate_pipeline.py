@@ -1,3 +1,4 @@
+import ee
 import numpy as np
 import pandas as pd
 
@@ -170,3 +171,81 @@ class FloodClimatePipeline:
         instead of a single best model. Kept so existing callers keep working.
         """
         return self.get_trusted_precipitation(*args, **kwargs)
+
+    # ── ERA5-driven observed precipitation (event hindcast) ───────
+    def get_observed_precipitation(
+        self,
+        geometry,                    # ee.Geometry
+        start_date: str,             # "YYYY-MM-DD"  (within a single month)
+        end_date: str,               # "YYYY-MM-DD"
+        baseline_start: str = "2003-01-01",
+        baseline_end: str = "2022-12-31",
+    ) -> dict:
+        """
+        Drive the flood graph from ERA5-Land **observed** precipitation
+        (reanalysis) — the scientifically correct source for hindcasting a
+        SPECIFIC flood event.
+
+        Why not CMIP6 here: free-running climate models reproduce climate
+        statistics, not the day a storm lands, so they are out-of-skill for the
+        timing of a single event (the Model Trust Engine rejects them). ERA5
+        reanalysis is the best estimate of the rainfall that actually fell.
+
+        The anomaly is the event mean vs. an ERA5 climatology for the same
+        calendar window (month + day-of-month) over a multi-year baseline,
+        computed server-side. Assumes the event lies within one calendar month.
+
+        Returns precip_mean / precip_anomaly / precip_spread (graph-ready), plus
+        the climatology used.
+        """
+        band = "total_precipitation_sum"      # ERA5-Land daily, metres -> *1000 = mm
+        era5 = ee.ImageCollection("ECMWF/ERA5_LAND/DAILY_AGGR").select(band)
+
+        event_img = era5.filterDate(start_date, end_date).mean()  # mean daily total
+
+        sm, sd = int(start_date[5:7]), int(start_date[8:10])
+        em, ed = int(end_date[5:7]), int(end_date[8:10])
+        clim = (era5.filterDate(baseline_start, baseline_end)
+                    .filter(ee.Filter.calendarRange(sm, em, "month"))
+                    .filter(ee.Filter.calendarRange(sd, ed, "day_of_month")))
+        clim_mean_img = clim.mean()
+        clim_std_img = clim.reduce(ee.Reducer.stdDev()).rename(band)
+
+        def _spatial(img, reducer):
+            return img.reduceRegion(reducer=reducer, geometry=geometry,
+                                    scale=11132, bestEffort=True,
+                                    maxPixels=int(1e9)).get(band)
+
+        stats = ee.Dictionary({
+            "event_mean":  _spatial(event_img, ee.Reducer.mean()),
+            "event_sstd":  _spatial(event_img, ee.Reducer.stdDev()),
+            "clim_mean":   _spatial(clim_mean_img, ee.Reducer.mean()),
+            "clim_std":    _spatial(clim_std_img, ee.Reducer.mean()),
+        }).getInfo()
+
+        if stats.get("event_mean") is None:
+            raise RuntimeError(
+                "FloodClimatePipeline: no ERA5-Land precipitation for the event "
+                "window — check the dates/region."
+            )
+
+        mm = 1000.0
+        event_mean = float(stats["event_mean"]) * mm
+        event_spread = float(stats.get("event_sstd") or 0.0) * mm
+        clim_mean = float(stats.get("clim_mean") or 0.0) * mm
+        clim_std = float(stats.get("clim_std") or 0.0) * mm
+        anomaly = (event_mean - clim_mean) / clim_std if clim_std > 1e-9 else 0.0
+
+        print(f"FloodClimatePipeline: ERA5 observed precip = {event_mean:.2f} mm/day "
+              f"(climatology {clim_mean:.2f} mm/day, anomaly {anomaly:+.2f} sigma)")
+
+        return {
+            "driver": "ERA5-Land reanalysis (observed)",
+            "precip_mean": event_mean,
+            "precip_anomaly": anomaly,
+            "precip_spread": event_spread,
+            "era5_mean": event_mean,
+            "clim_mean": clim_mean,
+            "clim_std": clim_std,
+            "baseline": [baseline_start, baseline_end],
+        }

@@ -124,11 +124,14 @@ def build_evidence_pack(case: ValidationCase, api_response: dict) -> dict:
         "confusion": {"tp": tp, "fp": fp, "fn": fn, "tn": tn},
         "scores": scores,
         "climate": {
+            "driver": api_response.get("climate_driver"),
             "best_model": api_response.get("best_model"),
             "trusted_models": api_response.get("trusted_models"),
             "trust_weights": api_response.get("trust_weights"),
             "precip_mean": api_response.get("precip_mean"),
             "precip_spread": api_response.get("precip_spread"),
+            "precip_anomaly": api_response.get("precip_anomaly"),
+            "clim_mean": api_response.get("precip_climatology_mean"),
             "n_kept": trust.get("n_kept"),
             "n_models": trust.get("n_models"),
         },
@@ -170,13 +173,25 @@ def render_markdown(pack: dict) -> str:
         "",
         "## Climate signal driving the screen",
         "",
-        f"- Trusted models: **{cl.get('n_kept')}/{cl.get('n_models')}** kept "
-        f"({', '.join(cl.get('trusted_models') or []) or 'n/a'}).",
-        f"- Top model: {cl.get('best_model') or 'n/a'}.",
-        f"- Skill-weighted ensemble precip: {cl.get('precip_mean')} "
-        f"± {cl.get('precip_spread')} mm/day.",
-        "",
     ]
+    if cl.get("driver"):
+        lines += [
+            f"- Driver: **{cl['driver']}** — event hindcast from observed "
+            "rainfall, not a free-running climate model.",
+            f"- Event precip: {cl.get('precip_mean')} mm/day "
+            f"(climatology {cl.get('clim_mean')} mm/day, "
+            f"anomaly {cl.get('precip_anomaly')} sigma).",
+            "",
+        ]
+    else:
+        lines += [
+            f"- Trusted models: **{cl.get('n_kept')}/{cl.get('n_models')}** kept "
+            f"({', '.join(cl.get('trusted_models') or []) or 'n/a'}).",
+            f"- Top model: {cl.get('best_model') or 'n/a'}.",
+            f"- Skill-weighted ensemble precip: {cl.get('precip_mean')} "
+            f"± {cl.get('precip_spread')} mm/day.",
+            "",
+        ]
     if pack.get("notes"):
         lines += ["---", f"_Note: {pack['notes']}_", ""]
     return "\n".join(lines)

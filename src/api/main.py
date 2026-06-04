@@ -2117,12 +2117,15 @@ def flood_validate_pilot(payload: FloodValidationRequest) -> dict:
         south = min(c[1] for c in bounds)
         north = max(c[1] for c in bounds)
 
+        # Event hindcast: drive the flood graph from ERA5 OBSERVED precipitation.
+        # CMIP6 free-running models are out-of-skill for the timing of a single
+        # event (the Model Trust Engine rejects them); ERA5 reanalysis is the
+        # correct source for validating against a specific historical flood.
         pipeline = FloodClimatePipeline(project_id)
-        climate = pipeline.get_best_model_precipitation(
+        climate = pipeline.get_observed_precipitation(
             geometry=geometry,
             start_date=payload.start_date.isoformat(),
             end_date=payload.end_date.isoformat(),
-            fast_mode=payload.fast_mode,
         )
 
         builder = ArasenseGraphBuilder(project_id)
@@ -2200,14 +2203,11 @@ def flood_validate_pilot(payload: FloodValidationRequest) -> dict:
             "input": model_to_dict(payload),
             "module_stage": "validation-stage flood screening pilot",
             "scope_note": "Validation metrics compare GNN screening flags with a Sentinel-1 threshold mask. They are useful for pilot evaluation, not final operational accuracy claims.",
-            "best_model": climate["best_model"],
-            "kge": round(climate["kge"], 4),
-            "error_pct": round(climate["error_pct"], 2),
+            "climate_driver": climate["driver"],
             "precip_mean": round(climate["precip_mean"], 3),
             "precip_anomaly": round(climate["precip_anomaly"], 4),
             "precip_spread": round(climate["precip_spread"], 3),
-            "trusted_models": climate["models_used"],
-            "trust_weights": [round(w, 4) for w in climate["weights"]],
+            "precip_climatology_mean": round(climate["clim_mean"], 3),
             "grid_shape": [rows, cols],
             "graph_nodes": int(graph.x.shape[0]),
             "graph_edges": int(graph.edge_index.shape[1]),
