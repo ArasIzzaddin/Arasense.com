@@ -3,7 +3,27 @@
 import numpy as np
 import pytest
 
-from climate.projection import METRICS, ClimateProjection
+from climate.projection import METRICS, ClimateProjection, weighted_projection
+
+
+def test_weighted_projection_from_precomputed_values():
+    # Server-side path: per-model historical/future scalars already computed.
+    per_model = [
+        {"name": "A", "weight": 0.6, "trust_tier": "trusted", "historical": 10.0, "future": 13.0},
+        {"name": "B", "weight": 0.4, "trust_tier": "usable", "historical": 20.0, "future": 22.0},
+    ]
+    out = weighted_projection(per_model, "rx1day", n_total=3)
+    # weighted change = 0.6*3 + 0.4*2 = 2.6
+    assert out["change"] == pytest.approx(2.6)
+    assert out["n_models_trusted"] == 2
+    assert out["n_models_total"] == 3
+    assert out["agreement_on_increase"] == pytest.approx(1.0)
+    assert out["per_model"][0]["change"] == pytest.approx(3.0)
+
+
+def test_weighted_projection_empty_raises():
+    with pytest.raises(ValueError, match="out-of-skill"):
+        weighted_projection([], "mean", n_total=4)
 
 
 def _ensemble(seed=0, n=120):

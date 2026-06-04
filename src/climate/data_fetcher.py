@@ -221,6 +221,55 @@ class ArasenseDataFetcher:
                 out[m_name] = s
         return ref_series, out
 
+    def get_extreme_stat(self, geometry, start_date, end_date,
+                         variable="precipitation", models=None, stat="p95",
+                         threshold_mm=20.0, fast_mode=True):
+        """
+        Server-side daily-extreme statistic per CMIP6 model — where the real
+        Mediterranean climate-change signal lives. Each model reduces to a single
+        scalar in ONE getInfo (no per-day download).
+
+        stat:
+            "p95"        — 95th percentile of daily values (extreme intensity)
+            "rx1day"     — maximum 1-day value over the window
+            "heavy_frac" — fraction of days at/above ``threshold_mm``
+        """
+        cfg = {
+            "temperature":   ("tas", 1.0),
+            "precipitation": ("pr", 86400.0),   # kg m-2 s-1 -> mm/day
+        }
+        band, scale = cfg.get(variable, cfg["precipitation"])
+        scenario = "historical" if int(start_date[:4]) <= 2014 else "ssp245"
+        base = (ee.ImageCollection("NASA/GDDP-CMIP6")
+                  .filterBounds(geometry)
+                  .filter(ee.Filter.eq("scenario", scenario))
+                  .filterDate(start_date, end_date)
+                  .select(band))
+
+        if models is None:
+            models = base.aggregate_array("model").distinct().getInfo()
+            models = models[:5] if fast_mode else models
+
+        out = {}
+        for m_name in models:
+            coll = base.filter(ee.Filter.eq("model", m_name)) \
+                       .map(lambda img: img.multiply(scale))
+            if stat == "p95":
+                img = coll.reduce(ee.Reducer.percentile([95]))
+            elif stat == "rx1day":
+                img = coll.max()
+            elif stat == "heavy_frac":
+                img = coll.map(lambda i: i.gte(threshold_mm)).mean()
+            else:
+                raise ValueError(f"Unknown stat '{stat}'.")
+            val = img.rename("v").reduceRegion(
+                reducer=ee.Reducer.mean(), geometry=geometry,
+                scale=27830, bestEffort=True, maxPixels=int(1e9),
+            ).get("v").getInfo()
+            if val is not None:
+                out[m_name] = float(val)
+        return out
+
     def get_model_series(self, geometry, start_date, end_date,
                          variable='precipitation', models=None, fast_mode=True):
         """

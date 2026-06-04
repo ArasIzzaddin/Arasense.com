@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 
 from climate.aras_eval import ArasDiagram
 from climate.trust_engine import ModelTrustEngine
-from climate.projection import ClimateProjection
+from climate.projection import ClimateProjection, weighted_projection
 from climate.data_fetcher import ArasenseDataFetcher
 from climate.gnn_bias_corrector import ClimateBiasCorrector
 from common.gee import get_earth_engine_status, get_project_id, initialize_earth_engine
@@ -72,7 +72,7 @@ class ClimateProjectionRequest(BaseModel):
     lon: float = Field(..., ge=-180, le=180)
     radius_km: float = Field(50, gt=0, le=500)
     variable: Literal["temperature", "precipitation"] = "precipitation"
-    metric: Literal["mean", "p95", "heavy_precip_frac"] = "mean"
+    metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac"] = "mean"
     hist_start: date = date(1995, 1, 1)
     hist_end: date = date(2014, 12, 31)
     future_start: date = date(2040, 1, 1)
@@ -1993,7 +1993,8 @@ def climate_projection(payload: ClimateProjectionRequest) -> dict:
         roi = ee.Geometry.Point([payload.lon, payload.lat]).buffer(payload.radius_km * 1000)
         fetcher = ArasenseDataFetcher(project_id)
 
-        # 1. Historical monthly climatology: ERA5 + CMIP6 historical (trust scoring).
+        # 1. Historical monthly climatology -> score model trust (which models are
+        #    skilful at this location's seasonal cycle and magnitude).
         ref_hist, hist_models = fetcher.get_monthly_series(
             geometry=roi,
             start_date=payload.hist_start.isoformat(),
@@ -2004,32 +2005,51 @@ def climate_projection(payload: ClimateProjectionRequest) -> dict:
         )
         if ref_hist is None or ref_hist.empty or not hist_models:
             raise HTTPException(status_code=404, detail="No historical climate data returned.")
-
-        # Align the reference and all models on their common months.
         hist_df = pd.DataFrame({"reference": ref_hist, **hist_models}).dropna()
         if hist_df.shape[0] < 6:
             raise HTTPException(status_code=404, detail="Too few overlapping months for a robust climatology.")
         model_names = [c for c in hist_df.columns if c != "reference"]
 
-        # 2. Future monthly series for the same models (scenario; future is unobserved).
-        _, future_models = fetcher.get_monthly_series(
-            geometry=roi,
-            start_date=payload.future_start.isoformat(),
-            end_date=payload.future_end.isoformat(),
-            variable=payload.variable,
-            models=model_names,
-            fast_mode=payload.fast_mode,
-            include_reference=False,
-        )
-        common = [n for n in model_names if n in future_models and not future_models[n].empty]
-        if not common:
-            raise HTTPException(status_code=404, detail="No models present in both historical and future windows.")
+        engine = ModelTrustEngine(hist_df["reference"].values,
+                                  [hist_df[n].values for n in model_names], model_names)
+        trusted = [r for r in engine.reports if r["weight"] > 0]
+        if not trusted:
+            raise HTTPException(status_code=400, detail="No model is trustworthy here (all KGE <= -0.41).")
+        trusted_names = [r["name"] for r in trusted]
+        report_by = {r["name"]: r for r in trusted}
 
-        aligned_ref = hist_df["reference"].values
-        hist_arrays = [hist_df[n].values for n in common]
-        future_arrays = [future_models[n].values for n in common]
+        # 2. Historical vs future value of the chosen metric, for trusted models.
+        #    "mean" uses the (fast) monthly series; extremes (p95/rx1day/heavy
+        #    precip) are computed server-side from DAILY data — where the real
+        #    Mediterranean signal lives.
+        if payload.metric == "mean":
+            _, fut_m = fetcher.get_monthly_series(
+                geometry=roi, start_date=payload.future_start.isoformat(),
+                end_date=payload.future_end.isoformat(), variable=payload.variable,
+                models=trusted_names, fast_mode=payload.fast_mode)
+            hist_val = {n: float(hist_df[n].mean()) for n in trusted_names}
+            fut_val = {n: float(fut_m[n].mean()) for n in trusted_names
+                       if n in fut_m and not fut_m[n].empty}
+        else:
+            stat = {"p95": "p95", "rx1day": "rx1day", "heavy_precip_frac": "heavy_frac"}[payload.metric]
+            hist_val = fetcher.get_extreme_stat(
+                geometry=roi, start_date=payload.hist_start.isoformat(),
+                end_date=payload.hist_end.isoformat(), variable=payload.variable,
+                models=trusted_names, stat=stat)
+            fut_val = fetcher.get_extreme_stat(
+                geometry=roi, start_date=payload.future_start.isoformat(),
+                end_date=payload.future_end.isoformat(), variable=payload.variable,
+                models=trusted_names, stat=stat)
 
-        proj = ClimateProjection(aligned_ref, hist_arrays, future_arrays, common).project(payload.metric)
+        per_model = [
+            {"name": n, "weight": report_by[n]["weight"], "trust_tier": report_by[n]["trust_tier"],
+             "historical": hist_val[n], "future": fut_val[n]}
+            for n in trusted_names if n in hist_val and n in fut_val
+        ]
+        if not per_model:
+            raise HTTPException(status_code=404, detail="No trusted models present in both windows.")
+
+        proj = weighted_projection(per_model, payload.metric, len(engine.reports), engine.summary())
 
         return {
             "project_id": project_id,
