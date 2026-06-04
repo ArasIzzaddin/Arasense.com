@@ -1,0 +1,8 @@
+# Minimal dependencies to import the engine modules and run the test suite.
+# The full app stack (torch, fastapi, streamlit, ...) lives in requirements.txt;
+# the current tests only need the numerical core plus a no-op `import ee`.
+numpy
+pandas
+matplotlib
+earthengine-api
+pytest
