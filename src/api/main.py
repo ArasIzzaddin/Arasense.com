@@ -6,6 +6,7 @@ from typing import Literal, Optional
 
 import ee
 import numpy as np
+import pandas as pd
 import torch
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
@@ -13,6 +14,7 @@ from pydantic import BaseModel, Field
 
 from climate.aras_eval import ArasDiagram
 from climate.trust_engine import ModelTrustEngine
+from climate.projection import ClimateProjection
 from climate.data_fetcher import ArasenseDataFetcher
 from climate.gnn_bias_corrector import ClimateBiasCorrector
 from common.gee import get_earth_engine_status, get_project_id, initialize_earth_engine
@@ -62,6 +64,19 @@ class ClimateDiagnosticRequest(BaseModel):
     end_date: date
     variable: Literal["temperature", "precipitation", "all_euro_cordex"] = "temperature"
     ref_dataset: str = "ERA5-Land"
+    fast_mode: bool = True
+
+
+class ClimateProjectionRequest(BaseModel):
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    radius_km: float = Field(50, gt=0, le=500)
+    variable: Literal["temperature", "precipitation"] = "precipitation"
+    metric: Literal["mean", "p95", "heavy_precip_frac"] = "mean"
+    hist_start: date = date(1995, 1, 1)
+    hist_end: date = date(2014, 12, 31)
+    future_start: date = date(2040, 1, 1)
+    future_end: date = date(2059, 12, 31)
     fast_mode: bool = True
 
 
@@ -1952,6 +1967,78 @@ def climate_trust_report(payload: ClimateDiagnosticRequest) -> dict:
             "input": model_to_dict(payload),
             "summary": engine.summary(),
             "models": engine.reports,
+        }
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/climate/projection")
+def climate_projection(payload: ClimateProjectionRequest) -> dict:
+    """
+    Forward-looking, trust-weighted climate projection — the defensible hazard
+    layer. Scores CMIP6 models against the observed historical climatology with
+    the Model Trust Engine, keeps the trusted ones, and projects the change in a
+    hazard metric (mean / p95 / heavy-precip fraction) into a future scenario
+    window, with an across-model uncertainty band.
+    """
+    if payload.hist_start > payload.hist_end or payload.future_start > payload.future_end:
+        raise HTTPException(status_code=400, detail="start dates must precede end dates.")
+
+    try:
+        project_id = initialize_earth_engine()
+        roi = ee.Geometry.Point([payload.lon, payload.lat]).buffer(payload.radius_km * 1000)
+        fetcher = ArasenseDataFetcher(project_id)
+
+        # 1. Historical monthly climatology: ERA5 + CMIP6 historical (trust scoring).
+        ref_hist, hist_models = fetcher.get_monthly_series(
+            geometry=roi,
+            start_date=payload.hist_start.isoformat(),
+            end_date=payload.hist_end.isoformat(),
+            variable=payload.variable,
+            fast_mode=payload.fast_mode,
+            include_reference=True,
+        )
+        if ref_hist is None or ref_hist.empty or not hist_models:
+            raise HTTPException(status_code=404, detail="No historical climate data returned.")
+
+        # Align the reference and all models on their common months.
+        hist_df = pd.DataFrame({"reference": ref_hist, **hist_models}).dropna()
+        if hist_df.shape[0] < 6:
+            raise HTTPException(status_code=404, detail="Too few overlapping months for a robust climatology.")
+        model_names = [c for c in hist_df.columns if c != "reference"]
+
+        # 2. Future monthly series for the same models (scenario; future is unobserved).
+        _, future_models = fetcher.get_monthly_series(
+            geometry=roi,
+            start_date=payload.future_start.isoformat(),
+            end_date=payload.future_end.isoformat(),
+            variable=payload.variable,
+            models=model_names,
+            fast_mode=payload.fast_mode,
+            include_reference=False,
+        )
+        common = [n for n in model_names if n in future_models and not future_models[n].empty]
+        if not common:
+            raise HTTPException(status_code=404, detail="No models present in both historical and future windows.")
+
+        aligned_ref = hist_df["reference"].values
+        hist_arrays = [hist_df[n].values for n in common]
+        future_arrays = [future_models[n].values for n in common]
+
+        proj = ClimateProjection(aligned_ref, hist_arrays, future_arrays, common).project(payload.metric)
+
+        return {
+            "project_id": project_id,
+            "input": model_to_dict(payload),
+            "windows": {
+                "historical": [payload.hist_start.isoformat(), payload.hist_end.isoformat()],
+                "future": [payload.future_start.isoformat(), payload.future_end.isoformat()],
+            },
+            "projection": proj,
         }
     except HTTPException:
         raise

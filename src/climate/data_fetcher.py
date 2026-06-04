@@ -149,6 +149,115 @@ class ArasenseDataFetcher:
 
         return results_dict
 
+    def _monthly_means(self, collection, band, scale_factor, geometry,
+                       start_date, end_date):
+        """
+        Server-side monthly-mean series for a single-band collection. Earth
+        Engine reduces every month and returns the whole series in ONE getInfo —
+        feasible for multi-decade climatological windows (unlike per-image).
+        """
+        start = ee.Date(start_date)
+        end = ee.Date(end_date)
+        n_months = end.difference(start, "month").floor()
+        months = ee.List.sequence(0, n_months.subtract(1))
+
+        def per_month(i):
+            i = ee.Number(i)
+            m0 = start.advance(i, "month")
+            m1 = m0.advance(1, "month")
+            img = collection.filterDate(m0, m1).mean()
+            val = img.reduceRegion(
+                reducer=ee.Reducer.mean(), geometry=geometry,
+                scale=27830, bestEffort=True, maxPixels=int(1e9),
+            ).get(band)
+            return ee.Feature(None, {"t": m0.format("YYYY-MM"), "v": val})
+
+        feats = ee.FeatureCollection(months.map(per_month)).getInfo()["features"]
+        rows = [(f["properties"]["t"], f["properties"].get("v")) for f in feats]
+        rows = [(t, v) for t, v in rows if v is not None]
+        if not rows:
+            return pd.Series(dtype=float)
+        idx = pd.to_datetime([t for t, _ in rows])
+        return pd.Series([float(v) * scale_factor for _, v in rows], index=idx).sort_index()
+
+    def get_monthly_series(self, geometry, start_date, end_date,
+                           variable="precipitation", models=None,
+                           fast_mode=True, include_reference=False):
+        """
+        Monthly-mean climate series (server-side), suitable for climatological
+        model-trust scoring and projection over multi-decade windows.
+
+        Returns
+        -------
+        (reference_series_or_None, dict[str, pd.Series])
+        """
+        cfg = {
+            "temperature":   ("temperature_2m", "tas", 1.0, 1.0),
+            "precipitation": ("total_precipitation_sum", "pr", 1000.0, 86400.0),
+        }
+        era_band, mod_band, era_scale, mod_scale = cfg.get(variable, cfg["precipitation"])
+
+        ref_series = None
+        if include_reference:
+            era5 = (ee.ImageCollection("ECMWF/ERA5_LAND/DAILY_AGGR")
+                      .filterBounds(geometry).select(era_band))
+            ref_series = self._monthly_means(era5, era_band, era_scale, geometry,
+                                             start_date, end_date)
+
+        scenario = "historical" if int(start_date[:4]) <= 2014 else "ssp245"
+        cmip6 = (ee.ImageCollection("NASA/GDDP-CMIP6")
+                   .filterBounds(geometry)
+                   .filter(ee.Filter.eq("scenario", scenario))
+                   .select(mod_band))
+        if models is None:
+            models = cmip6.filterDate(start_date, end_date).aggregate_array("model").distinct().getInfo()
+            models = models[:5] if fast_mode else models
+
+        out = {}
+        for m_name in models:
+            s = self._monthly_means(cmip6.filter(ee.Filter.eq("model", m_name)),
+                                    mod_band, mod_scale, geometry, start_date, end_date)
+            if not s.empty:
+                out[m_name] = s
+        return ref_series, out
+
+    def get_model_series(self, geometry, start_date, end_date,
+                         variable='precipitation', models=None, fast_mode=True):
+        """
+        Fetch CMIP6 model series WITHOUT an ERA5 join — needed for FUTURE windows
+        where there is no observed reference. Scenario is chosen by year
+        (historical <= 2014, else ssp245).
+
+        Returns
+        -------
+        dict[str, pd.Series]  — daily series per successfully fetched model.
+        """
+        bands = {
+            'temperature':     ('tas', 1.0),       # Kelvin
+            'precipitation':   ('pr', 86400.0),    # kg m-2 s-1 -> mm/day
+            'all_euro_cordex': ('pr', 86400.0),
+        }
+        band, scale_mod = bands.get(variable, bands['temperature'])
+
+        scenario = 'historical' if int(start_date[:4]) <= 2014 else 'ssp245'
+        cmip6_col = (ee.ImageCollection("NASA/GDDP-CMIP6")
+                       .filterBounds(geometry)
+                       .filterDate(start_date, end_date)
+                       .filter(ee.Filter.eq('scenario', scenario))
+                       .select(band))
+
+        if models is None:
+            models = cmip6_col.aggregate_array('model').distinct().getInfo()
+            models = models[:5] if fast_mode else models
+
+        out = {}
+        for m_name in models:
+            m_col = cmip6_col.filter(ee.Filter.eq('model', m_name))
+            s = self.extract_series(m_col, band, scale_mod, m_name, geometry, scale=25000)
+            if not s.empty:
+                out[m_name] = s
+        return out
+
     def extract_series(self, collection, band_name, scale_factor=1.0,
                        label="", geometry=None, scale=10000):
         """
