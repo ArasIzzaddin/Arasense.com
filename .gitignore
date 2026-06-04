@@ -18,3 +18,7 @@ Thumbs.db
 *.log
 uvicorn.out.log
 uvicorn.err.log
+
+# Local run artifacts
+full_*.json
+proj_result.json
