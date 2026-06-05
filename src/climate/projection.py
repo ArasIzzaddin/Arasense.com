@@ -54,6 +54,21 @@ def _hot_day_frac(x, threshold_k: float = 303.15):
     return float(np.mean(x >= threshold_k)) if x.size else 0.0
 
 
+def _dry_day_frac(x, threshold_mm: float = 1.0):
+    # fraction of dry days (precip below ~1 mm)
+    x = np.asarray(x, dtype=float)
+    return float(np.mean(x < threshold_mm)) if x.size else 0.0
+
+
+def _cdd(x, threshold_mm: float = 1.0):
+    # maximum run of consecutive dry days (standard drought index, ETCCDI CDD)
+    best = cur = 0
+    for v in np.asarray(x, dtype=float):
+        cur = cur + 1 if v < threshold_mm else 0
+        best = max(best, cur)
+    return float(best)
+
+
 METRICS = {
     "mean":              _mean,              # mean level (mm/day, or K)
     "p95":               _p95,               # 95th percentile (extreme intensity)
@@ -61,6 +76,8 @@ METRICS = {
     "heavy_precip_frac": _heavy_precip_frac, # fraction of heavy-rain days
     "tx_max":            _rx1day,            # max daily temperature over the window
     "hot_day_frac":      _hot_day_frac,      # fraction of hot days (Tmax >= 30 C)
+    "dry_day_frac":      _dry_day_frac,      # fraction of dry days (drought)
+    "cdd":               _cdd,               # max consecutive dry days (drought)
 }
 
 

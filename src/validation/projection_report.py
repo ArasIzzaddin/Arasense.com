@@ -22,6 +22,8 @@ _METRIC_META = {
     "heavy_precip_frac": ("Heavy-rain-day frequency", "fraction of days"),
     "tx_max":            ("Maximum temperature", "K"),
     "hot_day_frac":      ("Hot-day frequency (Tmax >= 30 C)", "fraction of days"),
+    "dry_day_frac":      ("Dry-day frequency", "fraction of days"),
+    "cdd":               ("Consecutive dry days (max run)", "days"),
 }
 
 

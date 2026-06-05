@@ -267,6 +267,8 @@ class ArasenseDataFetcher:
                     img = coll.max()
                 elif stat in ("heavy_frac", "hot_frac"):
                     img = coll.map(lambda i: i.gte(threshold)).mean()
+                elif stat == "dry_frac":
+                    img = coll.map(lambda i: i.lt(threshold)).mean()
                 else:
                     raise ValueError(f"Unknown stat '{stat}'.")
                 val = img.rename("v").reduceRegion(

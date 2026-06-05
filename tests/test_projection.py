@@ -123,6 +123,24 @@ def test_all_out_of_skill_refuses():
         ClimateProjection(obs, hist, future, ["X", "Y"]).project("mean")
 
 
+def test_drought_metrics_cdd_and_dry_frac():
+    from climate.projection import METRICS
+    # 4 dry days, 1 wet, 3 dry, 2 wet  -> longest dry run = 4; dry fraction = 7/10
+    series = [0.0, 0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 3.0, 2.0]
+    assert METRICS["cdd"](series) == 4.0
+    assert METRICS["dry_day_frac"](series) == pytest.approx(0.7)
+
+    # Future is drier (longer dry spells) -> positive change in both.
+    rng = np.random.default_rng(8)
+    n = 200
+    obs = np.abs(rng.normal(4, 3, n))
+    hist = [obs + rng.normal(0, 0.2, n) for _ in range(3)]
+    future = [np.where(rng.random(n) < 0.4, 0.0, h) for h in hist]  # force more dry days
+    proj = ClimateProjection(obs, hist, future, ["A", "B", "C"])
+    assert proj.project("dry_day_frac")["change"] > 0
+    assert proj.project("cdd")["change"] >= 0
+
+
 def test_unknown_metric_raises():
     obs, hist, names = _ensemble()
     future = [h + 1 for h in hist]
