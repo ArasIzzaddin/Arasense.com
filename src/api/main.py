@@ -73,6 +73,21 @@ class ClimateProjectionRequest(BaseModel):
     radius_km: float = Field(50, gt=0, le=500)
     variable: Literal["temperature", "precipitation"] = "precipitation"
     metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac"] = "mean"
+    scenario: Literal["ssp245", "ssp585"] = "ssp245"
+    hist_start: date = date(1995, 1, 1)
+    hist_end: date = date(2014, 12, 31)
+    future_start: date = date(2040, 1, 1)
+    future_end: date = date(2059, 12, 31)
+    fast_mode: bool = True
+
+
+class ClimateScenarioCompareRequest(BaseModel):
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    radius_km: float = Field(50, gt=0, le=500)
+    variable: Literal["temperature", "precipitation"] = "precipitation"
+    metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac"] = "rx1day"
+    scenarios: list[Literal["ssp245", "ssp585"]] = ["ssp245", "ssp585"]
     hist_start: date = date(1995, 1, 1)
     hist_end: date = date(2014, 12, 31)
     future_start: date = date(2040, 1, 1)
@@ -2115,14 +2130,69 @@ def climate_trust_report(payload: ClimateDiagnosticRequest) -> dict:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
+_STAT_BY_METRIC = {"p95": "p95", "rx1day": "rx1day", "heavy_precip_frac": "heavy_frac"}
+
+
+def _projection_score_trust(fetcher, roi, payload):
+    """Historical climatology -> Model Trust Engine. Returns (engine, hist_df,
+    trusted_names, report_by). Raises HTTPException on insufficient data."""
+    ref_hist, hist_models = fetcher.get_monthly_series(
+        geometry=roi, start_date=payload.hist_start.isoformat(),
+        end_date=payload.hist_end.isoformat(), variable=payload.variable,
+        fast_mode=payload.fast_mode, include_reference=True)
+    if ref_hist is None or ref_hist.empty or not hist_models:
+        raise HTTPException(status_code=404, detail="No historical climate data returned.")
+    hist_df = pd.DataFrame({"reference": ref_hist, **hist_models}).dropna()
+    if hist_df.shape[0] < 6:
+        raise HTTPException(status_code=404, detail="Too few overlapping months for a robust climatology.")
+    model_names = [c for c in hist_df.columns if c != "reference"]
+    engine = ModelTrustEngine(hist_df["reference"].values,
+                              [hist_df[n].values for n in model_names], model_names)
+    trusted = [r for r in engine.reports if r["weight"] > 0]
+    if not trusted:
+        raise HTTPException(status_code=400, detail="No model is trustworthy here (all KGE <= -0.41).")
+    return engine, hist_df, [r["name"] for r in trusted], {r["name"]: r for r in trusted}
+
+
+def _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, scenario, which):
+    """Per-trusted-model value of the chosen metric for the historical or a future
+    scenario window. ``which`` is 'historical' or 'future'."""
+    is_future = which == "future"
+    start = (payload.future_start if is_future else payload.hist_start).isoformat()
+    end = (payload.future_end if is_future else payload.hist_end).isoformat()
+    if payload.metric == "mean":
+        if not is_future:
+            return {n: float(hist_df[n].mean()) for n in trusted_names}
+        _, fut_m = fetcher.get_monthly_series(
+            geometry=roi, start_date=start, end_date=end, variable=payload.variable,
+            models=trusted_names, fast_mode=payload.fast_mode, scenario=scenario)
+        return {n: float(fut_m[n].mean()) for n in trusted_names
+                if n in fut_m and not fut_m[n].empty}
+    return fetcher.get_extreme_stat(
+        geometry=roi, start_date=start, end_date=end, variable=payload.variable,
+        models=trusted_names, stat=_STAT_BY_METRIC[payload.metric],
+        scenario=(scenario if is_future else None))
+
+
+def _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val):
+    per_model = [
+        {"name": n, "weight": report_by[n]["weight"], "trust_tier": report_by[n]["trust_tier"],
+         "historical": hist_val[n], "future": fut_val[n]}
+        for n in trusted_names if n in hist_val and n in fut_val
+    ]
+    if not per_model:
+        raise HTTPException(status_code=404, detail="No trusted models present in both windows.")
+    return weighted_projection(per_model, payload.metric, len(engine.reports), engine.summary())
+
+
 @app.post("/api/climate/projection")
 def climate_projection(payload: ClimateProjectionRequest) -> dict:
     """
     Forward-looking, trust-weighted climate projection — the defensible hazard
     layer. Scores CMIP6 models against the observed historical climatology with
     the Model Trust Engine, keeps the trusted ones, and projects the change in a
-    hazard metric (mean / p95 / heavy-precip fraction) into a future scenario
-    window, with an across-model uncertainty band.
+    hazard metric (mean / p95 / rx1day / heavy-precip fraction) into a future
+    scenario window, with an across-model uncertainty band.
     """
     if payload.hist_start > payload.hist_end or payload.future_start > payload.future_end:
         raise HTTPException(status_code=400, detail="start dates must precede end dates.")
@@ -2132,63 +2202,54 @@ def climate_projection(payload: ClimateProjectionRequest) -> dict:
         roi = ee.Geometry.Point([payload.lon, payload.lat]).buffer(payload.radius_km * 1000)
         fetcher = ArasenseDataFetcher(project_id)
 
-        # 1. Historical monthly climatology -> score model trust (which models are
-        #    skilful at this location's seasonal cycle and magnitude).
-        ref_hist, hist_models = fetcher.get_monthly_series(
-            geometry=roi,
-            start_date=payload.hist_start.isoformat(),
-            end_date=payload.hist_end.isoformat(),
-            variable=payload.variable,
-            fast_mode=payload.fast_mode,
-            include_reference=True,
-        )
-        if ref_hist is None or ref_hist.empty or not hist_models:
-            raise HTTPException(status_code=404, detail="No historical climate data returned.")
-        hist_df = pd.DataFrame({"reference": ref_hist, **hist_models}).dropna()
-        if hist_df.shape[0] < 6:
-            raise HTTPException(status_code=404, detail="Too few overlapping months for a robust climatology.")
-        model_names = [c for c in hist_df.columns if c != "reference"]
+        engine, hist_df, trusted_names, report_by = _projection_score_trust(fetcher, roi, payload)
+        hist_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, payload.scenario, "historical")
+        fut_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, payload.scenario, "future")
+        proj = _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val)
 
-        engine = ModelTrustEngine(hist_df["reference"].values,
-                                  [hist_df[n].values for n in model_names], model_names)
-        trusted = [r for r in engine.reports if r["weight"] > 0]
-        if not trusted:
-            raise HTTPException(status_code=400, detail="No model is trustworthy here (all KGE <= -0.41).")
-        trusted_names = [r["name"] for r in trusted]
-        report_by = {r["name"]: r for r in trusted}
+        return {
+            "project_id": project_id,
+            "input": model_to_dict(payload),
+            "scenario": payload.scenario,
+            "windows": {
+                "historical": [payload.hist_start.isoformat(), payload.hist_end.isoformat()],
+                "future": [payload.future_start.isoformat(), payload.future_end.isoformat()],
+            },
+            "n_models_scored": len(engine.reports),
+            "trust_models": engine.reports,
+            "projection": proj,
+        }
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-        # 2. Historical vs future value of the chosen metric, for trusted models.
-        #    "mean" uses the (fast) monthly series; extremes (p95/rx1day/heavy
-        #    precip) are computed server-side from DAILY data — where the real
-        #    Mediterranean signal lives.
-        if payload.metric == "mean":
-            _, fut_m = fetcher.get_monthly_series(
-                geometry=roi, start_date=payload.future_start.isoformat(),
-                end_date=payload.future_end.isoformat(), variable=payload.variable,
-                models=trusted_names, fast_mode=payload.fast_mode)
-            hist_val = {n: float(hist_df[n].mean()) for n in trusted_names}
-            fut_val = {n: float(fut_m[n].mean()) for n in trusted_names
-                       if n in fut_m and not fut_m[n].empty}
-        else:
-            stat = {"p95": "p95", "rx1day": "rx1day", "heavy_precip_frac": "heavy_frac"}[payload.metric]
-            hist_val = fetcher.get_extreme_stat(
-                geometry=roi, start_date=payload.hist_start.isoformat(),
-                end_date=payload.hist_end.isoformat(), variable=payload.variable,
-                models=trusted_names, stat=stat)
-            fut_val = fetcher.get_extreme_stat(
-                geometry=roi, start_date=payload.future_start.isoformat(),
-                end_date=payload.future_end.isoformat(), variable=payload.variable,
-                models=trusted_names, stat=stat)
 
-        per_model = [
-            {"name": n, "weight": report_by[n]["weight"], "trust_tier": report_by[n]["trust_tier"],
-             "historical": hist_val[n], "future": fut_val[n]}
-            for n in trusted_names if n in hist_val and n in fut_val
-        ]
-        if not per_model:
-            raise HTTPException(status_code=404, detail="No trusted models present in both windows.")
+@app.post("/api/climate/projection-compare")
+def climate_projection_compare(payload: ClimateScenarioCompareRequest) -> dict:
+    """
+    Compare emission scenarios (e.g. SSP2-4.5 vs SSP5-8.5) for the same hazard
+    metric and location. Model trust and the historical baseline are computed
+    once; only the future window differs per scenario — so the gap between
+    scenarios is the policy-relevant decision space.
+    """
+    if payload.hist_start > payload.hist_end or payload.future_start > payload.future_end:
+        raise HTTPException(status_code=400, detail="start dates must precede end dates.")
 
-        proj = weighted_projection(per_model, payload.metric, len(engine.reports), engine.summary())
+    try:
+        project_id = initialize_earth_engine()
+        roi = ee.Geometry.Point([payload.lon, payload.lat]).buffer(payload.radius_km * 1000)
+        fetcher = ArasenseDataFetcher(project_id)
+
+        engine, hist_df, trusted_names, report_by = _projection_score_trust(fetcher, roi, payload)
+        hist_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, None, "historical")
+
+        scenarios = {}
+        for scen in payload.scenarios:
+            fut_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, scen, "future")
+            scenarios[scen] = _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val)
 
         return {
             "project_id": project_id,
@@ -2199,7 +2260,7 @@ def climate_projection(payload: ClimateProjectionRequest) -> dict:
             },
             "n_models_scored": len(engine.reports),
             "trust_models": engine.reports,
-            "projection": proj,
+            "scenarios": scenarios,
         }
     except HTTPException:
         raise

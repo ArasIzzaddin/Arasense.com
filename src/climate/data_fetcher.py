@@ -182,7 +182,7 @@ class ArasenseDataFetcher:
 
     def get_monthly_series(self, geometry, start_date, end_date,
                            variable="precipitation", models=None,
-                           fast_mode=True, include_reference=False):
+                           fast_mode=True, include_reference=False, scenario=None):
         """
         Monthly-mean climate series (server-side), suitable for climatological
         model-trust scoring and projection over multi-decade windows.
@@ -204,7 +204,7 @@ class ArasenseDataFetcher:
             ref_series = self._monthly_means(era5, era_band, era_scale, geometry,
                                              start_date, end_date)
 
-        scenario = "historical" if int(start_date[:4]) <= 2014 else "ssp245"
+        scenario = scenario or ("historical" if int(start_date[:4]) <= 2014 else "ssp245")
         cmip6 = (ee.ImageCollection("NASA/GDDP-CMIP6")
                    .filterBounds(geometry)
                    .filter(ee.Filter.eq("scenario", scenario))
@@ -226,7 +226,7 @@ class ArasenseDataFetcher:
 
     def get_extreme_stat(self, geometry, start_date, end_date,
                          variable="precipitation", models=None, stat="p95",
-                         threshold_mm=20.0, fast_mode=True):
+                         threshold_mm=20.0, fast_mode=True, scenario=None):
         """
         Server-side daily-extreme statistic per CMIP6 model — where the real
         Mediterranean climate-change signal lives. Each model reduces to a single
@@ -242,7 +242,7 @@ class ArasenseDataFetcher:
             "precipitation": ("pr", 86400.0),   # kg m-2 s-1 -> mm/day
         }
         band, scale = cfg.get(variable, cfg["precipitation"])
-        scenario = "historical" if int(start_date[:4]) <= 2014 else "ssp245"
+        scenario = scenario or ("historical" if int(start_date[:4]) <= 2014 else "ssp245")
         base = (ee.ImageCollection("NASA/GDDP-CMIP6")
                   .filterBounds(geometry)
                   .filter(ee.Filter.eq("scenario", scenario))

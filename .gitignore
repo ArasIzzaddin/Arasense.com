@@ -22,3 +22,4 @@ uvicorn.err.log
 # Local run artifacts
 full_*.json
 proj_result.json
+compare.json
