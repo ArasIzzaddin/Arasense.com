@@ -16,6 +16,13 @@ from climate.aras_eval import ArasDiagram
 from climate.trust_engine import ModelTrustEngine
 from climate.projection import ClimateProjection, weighted_projection
 from climate.data_fetcher import ArasenseDataFetcher
+from validation.projection_report import (
+    ProjectionCase,
+    build_compare_report,
+    build_projection_report,
+    render_compare_markdown,
+    render_markdown as render_projection_markdown,
+)
 from climate.gnn_bias_corrector import ClimateBiasCorrector
 from common.gee import get_earth_engine_status, get_project_id, initialize_earth_engine
 from flood.graph_builder import ArasenseGraphBuilder
@@ -807,6 +814,10 @@ def root() -> str:
                     </select>
                   </label>
                   <button type="submit" id="proj-submit" style="align-self:end;">Project to 2050</button>
+                </div>
+                <div class="row">
+                  <button class="secondary" type="button" id="proj-compare-submit">Compare SSP2-4.5 vs SSP5-8.5</button>
+                  <button class="secondary" type="button" id="proj-download" disabled>⬇ Download report (.md)</button>
                 </div>
               </form>
             </div>
@@ -1767,6 +1778,7 @@ def root() -> str:
         if (!response.ok) throw new Error(data && data.detail ? data.detail : `HTTP ${response.status}`);
         responseBox.value = JSON.stringify(data, null, 2);
         renderProjection(data, variable);
+        setProjectionReport(data.report_markdown, 'arasense-projection.md');
         setStatus('Projection complete', 'ok');
       } catch (err) {
         projHeadline.textContent = 'Error';
@@ -1775,6 +1787,89 @@ def root() -> str:
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = original;
+      }
+    });
+
+    let projReportMd = null;
+    let projReportName = 'arasense-projection.md';
+    function setProjectionReport(markdown, filename) {
+      projReportMd = markdown || null;
+      projReportName = filename || 'arasense-projection.md';
+      document.getElementById('proj-download').disabled = !projReportMd;
+    }
+
+    document.getElementById('proj-download').addEventListener('click', () => {
+      if (!projReportMd) return;
+      const blob = new Blob([projReportMd], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = projReportName; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    function renderProjectionCompare(data, variable) {
+      const scen = data.scenarios || {};
+      const order = ['ssp245', 'ssp585'];
+      const labels = { ssp245: 'SSP2-4.5 (moderate)', ssp585: 'SSP5-8.5 (high emissions)' };
+      const present = order.filter((s) => scen[s]);
+      if (!present.length) {
+        projShell.innerHTML = '<div class="diagram-placeholder" style="min-height:200px;">No scenario data.</div>';
+        return;
+      }
+      const any = scen[present[0]];
+      projHeadline.textContent = `${any.n_models_trusted || 0}/${data.n_models_scored || 0} trusted`;
+      const rows = present.map((s) => {
+        const p = scen[s];
+        const color = p.change > 0 ? '#ff8f8f' : (p.change < 0 ? '#8bf0c7' : '#9bc9c0');
+        const pct = (p.pct_change === null || p.pct_change === undefined) ? '–' : ((p.pct_change >= 0 ? '+' : '') + Number(p.pct_change).toFixed(1) + '%');
+        return `<tr>
+          <td>${labels[s]}</td>
+          <td>${fmtVal(p.future_level, variable)}</td>
+          <td style="color:${color};">${p.change >= 0 ? '+' : ''}${fmtVal(p.change, variable)} (${pct})</td>
+          <td>${fmtVal(p.change_low, variable)} to ${fmtVal(p.change_high, variable)}</td>
+          <td>${Math.round((p.agreement_on_increase || 0) * 100)}%</td>
+        </tr>`;
+      }).join('');
+      projShell.innerHTML = `
+        <div class="series-note" style="margin:0 0 10px;">Same trusted models and historical baseline (${fmtVal(any.historical_level, variable)}) — only emissions differ. The gap between rows is the decision space.</div>
+        <div class="table-shell">
+          <table>
+            <thead><tr><th>Scenario</th><th>Future</th><th>Change by 2050</th><th>Spread (±1σ)</th><th>Agreement</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    }
+
+    document.getElementById('proj-compare-submit').addEventListener('click', async () => {
+      const variable = document.getElementById('proj-variable').value;
+      const metric = document.getElementById('proj-metric').value;
+      const fastMode = document.getElementById('proj-fast').value === 'true';
+      const btn = document.getElementById('proj-compare-submit');
+      const eta = fastMode ? '~1–3 min' : '~10–30 min (full ensemble × 2 scenarios)';
+      projHeadline.textContent = 'Comparing…';
+      btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Comparing…';
+      projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:200px;">Comparing SSP2-4.5 vs SSP5-8.5… ${eta}. Keep this tab open.</div>`;
+      try {
+        const response = await fetch('/api/climate/projection-compare', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lat: Number(climateLat.value), lon: Number(climateLon.value),
+            radius_km: Number(climateRadius.value), variable: variable, metric: metric,
+            scenarios: ['ssp245', 'ssp585'], fast_mode: fastMode
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data && data.detail ? data.detail : `HTTP ${response.status}`);
+        responseBox.value = JSON.stringify(data, null, 2);
+        renderProjectionCompare(data, variable);
+        setProjectionReport(data.report_markdown, 'arasense-scenario-comparison.md');
+        setStatus('Scenario comparison complete', 'ok');
+      } catch (err) {
+        projHeadline.textContent = 'Error';
+        projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:160px;color:var(--danger);">${err.message}</div>`;
+        setStatus('Comparison failed', 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = orig;
       }
     });
 
@@ -2133,6 +2228,19 @@ def climate_trust_report(payload: ClimateDiagnosticRequest) -> dict:
 _STAT_BY_METRIC = {"p95": "p95", "rx1day": "rx1day", "heavy_precip_frac": "heavy_frac"}
 
 
+def _case_from_payload(payload) -> ProjectionCase:
+    """Build a ProjectionCase from a projection/compare request for report rendering."""
+    return ProjectionCase(
+        name=f"Lat {payload.lat:.3f}, Lon {payload.lon:.3f}",
+        lat=payload.lat, lon=payload.lon, radius_km=payload.radius_km,
+        variable=payload.variable, metric=payload.metric,
+        hist_start=payload.hist_start.isoformat(), hist_end=payload.hist_end.isoformat(),
+        future_start=payload.future_start.isoformat(), future_end=payload.future_end.isoformat(),
+        fast_mode=payload.fast_mode,
+        notes="Generated from the Arasense console.",
+    )
+
+
 def _projection_score_trust(fetcher, roi, payload):
     """Historical climatology -> Model Trust Engine. Returns (engine, hist_df,
     trusted_names, report_by). Raises HTTPException on insufficient data."""
@@ -2207,7 +2315,7 @@ def climate_projection(payload: ClimateProjectionRequest) -> dict:
         fut_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, payload.scenario, "future")
         proj = _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val)
 
-        return {
+        response = {
             "project_id": project_id,
             "input": model_to_dict(payload),
             "scenario": payload.scenario,
@@ -2219,6 +2327,9 @@ def climate_projection(payload: ClimateProjectionRequest) -> dict:
             "trust_models": engine.reports,
             "projection": proj,
         }
+        response["report_markdown"] = render_projection_markdown(
+            build_projection_report(_case_from_payload(payload), response))
+        return response
     except HTTPException:
         raise
     except ValueError as exc:
@@ -2251,7 +2362,7 @@ def climate_projection_compare(payload: ClimateScenarioCompareRequest) -> dict:
             fut_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, scen, "future")
             scenarios[scen] = _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val)
 
-        return {
+        response = {
             "project_id": project_id,
             "input": model_to_dict(payload),
             "windows": {
@@ -2262,6 +2373,9 @@ def climate_projection_compare(payload: ClimateScenarioCompareRequest) -> dict:
             "trust_models": engine.reports,
             "scenarios": scenarios,
         }
+        response["report_markdown"] = render_compare_markdown(
+            build_compare_report(_case_from_payload(payload), response))
+        return response
     except HTTPException:
         raise
     except ValueError as exc:
