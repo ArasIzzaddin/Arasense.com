@@ -1,0 +1,40 @@
+{
+  "case": "Bologna \u2014 flood-driving rainfall, mid-century",
+  "notes": "Trust-weighted CMIP6 projection over a 20-year climatology. Pilot demonstration; extremes are the forward-looking flood-risk driver.",
+  "metric": "rx1day",
+  "metric_label": "Maximum 1-day precipitation",
+  "unit": "mm",
+  "windows": {
+    "historical": [
+      "1995-01-01",
+      "2014-12-31"
+    ],
+    "future": [
+      "2040-01-01",
+      "2059-12-31"
+    ]
+  },
+  "n_models_scored": 34,
+  "n_models_trusted": 32,
+  "historical_level": 40.23253608995566,
+  "scenarios": {
+    "ssp245": {
+      "label": "SSP2-4.5 (moderate)",
+      "future_level": 45.96532252750795,
+      "change": 5.732786437552291,
+      "change_low": -0.2632007894408144,
+      "change_high": 11.728773664545397,
+      "pct_change": 14.24913016851434,
+      "agreement_on_increase": 0.7822433417682687
+    },
+    "ssp585": {
+      "label": "SSP5-8.5 (high emissions)",
+      "future_level": 45.63850095890645,
+      "change": 5.416730108002119,
+      "change_low": -1.1721723940288724,
+      "change_high": 12.00563261003311,
+      "pct_change": 13.467159683448726,
+      "agreement_on_increase": 0.7409395899076604
+    }
+  }
+}
