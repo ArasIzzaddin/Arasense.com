@@ -5,7 +5,9 @@ import pytest
 from validation.projection_report import (
     BOLOGNA_2050,
     ProjectionCase,
+    build_compare_report,
     build_projection_report,
+    render_compare_markdown,
     render_markdown,
 )
 
@@ -74,3 +76,36 @@ def test_render_handles_missing_fields_gracefully():
     rep = build_projection_report(BOLOGNA_2050, {"projection": {}})
     md = render_markdown(rep)               # must not raise on n/a values
     assert "n/a" in md
+
+
+def _fake_compare_response():
+    base = {"n_models_trusted": 32, "historical_level": 40.23}
+    return {
+        "n_models_scored": 34,
+        "windows": {"historical": ["1995-01-01", "2014-12-31"],
+                    "future": ["2040-01-01", "2059-12-31"]},
+        "scenarios": {
+            "ssp245": {**base, "future_level": 45.97, "change": 5.74,
+                       "change_low": -0.26, "change_high": 11.73,
+                       "pct_change": 14.2, "agreement_on_increase": 0.78},
+            "ssp585": {**base, "future_level": 49.5, "change": 9.27,
+                       "change_low": 1.0, "change_high": 17.5,
+                       "pct_change": 23.0, "agreement_on_increase": 0.88},
+        },
+    }
+
+
+def test_build_compare_report_shares_baseline():
+    rep = build_compare_report(BOLOGNA_2050, _fake_compare_response())
+    assert rep["historical_level"] == pytest.approx(40.23)   # shared baseline
+    assert rep["n_models_trusted"] == 32
+    assert set(rep["scenarios"]) == {"ssp245", "ssp585"}
+    assert rep["scenarios"]["ssp585"]["pct_change"] == pytest.approx(23.0)
+
+
+def test_render_compare_markdown_shows_both_scenarios():
+    md = render_compare_markdown(build_compare_report(BOLOGNA_2050, _fake_compare_response()))
+    assert "Scenario Comparison" in md
+    assert "SSP2-4.5" in md and "SSP5-8.5" in md
+    assert "+14.2%" in md and "+23.0%" in md
+    assert "32 of 34" in md

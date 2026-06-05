@@ -160,6 +160,85 @@ def render_markdown(report: dict) -> str:
     return "\n".join(lines)
 
 
+_SCENARIO_LABEL = {
+    "ssp245": "SSP2-4.5 (moderate)",
+    "ssp585": "SSP5-8.5 (high emissions)",
+}
+
+
+def build_compare_report(case: ProjectionCase, api_response: dict) -> dict:
+    """Structure a /api/climate/projection-compare response into a report dict."""
+    scen_in = api_response.get("scenarios", {})
+    label, unit = _meta(case.metric, case.variable)
+    windows = api_response.get("windows", {
+        "historical": [case.hist_start, case.hist_end],
+        "future": [case.future_start, case.future_end],
+    })
+    # Historical level is shared across scenarios (same baseline).
+    any_proj = next(iter(scen_in.values()), {}) if scen_in else {}
+    scenarios = {
+        s: {
+            "label": _SCENARIO_LABEL.get(s, s),
+            "future_level": p.get("future_level"),
+            "change": p.get("change"),
+            "change_low": p.get("change_low"),
+            "change_high": p.get("change_high"),
+            "pct_change": p.get("pct_change"),
+            "agreement_on_increase": p.get("agreement_on_increase"),
+        }
+        for s, p in scen_in.items()
+    }
+    return {
+        "case": case.name,
+        "notes": case.notes,
+        "metric": case.metric,
+        "metric_label": label,
+        "unit": unit,
+        "windows": windows,
+        "n_models_scored": api_response.get("n_models_scored"),
+        "n_models_trusted": any_proj.get("n_models_trusted"),
+        "historical_level": any_proj.get("historical_level"),
+        "scenarios": scenarios,
+    }
+
+
+def render_compare_markdown(report: dict) -> str:
+    u = report["unit"]
+    w = report["windows"]
+    lines = [
+        f"# Scenario Comparison — {report['case']}",
+        "",
+        f"_{report['metric_label']} · historical {w['historical'][0]}–{w['historical'][1]} "
+        f"vs future {w['future'][0]}–{w['future'][1]}_",
+        "",
+        "> Trust-weighted CMIP6 projection (Aras Diagram). Model trust and the "
+        "historical baseline are identical across scenarios — only emissions differ, "
+        "so the gap between rows is the policy-relevant decision space.",
+        "",
+        f"Historical baseline: **{_fnum(report['historical_level'])} {u}** · "
+        f"**{report.get('n_models_trusted')} of {report.get('n_models_scored')}** models trusted.",
+        "",
+        f"| Scenario | Future ({u}) | Change ({u}) | % change | Spread ({u}) | Agreement |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+    for s in ("ssp245", "ssp585"):
+        sc = report["scenarios"].get(s)
+        if not sc:
+            continue
+        agree = sc.get("agreement_on_increase")
+        agree_s = "n/a" if agree is None else f"{agree * 100:.0f}%"
+        pct = sc.get("pct_change")
+        pct_s = "n/a" if pct is None else f"{pct:+.1f}%"
+        lines.append(
+            f"| {sc['label']} | {_fnum(sc['future_level'])} | {_fsigned(sc['change'])} | "
+            f"{pct_s} | {_fsigned(sc['change_low'])} to {_fsigned(sc['change_high'])} | {agree_s} |"
+        )
+    lines.append("")
+    if report.get("notes"):
+        lines += ["---", f"_Note: {report['notes']}_", ""]
+    return "\n".join(lines)
+
+
 def run_projection(case: ProjectionCase, api_base: str = "http://localhost:8080",
                    out_dir: str = "docs/projections", timeout: int = 3600) -> dict:
     """POST the case to a running Arasense API and write <slug>.json/.md."""
