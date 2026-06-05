@@ -4,6 +4,33 @@ import numpy as np
 
 from common.gee import initialize_earth_engine
 
+
+# ── in-memory result cache ────────────────────────────────────────────
+# The Earth Engine fetches dominate request latency. Caching them by request
+# parameters (incl. a location key) makes a repeat of the same location near
+# instant — so a demo can be pre-warmed and load on stage in seconds. Process-
+# level (persists across requests on the single uvicorn worker), FIFO-capped.
+_FETCH_CACHE: dict = {}
+_FETCH_CACHE_ORDER: list = []
+_FETCH_CACHE_MAX = 1024
+
+
+def _cache_get(key):
+    return _FETCH_CACHE.get(key)
+
+
+def _cache_put(key, value):
+    if key not in _FETCH_CACHE:
+        _FETCH_CACHE_ORDER.append(key)
+        if len(_FETCH_CACHE_ORDER) > _FETCH_CACHE_MAX:
+            _FETCH_CACHE.pop(_FETCH_CACHE_ORDER.pop(0), None)
+    _FETCH_CACHE[key] = value
+
+
+def clear_fetch_cache():
+    _FETCH_CACHE.clear()
+    _FETCH_CACHE_ORDER.clear()
+
 class ArasenseDataFetcher:
     """
     Data fetcher for Arasense platform.
@@ -182,15 +209,27 @@ class ArasenseDataFetcher:
 
     def get_monthly_series(self, geometry, start_date, end_date,
                            variable="precipitation", models=None,
-                           fast_mode=True, include_reference=False, scenario=None):
+                           fast_mode=True, include_reference=False, scenario=None,
+                           loc_key=None):
         """
         Monthly-mean climate series (server-side), suitable for climatological
         model-trust scoring and projection over multi-decade windows.
+
+        ``loc_key`` (e.g. "lat,lon,radius") enables result caching for that
+        location; omit it to bypass the cache.
 
         Returns
         -------
         (reference_series_or_None, dict[str, pd.Series])
         """
+        ckey = None
+        if loc_key is not None:
+            ckey = ("monthly", loc_key, variable, start_date, end_date, scenario,
+                    include_reference, fast_mode, tuple(models) if models else None)
+            hit = _cache_get(ckey)
+            if hit is not None:
+                return hit
+
         cfg = {
             "temperature":   ("temperature_2m", "tas", 1.0, 1.0),
             "precipitation": ("total_precipitation_sum", "pr", 1000.0, 86400.0),
@@ -222,11 +261,15 @@ class ArasenseDataFetcher:
                     out[m_name] = s
             except Exception as exc:  # skip a failing model rather than 500 the run
                 print(f"  [monthly {m_name}] skipped: {exc}")
-        return ref_series, out
+
+        result = (ref_series, out)
+        if ckey is not None:
+            _cache_put(ckey, result)
+        return result
 
     def get_extreme_stat(self, geometry, start_date, end_date,
                          variable="precipitation", models=None, stat="p95",
-                         threshold=20.0, fast_mode=True, scenario=None):
+                         threshold=20.0, fast_mode=True, scenario=None, loc_key=None):
         """
         Server-side daily-extreme statistic per CMIP6 model. Each model reduces to
         a single scalar in ONE getInfo (no per-day download).
@@ -237,8 +280,16 @@ class ArasenseDataFetcher:
             "heavy_frac" — fraction of days at/above ``threshold`` (precip, mm)
             "hot_frac"   — fraction of days at/above ``threshold`` (temp, K)
         Temperature heat metrics (max / hot_frac) use the daily-MAX band (tasmax);
-        otherwise temperature uses daily-mean (tas).
+        otherwise temperature uses daily-mean (tas). ``loc_key`` enables caching.
         """
+        ckey = None
+        if loc_key is not None:
+            ckey = ("extreme", loc_key, variable, start_date, end_date, scenario,
+                    stat, threshold, fast_mode, tuple(models) if models else None)
+            hit = _cache_get(ckey)
+            if hit is not None:
+                return dict(hit)
+
         if variable == "temperature":
             band = "tasmax" if stat in ("max", "hot_frac") else "tas"
             scale = 1.0   # Kelvin
@@ -279,6 +330,8 @@ class ArasenseDataFetcher:
                     out[m_name] = float(val)
             except Exception as exc:  # one bad model must not kill the ensemble
                 print(f"  [extreme {m_name}] skipped: {exc}")
+        if ckey is not None:
+            _cache_put(ckey, out)
         return out
 
     def get_model_series(self, geometry, start_date, end_date,

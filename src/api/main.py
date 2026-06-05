@@ -2340,13 +2340,18 @@ def _case_from_payload_hazard(payload) -> ProjectionCase:
     )
 
 
+def _loc_key(payload) -> str:
+    """Stable location key for caching Earth Engine fetches."""
+    return f"{payload.lat:.4f},{payload.lon:.4f},{payload.radius_km:g}"
+
+
 def _projection_score_trust(fetcher, roi, payload):
     """Historical climatology -> Model Trust Engine. Returns (engine, hist_df,
     trusted_names, report_by). Raises HTTPException on insufficient data."""
     ref_hist, hist_models = fetcher.get_monthly_series(
         geometry=roi, start_date=payload.hist_start.isoformat(),
         end_date=payload.hist_end.isoformat(), variable=payload.variable,
-        fast_mode=payload.fast_mode, include_reference=True)
+        fast_mode=payload.fast_mode, include_reference=True, loc_key=_loc_key(payload))
     if ref_hist is None or ref_hist.empty or not hist_models:
         raise HTTPException(status_code=404, detail="No historical climate data returned.")
     hist_df = pd.DataFrame({"reference": ref_hist, **hist_models}).dropna()
@@ -2372,14 +2377,15 @@ def _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, sce
             return {n: float(hist_df[n].mean()) for n in trusted_names}
         _, fut_m = fetcher.get_monthly_series(
             geometry=roi, start_date=start, end_date=end, variable=payload.variable,
-            models=trusted_names, fast_mode=payload.fast_mode, scenario=scenario)
+            models=trusted_names, fast_mode=payload.fast_mode, scenario=scenario,
+            loc_key=_loc_key(payload))
         return {n: float(fut_m[n].mean()) for n in trusted_names
                 if n in fut_m and not fut_m[n].empty}
     return fetcher.get_extreme_stat(
         geometry=roi, start_date=start, end_date=end, variable=payload.variable,
         models=trusted_names, stat=_STAT_BY_METRIC[payload.metric],
         threshold=_THRESHOLD_BY_METRIC.get(payload.metric, 20.0),
-        scenario=(scenario if is_future else None))
+        scenario=(scenario if is_future else None), loc_key=_loc_key(payload))
 
 
 def _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val):
