@@ -1,0 +1,76 @@
+{
+  "case": "Italian flood portfolio",
+  "notes": "Italian flood-exposure pilot, mid-century max 1-day rainfall.",
+  "metric": "rx1day",
+  "metric_label": "Maximum 1-day precipitation",
+  "unit": "mm",
+  "scenario": "ssp245",
+  "windows": {
+    "historical": [
+      "1995-01-01",
+      "2014-12-31"
+    ],
+    "future": [
+      "2040-01-01",
+      "2059-12-31"
+    ]
+  },
+  "ranked": [
+    {
+      "name": "Rome",
+      "available": true,
+      "historical": 39.91101831625773,
+      "future": 47.39916470726047,
+      "change": 7.488146391002739,
+      "pct_change": 18.76210306553979,
+      "agreement": 1.0,
+      "n_trusted": 5,
+      "rank": 1
+    },
+    {
+      "name": "Milan",
+      "available": true,
+      "historical": 63.9031034154817,
+      "future": 72.10390386619268,
+      "change": 8.200800450710984,
+      "pct_change": 12.833180256350726,
+      "agreement": 0.7911227701108956,
+      "n_trusted": 5,
+      "rank": 2
+    },
+    {
+      "name": "Florence",
+      "available": true,
+      "historical": 46.16847754046009,
+      "future": 51.44814126259096,
+      "change": 5.27966372213088,
+      "pct_change": 11.43564614515176,
+      "agreement": 0.8013041549413543,
+      "n_trusted": 5,
+      "rank": 3
+    },
+    {
+      "name": "Bologna",
+      "available": true,
+      "historical": 44.19619970234184,
+      "future": 48.94924755215115,
+      "change": 4.753047849809304,
+      "pct_change": 10.754426583780353,
+      "agreement": 1.0,
+      "n_trusted": 5,
+      "rank": 4
+    },
+    {
+      "name": "Venice",
+      "available": true,
+      "historical": 52.95643448305754,
+      "future": 54.69925273143627,
+      "change": 1.7428182483787258,
+      "pct_change": 3.291041523832782,
+      "agreement": 0.5647242446003806,
+      "n_trusted": 5,
+      "rank": 5
+    }
+  ],
+  "unavailable": []
+}
