@@ -48,11 +48,19 @@ def _heavy_precip_frac(x, threshold_mm: float = 20.0):
     return float(np.mean(x >= threshold_mm)) if x.size else 0.0
 
 
+def _hot_day_frac(x, threshold_k: float = 303.15):
+    # fraction of days at/above a hot-day threshold (default 30 C, in Kelvin)
+    x = np.asarray(x, dtype=float)
+    return float(np.mean(x >= threshold_k)) if x.size else 0.0
+
+
 METRICS = {
     "mean":              _mean,              # mean level (mm/day, or K)
     "p95":               _p95,               # 95th percentile (extreme intensity)
-    "rx1day":            _rx1day,            # max 1-day value over the window
+    "rx1day":            _rx1day,            # max 1-day precipitation
     "heavy_precip_frac": _heavy_precip_frac, # fraction of heavy-rain days
+    "tx_max":            _rx1day,            # max daily temperature over the window
+    "hot_day_frac":      _hot_day_frac,      # fraction of hot days (Tmax >= 30 C)
 }
 
 

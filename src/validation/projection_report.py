@@ -14,18 +14,21 @@ import json
 from dataclasses import dataclass
 
 
-# (label, unit) per metric for precipitation. Temperature overrides the unit.
+# (label, unit) per metric.
 _METRIC_META = {
     "mean":              ("Mean precipitation", "mm/day"),
     "p95":               ("95th-percentile daily precipitation", "mm/day"),
     "rx1day":            ("Maximum 1-day precipitation", "mm"),
     "heavy_precip_frac": ("Heavy-rain-day frequency", "fraction of days"),
+    "tx_max":            ("Maximum temperature", "K"),
+    "hot_day_frac":      ("Hot-day frequency (Tmax >= 30 C)", "fraction of days"),
 }
 
 
 def _meta(metric: str, variable: str):
     label, unit = _METRIC_META.get(metric, (metric, ""))
-    if variable == "temperature":
+    # Temperature mean/p95 reuse the precipitation labels — relabel + Kelvin.
+    if variable == "temperature" and metric in ("mean", "p95"):
         label = label.replace("precipitation", "temperature").replace("rainfall", "temperature")
         unit = "K"
     return label, unit

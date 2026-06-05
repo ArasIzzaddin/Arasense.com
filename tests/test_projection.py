@@ -96,6 +96,23 @@ def test_metric_heavy_precip_frac():
     assert 0.0 <= out["future_level"] <= 1.0
 
 
+def test_temperature_extreme_metrics():
+    # Kelvin daily temps ~22 C mean; future warms by +3 K.
+    rng = np.random.default_rng(5)
+    n = 250
+    obs = rng.normal(295.0, 5.0, n)
+    hist = [obs + rng.normal(0, 0.5, n) for _ in range(3)]
+    future = [h + 3.0 for h in hist]
+    proj = ClimateProjection(obs, hist, future, ["A", "B", "C"])
+
+    tx = proj.project("tx_max")
+    assert tx["change"] == pytest.approx(3.0, abs=0.5)        # max temp rises ~+3 K
+
+    hot = proj.project("hot_day_frac")                        # threshold 303.15 K (30 C)
+    assert 0.0 <= hot["future_level"] <= 1.0
+    assert hot["change"] >= 0                                 # warming -> more hot days
+
+
 def test_all_out_of_skill_refuses():
     rng = np.random.default_rng(3)
     n = 80

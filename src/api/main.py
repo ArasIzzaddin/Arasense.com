@@ -79,7 +79,7 @@ class ClimateProjectionRequest(BaseModel):
     lon: float = Field(..., ge=-180, le=180)
     radius_km: float = Field(50, gt=0, le=500)
     variable: Literal["temperature", "precipitation"] = "precipitation"
-    metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac"] = "mean"
+    metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac", "tx_max", "hot_day_frac"] = "mean"
     scenario: Literal["ssp245", "ssp585"] = "ssp245"
     hist_start: date = date(1995, 1, 1)
     hist_end: date = date(2014, 12, 31)
@@ -93,7 +93,7 @@ class ClimateScenarioCompareRequest(BaseModel):
     lon: float = Field(..., ge=-180, le=180)
     radius_km: float = Field(50, gt=0, le=500)
     variable: Literal["temperature", "precipitation"] = "precipitation"
-    metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac"] = "rx1day"
+    metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac", "tx_max", "hot_day_frac"] = "rx1day"
     scenarios: list[Literal["ssp245", "ssp585"]] = ["ssp245", "ssp585"]
     hist_start: date = date(1995, 1, 1)
     hist_end: date = date(2014, 12, 31)
@@ -1746,6 +1746,17 @@ def root() -> str:
       }, 'climate');
     });
 
+    const PROJ_METRICS = {
+      precipitation: [['rx1day', 'max 1-day rain'], ['heavy_precip_frac', 'heavy-rain-day frequency'], ['p95', 'p95 extreme intensity'], ['mean', 'mean']],
+      temperature: [['tx_max', 'max temperature (Tmax)'], ['hot_day_frac', 'hot-day frequency (≥30°C)'], ['p95', 'p95 extreme intensity'], ['mean', 'mean']]
+    };
+    function updateProjMetricOptions() {
+      const v = document.getElementById('proj-variable').value;
+      document.getElementById('proj-metric').innerHTML =
+        PROJ_METRICS[v].map(([val, lab]) => `<option value="${val}">${lab}</option>`).join('');
+    }
+    document.getElementById('proj-variable').addEventListener('change', updateProjMetricOptions);
+
     document.getElementById('projection-form').addEventListener('submit', async (event) => {
       event.preventDefault();
       const variable = document.getElementById('proj-variable').value;
@@ -2225,7 +2236,9 @@ def climate_trust_report(payload: ClimateDiagnosticRequest) -> dict:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-_STAT_BY_METRIC = {"p95": "p95", "rx1day": "rx1day", "heavy_precip_frac": "heavy_frac"}
+_STAT_BY_METRIC = {"p95": "p95", "rx1day": "rx1day", "heavy_precip_frac": "heavy_frac",
+                   "tx_max": "max", "hot_day_frac": "hot_frac"}
+_THRESHOLD_BY_METRIC = {"heavy_precip_frac": 20.0, "hot_day_frac": 303.15}  # mm / Kelvin
 
 
 def _case_from_payload(payload) -> ProjectionCase:
@@ -2279,6 +2292,7 @@ def _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, sce
     return fetcher.get_extreme_stat(
         geometry=roi, start_date=start, end_date=end, variable=payload.variable,
         models=trusted_names, stat=_STAT_BY_METRIC[payload.metric],
+        threshold=_THRESHOLD_BY_METRIC.get(payload.metric, 20.0),
         scenario=(scenario if is_future else None))
 
 

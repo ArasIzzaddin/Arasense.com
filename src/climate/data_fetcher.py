@@ -226,22 +226,25 @@ class ArasenseDataFetcher:
 
     def get_extreme_stat(self, geometry, start_date, end_date,
                          variable="precipitation", models=None, stat="p95",
-                         threshold_mm=20.0, fast_mode=True, scenario=None):
+                         threshold=20.0, fast_mode=True, scenario=None):
         """
-        Server-side daily-extreme statistic per CMIP6 model — where the real
-        Mediterranean climate-change signal lives. Each model reduces to a single
-        scalar in ONE getInfo (no per-day download).
+        Server-side daily-extreme statistic per CMIP6 model. Each model reduces to
+        a single scalar in ONE getInfo (no per-day download).
 
         stat:
             "p95"        — 95th percentile of daily values (extreme intensity)
-            "rx1day"     — maximum 1-day value over the window
-            "heavy_frac" — fraction of days at/above ``threshold_mm``
+            "rx1day"/"max" — maximum 1-day value over the window
+            "heavy_frac" — fraction of days at/above ``threshold`` (precip, mm)
+            "hot_frac"   — fraction of days at/above ``threshold`` (temp, K)
+        Temperature heat metrics (max / hot_frac) use the daily-MAX band (tasmax);
+        otherwise temperature uses daily-mean (tas).
         """
-        cfg = {
-            "temperature":   ("tas", 1.0),
-            "precipitation": ("pr", 86400.0),   # kg m-2 s-1 -> mm/day
-        }
-        band, scale = cfg.get(variable, cfg["precipitation"])
+        if variable == "temperature":
+            band = "tasmax" if stat in ("max", "hot_frac") else "tas"
+            scale = 1.0   # Kelvin
+        else:
+            band = "pr"
+            scale = 86400.0   # kg m-2 s-1 -> mm/day
         scenario = scenario or ("historical" if int(start_date[:4]) <= 2014 else "ssp245")
         base = (ee.ImageCollection("NASA/GDDP-CMIP6")
                   .filterBounds(geometry)
@@ -260,10 +263,10 @@ class ArasenseDataFetcher:
                            .map(lambda img: img.multiply(scale))
                 if stat == "p95":
                     img = coll.reduce(ee.Reducer.percentile([95]))
-                elif stat == "rx1day":
+                elif stat in ("rx1day", "max"):
                     img = coll.max()
-                elif stat == "heavy_frac":
-                    img = coll.map(lambda i: i.gte(threshold_mm)).mean()
+                elif stat in ("heavy_frac", "hot_frac"):
+                    img = coll.map(lambda i: i.gte(threshold)).mean()
                 else:
                     raise ValueError(f"Unknown stat '{stat}'.")
                 val = img.rename("v").reduceRegion(
