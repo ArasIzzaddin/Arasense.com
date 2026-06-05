@@ -833,6 +833,9 @@ def root() -> str:
                   <button class="secondary" type="button" id="proj-compare-submit">Compare SSP2-4.5 vs SSP5-8.5</button>
                   <button class="secondary" type="button" id="proj-download" disabled>⬇ Download report (.md)</button>
                 </div>
+                <div class="row">
+                  <button class="secondary" type="button" id="proj-hazard-submit">Multi-hazard report (flood · heat · drought)</button>
+                </div>
               </form>
             </div>
           </div>
@@ -1893,6 +1896,62 @@ def root() -> str:
         projHeadline.textContent = 'Error';
         projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:160px;color:var(--danger);">${err.message}</div>`;
         setStatus('Comparison failed', 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = orig;
+      }
+    });
+
+    function renderHazardProfile(data) {
+      const H = [['rx1day', 'Flood-driving rainfall', 'mm'], ['tx_max', 'Heat (hottest day)', 'K'], ['dry_day_frac', 'Drought (dry-day freq)', 'frac']];
+      const haz = data.hazards || {};
+      projHeadline.textContent = `${data.n_models_scored || 0} models scored`;
+      const fv = (v, u) => v === null || v === undefined ? '–' : (u === 'K' ? (v - 273.15).toFixed(1) + '°C' : (u === 'frac' ? (v * 100).toFixed(1) + '%' : Number(v).toFixed(2) + ' mm'));
+      const fc = (v, u) => v === null || v === undefined ? '–' : (u === 'K' ? (v >= 0 ? '+' : '') + v.toFixed(1) + ' K' : (u === 'frac' ? (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + ' pts' : (v >= 0 ? '+' : '') + Number(v).toFixed(2) + ' mm'));
+      const rows = H.map(([m, label, u]) => {
+        const p = haz[m];
+        if (!p || p.error) return `<tr><td><strong>${label}</strong></td><td colspan="4" style="color:var(--muted);">out of skill / unavailable</td></tr>`;
+        const color = p.change > 0 ? '#ff8f8f' : (p.change < 0 ? '#8bf0c7' : '#9bc9c0');
+        const pct = (p.pct_change === null || p.pct_change === undefined) ? '' : ' (' + (p.pct_change >= 0 ? '+' : '') + Number(p.pct_change).toFixed(0) + '%)';
+        return `<tr>
+          <td><strong>${label}</strong></td>
+          <td>${fv(p.historical_level, u)}</td>
+          <td>${fv(p.future_level, u)}</td>
+          <td style="color:${color};">${fc(p.change, u)}${pct}</td>
+          <td>${Math.round((p.agreement_on_increase || 0) * 100)}%</td>
+        </tr>`;
+      }).join('');
+      projShell.innerHTML = `
+        <div class="series-note" style="margin:0 0 10px;">Scenario ${(data.scenario || 'ssp245').toUpperCase()} · each hazard trust-screened independently. The wettest day, the hottest day, and the dry spell — one defensible page.</div>
+        <div class="table-shell"><table>
+          <thead><tr><th>Hazard</th><th>Today</th><th>2050</th><th>Change</th><th>Agreement</th></tr></thead>
+          <tbody>${rows}</tbody></table></div>`;
+    }
+
+    document.getElementById('proj-hazard-submit').addEventListener('click', async () => {
+      const fastMode = document.getElementById('proj-fast').value === 'true';
+      const btn = document.getElementById('proj-hazard-submit');
+      const eta = fastMode ? '~5–8 min' : '~30–60 min (full ensemble × 3 hazards)';
+      projHeadline.textContent = 'Running…';
+      btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Running 3 hazards…';
+      projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:200px;">Projecting flood, heat, and drought… ${eta}. Keep this tab open.</div>`;
+      try {
+        const response = await fetch('/api/climate/hazard-profile', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lat: Number(climateLat.value), lon: Number(climateLon.value),
+            radius_km: Number(climateRadius.value), scenario: 'ssp245', fast_mode: fastMode
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data && data.detail ? data.detail : `HTTP ${response.status}`);
+        responseBox.value = JSON.stringify(data, null, 2);
+        renderHazardProfile(data);
+        setProjectionReport(data.report_markdown, 'arasense-multi-hazard.md');
+        setStatus('Multi-hazard profile complete', 'ok');
+      } catch (err) {
+        projHeadline.textContent = 'Error';
+        projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:160px;color:var(--danger);">${err.message}</div>`;
+        setStatus('Hazard profile failed', 'error');
       } finally {
         btn.disabled = false; btn.textContent = orig;
       }
