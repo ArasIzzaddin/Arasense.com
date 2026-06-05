@@ -19,8 +19,10 @@ from climate.data_fetcher import ArasenseDataFetcher
 from validation.projection_report import (
     ProjectionCase,
     build_compare_report,
+    build_hazard_profile,
     build_projection_report,
     render_compare_markdown,
+    render_hazard_markdown,
     render_markdown as render_projection_markdown,
 )
 from climate.gnn_bias_corrector import ClimateBiasCorrector
@@ -95,6 +97,18 @@ class ClimateScenarioCompareRequest(BaseModel):
     variable: Literal["temperature", "precipitation"] = "precipitation"
     metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac", "tx_max", "hot_day_frac", "dry_day_frac"] = "rx1day"
     scenarios: list[Literal["ssp245", "ssp585"]] = ["ssp245", "ssp585"]
+    hist_start: date = date(1995, 1, 1)
+    hist_end: date = date(2014, 12, 31)
+    future_start: date = date(2040, 1, 1)
+    future_end: date = date(2059, 12, 31)
+    fast_mode: bool = True
+
+
+class HazardProfileRequest(BaseModel):
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    radius_km: float = Field(50, gt=0, le=500)
+    scenario: Literal["ssp245", "ssp585"] = "ssp245"
     hist_start: date = date(1995, 1, 1)
     hist_end: date = date(2014, 12, 31)
     future_start: date = date(2040, 1, 1)
@@ -2255,6 +2269,18 @@ def _case_from_payload(payload) -> ProjectionCase:
     )
 
 
+def _case_from_payload_hazard(payload) -> ProjectionCase:
+    """ProjectionCase for a multi-hazard request (no single variable/metric)."""
+    return ProjectionCase(
+        name=f"Lat {payload.lat:.3f}, Lon {payload.lon:.3f}",
+        lat=payload.lat, lon=payload.lon, radius_km=payload.radius_km,
+        hist_start=payload.hist_start.isoformat(), hist_end=payload.hist_end.isoformat(),
+        future_start=payload.future_start.isoformat(), future_end=payload.future_end.isoformat(),
+        fast_mode=payload.fast_mode,
+        notes="Multi-hazard profile generated from the Arasense console.",
+    )
+
+
 def _projection_score_trust(fetcher, roi, payload):
     """Historical climatology -> Model Trust Engine. Returns (engine, hist_df,
     trusted_names, report_by). Raises HTTPException on insufficient data."""
@@ -2390,6 +2416,73 @@ def climate_projection_compare(payload: ClimateScenarioCompareRequest) -> dict:
         }
         response["report_markdown"] = render_compare_markdown(
             build_compare_report(_case_from_payload(payload), response))
+        return response
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+# Hazards in the multi-hazard profile: (variable, metric).
+_PROFILE_HAZARDS = [("precipitation", "rx1day"), ("precipitation", "dry_day_frac"),
+                    ("temperature", "tx_max")]
+
+
+@app.post("/api/climate/hazard-profile")
+def climate_hazard_profile(payload: HazardProfileRequest) -> dict:
+    """
+    Multi-hazard city profile: project flood-driving rainfall, drought, and heat
+    for one location in a single call. Trust is scored once per variable
+    (precipitation, temperature) and reused across that variable's hazards. A
+    hazard that is out-of-skill here is reported as such, not failed.
+    """
+    if payload.hist_start > payload.hist_end or payload.future_start > payload.future_end:
+        raise HTTPException(status_code=400, detail="start dates must precede end dates.")
+
+    def _sub(variable, metric):
+        return ClimateProjectionRequest(
+            lat=payload.lat, lon=payload.lon, radius_km=payload.radius_km,
+            variable=variable, metric=metric, scenario=payload.scenario,
+            hist_start=payload.hist_start, hist_end=payload.hist_end,
+            future_start=payload.future_start, future_end=payload.future_end,
+            fast_mode=payload.fast_mode)
+
+    try:
+        project_id = initialize_earth_engine()
+        roi = ee.Geometry.Point([payload.lon, payload.lat]).buffer(payload.radius_km * 1000)
+        fetcher = ArasenseDataFetcher(project_id)
+
+        hazards = {}
+        n_scored = None
+        trust_cache = {}  # variable -> (engine, hist_df, trusted_names, report_by)
+        for variable, metric in _PROFILE_HAZARDS:
+            mp = _sub(variable, metric)
+            try:
+                if variable not in trust_cache:
+                    trust_cache[variable] = _projection_score_trust(fetcher, roi, mp)
+                engine, hist_df, trusted_names, report_by = trust_cache[variable]
+                n_scored = len(engine.reports)
+                hist_val = _projection_metric_values(fetcher, roi, mp, hist_df, trusted_names, None, "historical")
+                fut_val = _projection_metric_values(fetcher, roi, mp, hist_df, trusted_names, payload.scenario, "future")
+                hazards[metric] = _projection_assemble(mp, engine, report_by, trusted_names, hist_val, fut_val)
+            except HTTPException as exc:
+                hazards[metric] = {"error": exc.detail}
+
+        response = {
+            "project_id": project_id,
+            "input": model_to_dict(payload),
+            "scenario": payload.scenario,
+            "windows": {
+                "historical": [payload.hist_start.isoformat(), payload.hist_end.isoformat()],
+                "future": [payload.future_start.isoformat(), payload.future_end.isoformat()],
+            },
+            "n_models_scored": n_scored,
+            "hazards": hazards,
+        }
+        response["report_markdown"] = render_hazard_markdown(
+            build_hazard_profile(_case_from_payload_hazard(payload), response))
         return response
     except HTTPException:
         raise

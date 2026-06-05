@@ -244,6 +244,100 @@ def render_compare_markdown(report: dict) -> str:
     return "\n".join(lines)
 
 
+# Hazards shown in the multi-hazard city profile: (metric, hazard label, variable).
+_HAZARD_DEF = [
+    ("rx1day", "Flood-driving rainfall", "precipitation"),
+    ("tx_max", "Heat", "temperature"),
+    ("dry_day_frac", "Drought", "precipitation"),
+]
+
+
+def _disp(v, unit):
+    if v is None:
+        return "n/a"
+    if unit == "K":
+        return f"{v - 273.15:.1f} °C"
+    if unit == "fraction of days":
+        return f"{v * 100:.1f}% of days"
+    return f"{v:.2f} {unit}"
+
+
+def _disp_change(v, unit):
+    if v is None:
+        return "n/a"
+    if unit == "K":
+        return f"{v:+.1f} K"           # a Kelvin delta equals a Celsius delta
+    if unit == "fraction of days":
+        return f"{v * 100:+.1f} pts"
+    return f"{v:+.2f} {unit}"
+
+
+def build_hazard_profile(case: ProjectionCase, api_response: dict) -> dict:
+    """Structure a /api/climate/hazard-profile response into a multi-hazard report."""
+    haz_in = api_response.get("hazards", {})
+    hazards = []
+    for metric, hazard_label, variable in _HAZARD_DEF:
+        p = haz_in.get(metric)
+        if not p or "error" in p:
+            hazards.append({"hazard": hazard_label, "metric": metric, "available": False,
+                            "reason": (p or {}).get("error", "not available")})
+            continue
+        label, unit = _meta(metric, variable)
+        hazards.append({
+            "hazard": hazard_label, "metric": metric, "indicator": label, "unit": unit,
+            "available": True,
+            "historical": p.get("historical_level"), "future": p.get("future_level"),
+            "change": p.get("change"), "pct_change": p.get("pct_change"),
+            "agreement": p.get("agreement_on_increase"), "n_trusted": p.get("n_models_trusted"),
+        })
+    return {
+        "case": case.name,
+        "notes": case.notes,
+        "scenario": api_response.get("scenario"),
+        "windows": api_response.get("windows", {
+            "historical": [case.hist_start, case.hist_end],
+            "future": [case.future_start, case.future_end],
+        }),
+        "n_models_scored": api_response.get("n_models_scored"),
+        "hazards": hazards,
+    }
+
+
+def render_hazard_markdown(report: dict) -> str:
+    w = report["windows"]
+    scen = (report.get("scenario") or "ssp245").upper().replace("SSP", "SSP")
+    lines = [
+        f"# Multi-Hazard Climate Profile — {report['case']}",
+        "",
+        f"_Scenario {scen} · historical {w['historical'][0]}–{w['historical'][1]} "
+        f"vs future {w['future'][0]}–{w['future'][1]}_",
+        "",
+        "> Trust-weighted CMIP6 projection (Aras Diagram). Each hazard uses only the "
+        "models that pass skill screening for that variable here; agreement is the "
+        "share of trusted-model weight moving in the same direction.",
+        "",
+        "| Hazard | Indicator | Today | 2050 | Change | Agreement |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+    for h in report["hazards"]:
+        if not h.get("available"):
+            lines.append(f"| {h['hazard']} | — | _out of skill / unavailable_ | — | — | — |")
+            continue
+        u = h["unit"]
+        agree = h.get("agreement")
+        agree_s = "n/a" if agree is None else f"{agree * 100:.0f}%"
+        pct = h.get("pct_change")
+        pct_s = "" if pct is None else f" ({pct:+.0f}%)"
+        lines.append(
+            f"| **{h['hazard']}** | {h['indicator']} | {_disp(h['historical'], u)} | "
+            f"{_disp(h['future'], u)} | {_disp_change(h['change'], u)}{pct_s} | {agree_s} |"
+        )
+    lines.append("")
+    if report.get("notes"):
+        lines += ["---", f"_Note: {report['notes']}_", ""]
+    return "\n".join(lines)
+
+
 def run_projection(case: ProjectionCase, api_base: str = "http://localhost:8080",
                    out_dir: str = "docs/projections", timeout: int = 3600) -> dict:
     """POST the case to a running Arasense API and write <slug>.json/.md."""

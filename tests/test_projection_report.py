@@ -6,8 +6,10 @@ from validation.projection_report import (
     BOLOGNA_2050,
     ProjectionCase,
     build_compare_report,
+    build_hazard_profile,
     build_projection_report,
     render_compare_markdown,
+    render_hazard_markdown,
     render_markdown,
 )
 
@@ -109,3 +111,29 @@ def test_render_compare_markdown_shows_both_scenarios():
     assert "SSP2-4.5" in md and "SSP5-8.5" in md
     assert "+14.2%" in md and "+23.0%" in md
     assert "32 of 34" in md
+
+
+def _fake_hazard_response():
+    return {
+        "scenario": "ssp245",
+        "windows": {"historical": ["1995-01-01", "2014-12-31"],
+                    "future": ["2040-01-01", "2059-12-31"]},
+        "n_models_scored": 34,
+        "hazards": {
+            "rx1day": {"historical_level": 40.2, "future_level": 45.9, "change": 5.7,
+                       "pct_change": 14.2, "agreement_on_increase": 0.78, "n_models_trusted": 32},
+            "tx_max": {"historical_level": 310.5, "future_level": 313.9, "change": 3.4,
+                       "pct_change": 1.1, "agreement_on_increase": 1.0, "n_models_trusted": 30},
+            "dry_day_frac": {"error": "No model is trustworthy here (all KGE <= -0.41)."},
+        },
+    }
+
+
+def test_hazard_profile_renders_all_three_with_units_and_skips_failed():
+    rep = build_hazard_profile(BOLOGNA_2050, _fake_hazard_response())
+    md = render_hazard_markdown(rep)
+    assert "Multi-Hazard Climate Profile" in md
+    assert "Flood-driving rainfall" in md and "Heat" in md and "Drought" in md
+    assert "+5.70 mm" in md            # flood change with unit
+    assert "37.4 °C" in md and "40.8 °C" in md   # heat shown in Celsius (from Kelvin)
+    assert "out of skill" in md        # drought hazard reported as unavailable
