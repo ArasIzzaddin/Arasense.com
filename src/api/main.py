@@ -46,6 +46,18 @@ app = FastAPI(
     description="Arasense API — climate diagnostics, flood graph, and integrated climate-driven flood analysis.",
 )
 
+
+@app.middleware("http")
+async def _no_cache_console(request, call_next):
+    """The console HTML changes often during development; never let the browser
+    serve a stale cached copy (avoids the UI 'coming and going' across loads)."""
+    response = await call_next(request)
+    if request.url.path == "/":
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+    return response
+
+
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 
@@ -275,6 +287,8 @@ def root() -> str:
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Arasense Climate Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
