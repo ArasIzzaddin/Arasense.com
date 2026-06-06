@@ -1,4 +1,5 @@
 import os
+import hmac
 import traceback
 from datetime import date
 from pathlib import Path
@@ -9,7 +10,7 @@ import numpy as np
 import pandas as pd
 import torch
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from climate.aras_eval import ArasDiagram
@@ -24,6 +25,12 @@ from validation.projection_report import (
     render_compare_markdown,
     render_hazard_markdown,
     render_markdown as render_projection_markdown,
+)
+from validation.portfolio_report import (
+    PortfolioCase,
+    PortfolioLocation,
+    build_portfolio_report,
+    render_portfolio_markdown,
 )
 from climate.gnn_bias_corrector import ClimateBiasCorrector
 from common.gee import get_earth_engine_status, get_project_id, initialize_earth_engine
@@ -40,6 +47,80 @@ app = FastAPI(
 )
 
 BASE_DIR = Path(__file__).resolve().parents[2]
+
+
+def env_flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def unavailable_response(message: str, status_code: int = 503):
+    return HTMLResponse(
+        f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arasense App Unavailable</title>
+  <style>
+    body {{
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #06151d;
+      color: #ebf9f4;
+      font-family: Arial, sans-serif;
+    }}
+    main {{
+      width: min(92vw, 560px);
+      border: 1px solid rgba(139, 240, 199, 0.2);
+      border-radius: 8px;
+      padding: 32px;
+      background: rgba(10, 29, 37, 0.92);
+    }}
+    h1 {{ margin: 0 0 12px; font-size: 24px; }}
+    p {{ margin: 0; color: #9bc9c0; line-height: 1.5; }}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Arasense app is temporarily unavailable</h1>
+    <p>{message}</p>
+  </main>
+</body>
+</html>""",
+        status_code=status_code,
+    )
+
+
+@app.middleware("http")
+async def protect_deployed_app(request: Request, call_next):
+    path = request.url.path
+    if path == "/healthz":
+        return await call_next(request)
+
+    if env_flag("ARASENSE_APP_DISABLED"):
+        message = os.getenv(
+            "ARASENSE_APP_DISABLED_MESSAGE",
+            "The current demo usage limit has been reached. The public website remains online.",
+        )
+        if path.startswith("/api/"):
+            return JSONResponse({"detail": message}, status_code=503)
+        return unavailable_response(message, status_code=503)
+
+    expected_secret = os.getenv("ARASENSE_BACKEND_SHARED_SECRET", "").strip()
+    if expected_secret:
+        provided_secret = request.headers.get("x-arasense-origin-secret", "").strip()
+        if not hmac.compare_digest(provided_secret, expected_secret):
+            message = "This app endpoint is only available through the protected Arasense gateway."
+            if path.startswith("/api/"):
+                return JSONResponse({"detail": message}, status_code=403)
+            return unavailable_response(message, status_code=403)
+
+    return await call_next(request)
 
 
 def model_to_dict(model: BaseModel) -> dict:
@@ -109,6 +190,26 @@ class HazardProfileRequest(BaseModel):
     lon: float = Field(..., ge=-180, le=180)
     radius_km: float = Field(50, gt=0, le=500)
     scenario: Literal["ssp245", "ssp585"] = "ssp245"
+    hist_start: date = date(1995, 1, 1)
+    hist_end: date = date(2014, 12, 31)
+    future_start: date = date(2040, 1, 1)
+    future_end: date = date(2059, 12, 31)
+    fast_mode: bool = True
+
+
+class PortfolioLoc(BaseModel):
+    name: str
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+
+
+class ClimatePortfolioRequest(BaseModel):
+    name: str = "Portfolio"
+    locations: list[PortfolioLoc]
+    variable: Literal["temperature", "precipitation"] = "precipitation"
+    metric: Literal["mean", "p95", "rx1day", "heavy_precip_frac", "tx_max", "hot_day_frac", "dry_day_frac"] = "rx1day"
+    scenario: Literal["ssp245", "ssp585"] = "ssp245"
+    radius_km: float = Field(50, gt=0, le=500)
     hist_start: date = date(1995, 1, 1)
     hist_end: date = date(2014, 12, 31)
     future_start: date = date(2040, 1, 1)
@@ -837,6 +938,16 @@ def root() -> str:
                   <button class="secondary" type="button" id="proj-hazard-submit">Multi-hazard report (flood · heat · drought)</button>
                 </div>
               </form>
+              <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px;">
+                <h3 style="margin:0 0 6px;">Portfolio ranking</h3>
+                <p style="color:var(--muted);font-size:13px;margin:0 0 8px;">One location per line as <code>Name,lat,lon</code>. Ranks by the variable + metric selected above (most-worsening first).</p>
+                <textarea id="proj-portfolio-input" style="min-height:84px;">Bologna,44.494,11.343
+Rome,41.903,12.496
+Venice,45.438,12.327</textarea>
+                <div class="row" style="margin-top:8px;">
+                  <button class="secondary" type="button" id="proj-portfolio-submit">Rank portfolio</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1957,6 +2068,60 @@ def root() -> str:
       }
     });
 
+    function renderPortfolio(data) {
+      const u = data.unit;
+      const fmt = (v) => v === null || v === undefined ? '–' : (u === 'K' ? (v - 273.15).toFixed(1) + '°C' : (u === 'fraction of days' ? (v * 100).toFixed(1) + '%' : Number(v).toFixed(1) + ' ' + u));
+      const fmc = (v) => v === null || v === undefined ? '–' : (u === 'K' ? (v >= 0 ? '+' : '') + v.toFixed(1) + ' K' : (u === 'fraction of days' ? (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + ' pts' : (v >= 0 ? '+' : '') + Number(v).toFixed(1) + ' ' + u));
+      const ranked = data.ranked || [];
+      projHeadline.textContent = `${ranked.length} ranked`;
+      const rows = ranked.map((r) => {
+        const color = r.change > 0 ? '#ff8f8f' : (r.change < 0 ? '#8bf0c7' : '#9bc9c0');
+        const pct = (r.pct_change === null || r.pct_change === undefined) ? '' : ' (' + (r.pct_change >= 0 ? '+' : '') + Number(r.pct_change).toFixed(0) + '%)';
+        return `<tr><td>${r.rank}</td><td><strong>${r.name}</strong></td><td>${fmt(r.historical)}</td><td>${fmt(r.future)}</td><td style="color:${color};">${fmc(r.change)}${pct}</td><td>${Math.round((r.agreement || 0) * 100)}%</td></tr>`;
+      }).join('');
+      const unavail = (data.unavailable || []).map((r) => r.name).join(', ');
+      projShell.innerHTML = `
+        <div class="series-note" style="margin:0 0 10px;">${data.metric_label} change · ranked most-worsening first.${unavail ? ' Out of skill: ' + unavail + '.' : ''}</div>
+        <div class="table-shell"><table>
+          <thead><tr><th>Rank</th><th>Location</th><th>Today</th><th>2050</th><th>Change</th><th>Agreement</th></tr></thead>
+          <tbody>${rows}</tbody></table></div>`;
+    }
+
+    document.getElementById('proj-portfolio-submit').addEventListener('click', async () => {
+      const variable = document.getElementById('proj-variable').value;
+      const metric = document.getElementById('proj-metric').value;
+      const fastMode = document.getElementById('proj-fast').value === 'true';
+      const locations = [];
+      for (const line of document.getElementById('proj-portfolio-input').value.trim().split('\n')) {
+        const p = line.split(',').map((s) => s.trim());
+        const lat = Number(p[1]), lon = Number(p[2]);
+        if (p.length >= 3 && p[0] && !isNaN(lat) && !isNaN(lon)) locations.push({ name: p[0], lat, lon });
+      }
+      if (!locations.length) { setStatus('Add locations as Name,lat,lon', 'error'); return; }
+      const btn = document.getElementById('proj-portfolio-submit');
+      projHeadline.textContent = 'Ranking…';
+      btn.disabled = true; const orig = btn.textContent; btn.textContent = `Ranking ${locations.length}…`;
+      projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:200px;">Ranking ${locations.length} locations… cold locations take ~3–6 min each; pre-warmed ones are instant. Keep this tab open.</div>`;
+      try {
+        const response = await fetch('/api/climate/portfolio', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'Portfolio', locations: locations, variable: variable, metric: metric, scenario: 'ssp245', radius_km: Number(climateRadius.value), fast_mode: fastMode })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data && data.detail ? data.detail : `HTTP ${response.status}`);
+        responseBox.value = JSON.stringify(data, null, 2);
+        renderPortfolio(data);
+        setProjectionReport(data.report_markdown, 'arasense-portfolio.md');
+        setStatus('Portfolio ranked', 'ok');
+      } catch (err) {
+        projHeadline.textContent = 'Error';
+        projShell.innerHTML = `<div class="diagram-placeholder" style="min-height:160px;color:var(--danger);">${err.message}</div>`;
+        setStatus('Portfolio failed', 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = orig;
+      }
+    });
+
     document.getElementById('flood-form').addEventListener('submit', (event) => {
       event.preventDefault();
       const form = new FormData(event.target);
@@ -2549,6 +2714,70 @@ def climate_hazard_profile(payload: HazardProfileRequest) -> dict:
         response["report_markdown"] = render_hazard_markdown(
             build_hazard_profile(_case_from_payload_hazard(payload), response))
         return response
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/api/climate/portfolio")
+def climate_portfolio(payload: ClimatePortfolioRequest) -> dict:
+    """
+    Rank a portfolio of locations by the trust-weighted projected change in one
+    hazard metric — the asset-manager 'which exposures worsen most?' view. Each
+    location is screened independently; out-of-skill ones are listed, not failed.
+    Warmed locations (see the fetch cache) return near-instantly.
+    """
+    if not payload.locations:
+        raise HTTPException(status_code=400, detail="locations must not be empty.")
+    if payload.hist_start > payload.hist_end or payload.future_start > payload.future_end:
+        raise HTTPException(status_code=400, detail="start dates must precede end dates.")
+
+    def _sub(loc):
+        return ClimateProjectionRequest(
+            lat=loc.lat, lon=loc.lon, radius_km=payload.radius_km,
+            variable=payload.variable, metric=payload.metric, scenario=payload.scenario,
+            hist_start=payload.hist_start, hist_end=payload.hist_end,
+            future_start=payload.future_start, future_end=payload.future_end,
+            fast_mode=payload.fast_mode)
+
+    try:
+        project_id = initialize_earth_engine()
+        fetcher = ArasenseDataFetcher(project_id)
+
+        results = []
+        for loc in payload.locations:
+            sub = _sub(loc)
+            roi = ee.Geometry.Point([loc.lon, loc.lat]).buffer(payload.radius_km * 1000)
+            try:
+                engine, hist_df, trusted_names, report_by = _projection_score_trust(fetcher, roi, sub)
+                hist_val = _projection_metric_values(fetcher, roi, sub, hist_df, trusted_names, None, "historical")
+                fut_val = _projection_metric_values(fetcher, roi, sub, hist_df, trusted_names, payload.scenario, "future")
+                proj = _projection_assemble(sub, engine, report_by, trusted_names, hist_val, fut_val)
+                results.append((loc.name, {"projection": proj}))
+            except HTTPException as exc:
+                results.append((loc.name, {"detail": exc.detail}))
+
+        case = PortfolioCase(
+            name=payload.name,
+            locations=[PortfolioLocation(l.name, l.lat, l.lon) for l in payload.locations],
+            variable=payload.variable, metric=payload.metric, scenario=payload.scenario,
+            radius_km=payload.radius_km,
+            hist_start=payload.hist_start.isoformat(), hist_end=payload.hist_end.isoformat(),
+            future_start=payload.future_start.isoformat(), future_end=payload.future_end.isoformat(),
+            fast_mode=payload.fast_mode)
+        report = build_portfolio_report(case, results)
+
+        return {
+            "project_id": project_id,
+            "input": model_to_dict(payload),
+            "metric": report["metric"], "metric_label": report["metric_label"], "unit": report["unit"],
+            "scenario": payload.scenario,
+            "ranked": report["ranked"], "unavailable": report["unavailable"],
+            "report_markdown": render_portfolio_markdown(report),
+        }
     except HTTPException:
         raise
     except ValueError as exc:
