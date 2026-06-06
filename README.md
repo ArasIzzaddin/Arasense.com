@@ -1,114 +1,137 @@
-# ARASENSE INTELLIGENCE
-### Institutional-Grade Climate Risk Analytics & AI Predictive Engines
+# Arasense — the trust layer for climate risk
 
-## FastAPI / Cloud Run
+![Scientific Core](https://img.shields.io/badge/Scientific%20Core-Aras%20Diagram%20(Izzaddin%20et%20al.%2C%202024)-00ff88?style=for-the-badge)
+![Data](https://img.shields.io/badge/Data-ERA5--Land%20%2F%20NASA%20GDDP--CMIP6-orange?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20CI-blue?style=for-the-badge)
 
-This repo includes a FastAPI backend that can be deployed to Google Cloud Run.
+**Arasense tells institutions which climate models to trust — for their location, across every hazard — and turns that into defensible, decision-ready risk evidence.**
 
-What works after deployment:
+Most climate-risk work averages a whole CMIP6 ensemble, giving a model that captures the local climate the same weight as one that doesn't. Arasense scores every model against the observed climatology with the peer-reviewed **Aras Diagram** (Izzaddin et al., 2024, *SERRA*), keeps only the models that earn trust, weights them by skill, and projects how the hazard changes — with the uncertainty reported, not hidden.
 
-- `GET /` serves the website shell
-- `GET /docs` serves the API docs
-- `GET /healthz` reports whether Earth Engine is ready
+Developed at the Technical University of Bari (Poliba).
 
-What requires Earth Engine credentials:
+---
 
-- `POST /api/climate/diagnostic`
-- `POST /api/flood/graph-summary`
+## What it does
 
-Local run:
+| Capability | Detail |
+| --- | --- |
+| **Model trust** | Per-model total Aras error (bias / variability / timing), trust tiers, skill weights; rejects out-of-skill models (KGE ≤ −0.41). |
+| **Hazards** | Flood-driving rainfall (max 1-day, heavy-rain days, p95), heat (max temperature, hot-day frequency), drought (dry-day frequency). |
+| **Forward projection** | Trust-weighted change to mid-century with an across-model uncertainty band and model-agreement. |
+| **Scenarios** | SSP2-4.5 vs SSP5-8.5, sharing one trust baseline. |
+| **Multi-hazard profile** | Flood + heat + drought for a location in one report. |
+| **Portfolio** | Rank a list of locations by which worsens most. |
+| **Global** | Any land location (ERA5-Land + GDDP-CMIP6 are global). |
+| **Reports** | Every result renders to a shareable one-page markdown/JSON. |
+
+### Example (live data)
+- **Bologna, mid-century:** max 1-day rainfall **+14%** (32/34 models trusted, 78% agree); hottest day **37 → 41 °C**.
+- **Italian portfolio (max 1-day rainfall):** Rome +19% · Milan +13% · Florence +11% · Bologna +11% · Venice +3%.
+
+---
+
+## The science: the Aras Diagram
+
+Each model's error vs. an observed reference is decomposed into three components
+(Izzaddin et al., 2024):
+
+- **β − 1** — bias ratio (μ_model / μ_obs − 1)
+- **α − 1** — variability ratio (σ_model / σ_obs − 1)
+- **r** — correlation (timing / phase)
+
+with **total error** `E = √[(1−r)² + (β−1)² + (α−1)²]` and `KGE = 1 − E`. Trust tiers
+and skill weights follow from this; the reject threshold KGE = −0.41 is the
+mean-flow benchmark of Knoben et al. (2019). See [`METHODOLOGY.md`](METHODOLOGY.md).
+
+> **Reference:** Izzaddin, A., et al. (2024). *A new diagram for performance
+> evaluation of complex models.* Stochastic Environmental Research and Risk
+> Assessment (SERRA).
+
+---
+
+## API
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /` | Map-first console (UI) |
+| `GET /healthz` | Earth Engine readiness |
+| `POST /api/climate/diagnostic` | Aras Diagram + Model Trust Report |
+| `POST /api/climate/projection` | Trust-weighted forward projection (one metric) |
+| `POST /api/climate/projection-compare` | SSP2-4.5 vs SSP5-8.5 |
+| `POST /api/climate/hazard-profile` | Multi-hazard city profile |
+| `POST /api/climate/portfolio` | Rank a portfolio of locations |
+| `POST /api/flood/*` | Flood screening pilot (validation-stage) |
+
+---
+
+## Quickstart (local)
 
 ```bash
-$env:PYTHONPATH="D:\arasbotan\src"
-python -m uvicorn api.main:app --host 0.0.0.0 --port 8080
+pip install -r requirements.txt
+$env:ARASENSE_GCP_PROJECT   = "valid-shine-488311-d6"
+$env:GCP_SERVICE_ACCOUNT_JSON = (Get-Content path\to\service-account.json -Raw)
+$env:PYTHONPATH = "$PWD\src"
+python -m uvicorn api.main:app --host 127.0.0.1 --port 8088
 ```
 
-Required environment variables for Earth Engine service-account auth:
+Open <http://127.0.0.1:8088>. For a fast live demo, pre-warm the cache first:
 
 ```bash
-ARASENSE_GCP_PROJECT=valid-shine-488311-d6
-GCP_SERVICE_ACCOUNT_JSON='{"type":"service_account", ... }'
+python scripts/prewarm.py            # warms demo cities; later clicks are instant
 ```
 
-Cloud Run deploy example:
+### Tests
+
+```bash
+python -m pytest                     # zero-config via pytest.ini; runs in CI on every push
+```
+
+---
+
+## Scope and honesty
+
+- The **trust + projection layer** is the validated core and works globally on land.
+- Where no model earns trust, the platform **declines to project** rather than fake a number.
+- **Open ocean** has no land reference and is declined.
+- The **flood-event GNN** is a **validation-stage** screening pilot (Emilia-Romagna /
+  Bologna), not engineering-grade forecasting — see the flood section below.
+- **Consecutive-dry-days** is implemented in-engine but not served (the server-side
+  scan exceeds Earth Engine limits).
+
+### Flood screening pilot
+A Graph Neural Network combines terrain graph structure, precipitation, and
+Sentinel-1 evidence for rapid, exploratory regional screening. Validation
+priorities: validate against known event windows, compare with Sentinel-1 masks,
+document false positives/negatives and scale sensitivity, expand only after 3–5
+defensible case studies. Not a replacement for hydraulic modelling or field
+validation.
+
+---
+
+## Deployment (Google Cloud Run)
 
 ```bash
 gcloud run deploy arasense-api ^
-  --source . ^
-  --region us-central1 ^
-  --allow-unauthenticated ^
+  --source . --region us-central1 --allow-unauthenticated ^
+  --min-instances 0 --max-instances 1 --cpu 1 --memory 1Gi --concurrency 10 ^
   --set-env-vars ARASENSE_GCP_PROJECT=valid-shine-488311-d6
 ```
 
-Windows shortcut:
-
-1. Copy `env.cloudrun.example.yaml` to `env.cloudrun.yaml`
-2. Replace the placeholder values with your real Google service-account values
-3. Run `.\deploy-cloudrun.ps1`
-
-Production checklist:
-
-1. Install and authenticate `gcloud`
-2. Enable Cloud Run and Artifact Registry in your Google Cloud project
-3. Put your Earth Engine service-account JSON into `env.cloudrun.yaml`
-4. Deploy with `.\deploy-cloudrun.ps1`
-5. Open the returned Cloud Run URL
-6. Verify `GET /healthz` returns `"status": "ok"`
-
-Main endpoints:
-
-- `GET /healthz`
-- `POST /api/climate/diagnostic`
-- `POST /api/flood/graph-summary`
-
-![Scientific Foundation](https://img.shields.io/badge/Scientific%20Core-Aras%20Diagram%20(2024)-00ff88?style=for-the-badge)
-![AI Engine](https://img.shields.io/badge/AI%20Engine-GNN%20Surrogates-blue?style=for-the-badge)
-![Data Source](https://img.shields.io/badge/Data%20Provenance-ECMWF%20%2F%20NASA-orange?style=for-the-badge)
-
-**Arasense AI** is a professional climate intelligence platform that translates complex climate physics into actionable institutional risk data. Developed at the Technical University of Bari (Poliba), the platform bridges the gap between academic peer-reviewed research and enterprise-level climate adaptation strategies.
+Cost-controlled access: keep `www.arasense.com` on Cloudflare Pages as the public
+site; deploy this app to Cloud Run for `app.arasense.com`; put the Cloudflare
+Worker in `cloudflare-worker/` in front, sharing `ARASENSE_BACKEND_SHARED_SECRET`
+/ `ORIGIN_SHARED_SECRET`, with `MONTHLY_API_LIMIT` to cap `/api/*` usage. See
+`docs/deployment-cost-control.md`. Windows: copy `env.cloudrun.example.yaml` →
+`env.cloudrun.yaml`, fill in real values, run `.\deploy-cloudrun.ps1`.
 
 ---
 
-## 🚀 Core Business Pillars
+## Founder
 
-### 1. Climate Intelligence (Model Benchmarking)
-Powered by the **Aras Diagram (Izzaddin et al., 2024)**, Arasense provides a unique 2D error decomposition for Global and Regional Climate Models (CMIP6/CORDEX). Unlike traditional Taylor Diagrams, the Arasense engine explicitly identifies:
-*   **Bias (α):** Systematic mean mismatch.
-*   **Variability (β):** Fluctuation and magnitude mismatch.
-*   **Phase Alignment:** Temporal and spatial correlation.
+**Aras Izzaddin** — Founder & Lead Researcher, Technical University of Bari (Poliba).
+Author of the Aras Diagram (Izzaddin et al., 2024).
+📧 [arasbotan.izzaddin@poliba.it](mailto:arasbotan.izzaddin@poliba.it) ·
+📑 [ResearchGate](https://www.researchgate.net/profile/Aras-Izzaddin)
 
-### 2. Flood Surrogates (Topological GNN)
-Arasense utilizes **Graph Neural Networks (GNN)** to perform real-time flood propagation modeling. By training on historical Sentinel-1 SAR imagery and topological flow paths, our GNN surrogates offer a **1000x speedup** over traditional hydraulic models (like HEC-RAS) without sacrificing topological accuracy.
-
----
-
-## 🔬 Scientific Foundation
-
-The platform's methodology is verified by peer-reviewed research:
-
-*   **Izzaddin, A., et al. (2024).** *"A new diagram for performance evaluation of complex models."* Published in **Stochastic Environmental Research and Risk Assessment**.
-*   **Regional Assessment:** Multi-model ensemble evaluation of EURO-CORDEX simulations for the Mediterranean basin.
-
----
-
-## 🛠️ Technological Stack
-
-*   **Geospatial Engine:** Google Earth Engine (Petabyte-scale archives)
-*   **AI Framework:** PyTorch Geometric (Graph Neural Networks)
-*   **Analytics:** NASA GDDP-CMIP6 & ECMWF ERA5-Land
-*   **Interface:** Streamlit Executive UI
-
----
-
-## 🏛️ Executive Profile
-
-**Aras Izzaddin**  
-*Founder & Lead Researcher*  
-Technical University of Bari (Poliba)
-
-📧 [arasbotan.izzaddin@poliba.it](mailto:arasbotan.izzaddin@poliba.it)  
-🔗 [LinkedIn Profile](https://linkedin.com)  
-📑 [ResearchGate Portfolio](https://www.researchgate.net/profile/Aras-Izzaddin)
-
----
-*© 2024 Arasense Intelligence. Scientific IP: Izzaddin et al.*
+*© Arasense. Scientific IP: Izzaddin et al. (2024).*
