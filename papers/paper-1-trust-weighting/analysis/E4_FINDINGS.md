@@ -25,9 +25,29 @@ is a property of the ensemble, not a bug in the test.)
   (the motivation for emergent constraints; the reason performance-weighting
   schemes such as ClimWIP are contested).
 
+## E4b — aligned scoring (the fix works)
+Re-running the perfect-model test for `rx1day` but scoring trust on each model's
+**annual max-1-day rainfall series** (1995–2014) — aligning the predictor with the
+predictand — instead of the monthly climatology:
+
+| Trust scored on | RMSE weighted | RMSE equal | Improvement |
+| --- | --- | --- | --- |
+| monthly climatology | 7.318 | 7.292 | −0.3% (null) |
+| **annual target-metric series** | **6.738** | 7.292 | **+7.6%** |
+
+**Finding:** performance weighting *does* improve the extreme projection, but only
+when models are scored on their skill at the **target quantity itself**, not a
+generic climatology. Predictor–predictand alignment is the key. (Raw:
+`e4b_bologna_rx1day.json`.) Caveat: one location/metric/scenario — generalise
+across regions, metrics, and scenarios for the paper.
+
 ## Consequences (what we will and will not claim)
-- **Do NOT claim** that trust-weighting produces a *more accurate* central
-  projection than the ensemble mean. This validation does not support it.
+- **Do NOT claim** that the *currently shipped* (monthly-scored) trust-weighting
+  produces a more accurate central projection than the ensemble mean — E4 does not
+  support it.
+- **DO** pursue **aligned scoring** (score on the target metric's own historical
+  series): E4b shows a real +7.6% RMSE gain for rx1day. Adopt it in the product
+  for extreme metrics, then re-validate across regions before claiming accuracy.
 - **Defensible value of the platform/method:**
   1. **Interpretable model diagnosis** — the Aras Diagram attributes each model's
      error to bias / variability / timing.
