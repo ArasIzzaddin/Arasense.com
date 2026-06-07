@@ -1,8 +1,11 @@
+import os
+
 import ee
 import pandas as pd
 import numpy as np
 
 from common.gee import initialize_earth_engine
+from climate.esgf_cordex_fetcher import EuroCordexESGFFetcher
 
 
 # ── in-memory result cache ────────────────────────────────────────────
@@ -63,6 +66,7 @@ class ArasenseDataFetcher:
 
     def get_climate_data(self, geometry, start_date, end_date,
                          variable='temperature',
+                         model_family='cmip6',
                          ref_dataset='ERA5-Land',
                          fast_mode=True):
         """
@@ -90,11 +94,19 @@ class ArasenseDataFetcher:
                                 'cmip6': 'pr',
                                 'scale_era5': 1000.0,
                                 'scale_mod' : 86400.0},
-            'all_euro_cordex': {'era5': 'total_precipitation_sum',
-                                'cmip6': 'pr',
-                                'scale_era5': 1000.0,
-                                'scale_mod' : 86400.0},
         }
+        if variable == 'all_euro_cordex':
+            model_family = 'euro_cordex'
+            variable = 'precipitation'
+        if model_family == 'euro_cordex':
+            return self._get_euro_cordex_data(
+                geometry=geometry,
+                start_date=start_date,
+                end_date=end_date,
+                variable=variable,
+                ref_dataset=ref_dataset,
+                fast_mode=fast_mode,
+            )
         v = vars_map.get(variable, vars_map['temperature'])
 
         # 1. Reference fetch (ERA5-Land)
@@ -174,6 +186,196 @@ class ArasenseDataFetcher:
                 combined.columns = ['reference', 'model']
                 results_dict[m_name] = combined
 
+        return results_dict
+
+    def _get_euro_cordex_data(self, geometry, start_date, end_date,
+                              variable='precipitation',
+                              ref_dataset='ERA5-Land', fast_mode=True):
+        """
+        Fetch EURO-CORDEX data from a user-configured Earth Engine
+        ImageCollection asset and compare it against ERA5-Land.
+
+        EURO-CORDEX is not currently a public Earth Engine catalog collection.
+        Configure one of these before selecting this mode:
+
+        - ARASENSE_EURO_CORDEX_ASSET=projects/.../assets/...
+        - or put the Earth Engine asset id in the console's Reference Dataset
+          field for this run.
+
+        Expected asset shape:
+        - ImageCollection
+        - precipitation band named "pr" by default, or temperature band "tas"
+        - model id property named "model" by default
+        - optional scenario property named "scenario"
+
+        Optional overrides:
+        - ARASENSE_EURO_CORDEX_PR_BAND
+        - ARASENSE_EURO_CORDEX_TAS_BAND
+        - ARASENSE_EURO_CORDEX_MODEL_PROPERTY
+        - ARASENSE_EURO_CORDEX_SCENARIO_PROPERTY
+        - ARASENSE_EURO_CORDEX_SCENARIO
+        """
+        asset_id = os.getenv("ARASENSE_EURO_CORDEX_ASSET", "").strip()
+        if not asset_id and ref_dataset and ref_dataset.startswith("projects/"):
+            asset_id = ref_dataset.strip()
+        if not asset_id:
+            return self._get_euro_cordex_esgf_data(
+                geometry=geometry,
+                start_date=start_date,
+                end_date=end_date,
+                variable=variable,
+                ref_dataset=ref_dataset,
+                fast_mode=fast_mode,
+            )
+
+        return self._get_euro_cordex_gee_asset_data(
+            geometry=geometry,
+            start_date=start_date,
+            end_date=end_date,
+            variable=variable,
+            ref_dataset=ref_dataset,
+            fast_mode=fast_mode,
+            asset_id=asset_id,
+        )
+
+    def _get_euro_cordex_gee_asset_data(self, geometry, start_date, end_date,
+                                        variable='precipitation',
+                                        ref_dataset='ERA5-Land', fast_mode=True,
+                                        asset_id=''):
+        """Read EURO-CORDEX from a pre-ingested Earth Engine ImageCollection asset."""
+        if not asset_id:
+            raise ValueError(
+                "EURO-CORDEX is not a public Earth Engine catalog collection in this app. "
+                "Download/ingest EURO-CORDEX from ESGF as an Earth Engine ImageCollection, "
+                "then set ARASENSE_EURO_CORDEX_ASSET or paste the asset id in the "
+                "Reference Dataset field."
+            )
+
+        cfg = {
+            'temperature': {
+                'era5_band': 'temperature_2m',
+                'era5_scale': 1.0,
+                'cordex_band': os.getenv("ARASENSE_EURO_CORDEX_TAS_BAND", "tas"),
+                'cordex_scale': 1.0,
+            },
+            'precipitation': {
+                'era5_band': 'total_precipitation_sum',
+                'era5_scale': 1000.0,
+                'cordex_band': os.getenv("ARASENSE_EURO_CORDEX_PR_BAND", "pr"),
+                'cordex_scale': 86400.0,
+            },
+        }
+        v = cfg.get(variable, cfg['precipitation'])
+        model_property = os.getenv("ARASENSE_EURO_CORDEX_MODEL_PROPERTY", "model")
+        scenario_property = os.getenv("ARASENSE_EURO_CORDEX_SCENARIO_PROPERTY", "scenario")
+        scenario = os.getenv("ARASENSE_EURO_CORDEX_SCENARIO", "").strip()
+
+        ref_col = (ee.ImageCollection("ECMWF/ERA5_LAND/DAILY_AGGR")
+                     .filterBounds(geometry)
+                     .filterDate(start_date, end_date)
+                     .select(v['era5_band']))
+        ref_series = self.extract_series(ref_col, v['era5_band'],
+                                         v['era5_scale'], "Reference",
+                                         geometry)
+
+        cordex_col = (ee.ImageCollection(asset_id)
+                        .filterBounds(geometry)
+                        .filterDate(start_date, end_date)
+                        .select(v['cordex_band']))
+        if scenario:
+            cordex_col = cordex_col.filter(ee.Filter.eq(scenario_property, scenario))
+
+        try:
+            all_available_models = (cordex_col.aggregate_array(model_property)
+                                              .distinct().getInfo())
+            all_available_models = [str(item) for item in all_available_models if item]
+        except Exception as discovery_err:
+            raise ValueError(
+                "Could not discover EURO-CORDEX model names from the configured asset. "
+                f"Check asset id '{asset_id}' and model property '{model_property}'. "
+                f"Original error: {discovery_err}"
+            ) from discovery_err
+
+        if not all_available_models:
+            raise ValueError(
+                "The configured EURO-CORDEX asset returned no model names for this "
+                "location/date range. Check date range, scenario, band, and model property."
+            )
+
+        models_to_fetch = all_available_models[:5] if fast_mode else all_available_models
+        results_dict = {'reference': ref_series}
+
+        for m_name in models_to_fetch:
+            m_col = cordex_col.filter(ee.Filter.eq(model_property, m_name))
+            m_series = self.extract_series(m_col, v['cordex_band'], v['cordex_scale'], m_name,
+                                           geometry, scale=12000)
+            if not m_series.empty:
+                combined = (pd.concat([ref_series, m_series], axis=1, join='inner')
+                              .dropna())
+                combined.columns = ['reference', 'model']
+                results_dict[f"EURO-CORDEX:{m_name}"] = combined
+
+        return results_dict
+
+    def _get_euro_cordex_esgf_data(self, geometry, start_date, end_date,
+                                   variable='precipitation',
+                                   ref_dataset='ERA5-Land', fast_mode=True):
+        """Read EURO-CORDEX directly from ESGF NetCDF files, cached locally."""
+        cfg = {
+            'temperature': {
+                'era5_band': 'temperature_2m',
+                'era5_scale': 1.0,
+            },
+            'precipitation': {
+                'era5_band': 'total_precipitation_sum',
+                'era5_scale': 1000.0,
+            },
+        }
+        v = cfg.get(variable, cfg['precipitation'])
+
+        ref_col = (ee.ImageCollection("ECMWF/ERA5_LAND/DAILY_AGGR")
+                     .filterBounds(geometry)
+                     .filterDate(start_date, end_date)
+                     .select(v['era5_band']))
+        ref_series = self.extract_series(ref_col, v['era5_band'],
+                                         v['era5_scale'], "Reference",
+                                         geometry)
+
+        try:
+            lon, lat = geometry.centroid(maxError=1).coordinates().getInfo()
+            area = float(geometry.area(maxError=1).getInfo())
+            radius_km = max((area / np.pi) ** 0.5 / 1000.0, 1.0)
+        except Exception as exc:
+            raise ValueError(f"Could not derive EURO-CORDEX ROI coordinates: {exc}") from exc
+
+        fetcher = EuroCordexESGFFetcher()
+        model_series = fetcher.get_series_by_model(
+            lat=lat,
+            lon=lon,
+            radius_km=radius_km,
+            start_date=start_date,
+            end_date=end_date,
+            variable=variable,
+            fast_mode=fast_mode,
+            source_hint=ref_dataset,
+        )
+        if not model_series:
+            raise ValueError("No usable EURO-CORDEX model series were extracted.")
+
+        results_dict = {'reference': ref_series}
+        for model_name, series in model_series.items():
+            combined = (pd.concat([ref_series, series], axis=1, join='inner')
+                          .dropna())
+            if combined.empty:
+                continue
+            combined.columns = ['reference', 'model']
+            results_dict[model_name] = combined
+
+        if len(results_dict) == 1:
+            raise ValueError(
+                "EURO-CORDEX files were found, but no dates overlapped with ERA5-Land "
+                "for the selected request."
+            )
         return results_dict
 
     def _monthly_means(self, collection, band, scale_factor, geometry,
@@ -330,6 +532,85 @@ class ArasenseDataFetcher:
                     out[m_name] = float(val)
             except Exception as exc:  # one bad model must not kill the ensemble
                 print(f"  [extreme {m_name}] skipped: {exc}")
+        if ckey is not None:
+            _cache_put(ckey, out)
+        return out
+
+    def get_annual_stat_series(self, geometry, start_date, end_date,
+                               variable="precipitation", models=None, stat="max",
+                               threshold=20.0, fast_mode=True, scenario=None, loc_key=None):
+        """
+        Per-model ANNUAL series of an extreme statistic (e.g. annual max 1-day
+        rainfall). Lets trust be scored on the *target metric's own* year-to-year
+        behaviour rather than the monthly climatology. One getInfo per model.
+
+        Returns dict[str, pd.Series] indexed by year.
+        """
+        ckey = None
+        if loc_key is not None:
+            ckey = ("annual", loc_key, variable, start_date, end_date, scenario,
+                    stat, threshold, fast_mode, tuple(models) if models else None)
+            hit = _cache_get(ckey)
+            if hit is not None:
+                return hit
+
+        if variable == "temperature":
+            band = "tasmax" if stat in ("max", "hot_frac") else "tas"
+            scale = 1.0
+        else:
+            band = "pr"
+            scale = 86400.0
+        scenario = scenario or ("historical" if int(start_date[:4]) <= 2014 else "ssp245")
+        base = (ee.ImageCollection("NASA/GDDP-CMIP6")
+                  .filterBounds(geometry)
+                  .filter(ee.Filter.eq("scenario", scenario))
+                  .select(band))
+        if models is None:
+            models = base.filterDate(start_date, end_date).aggregate_array("model").distinct().getInfo()
+            models = models[:5] if fast_mode else models
+
+        start_d = ee.Date(start_date)
+        n_years = ee.Date(end_date).difference(start_d, "year").ceil()
+        years = ee.List.sequence(0, n_years.subtract(1))
+
+        def _series(model):
+            mcoll = base.filter(ee.Filter.eq("model", model))
+
+            def per_year(i):
+                i = ee.Number(i)
+                y0 = start_d.advance(i, "year")
+                coll = mcoll.filterDate(y0, y0.advance(1, "year")).map(lambda im: im.multiply(scale))
+                if stat in ("max", "rx1day"):
+                    img = coll.max()
+                elif stat == "p95":
+                    img = coll.reduce(ee.Reducer.percentile([95]))
+                elif stat in ("heavy_frac", "hot_frac"):
+                    img = coll.map(lambda im: im.gte(threshold)).mean()
+                elif stat == "dry_frac":
+                    img = coll.map(lambda im: im.lt(threshold)).mean()
+                else:
+                    img = coll.mean()
+                val = img.rename("v").reduceRegion(
+                    reducer=ee.Reducer.mean(), geometry=geometry, scale=27830,
+                    bestEffort=True, maxPixels=int(1e9)).get("v")
+                return ee.Feature(None, {"t": y0.format("YYYY"), "v": val})
+
+            feats = ee.FeatureCollection(years.map(per_year)).getInfo()["features"]
+            rows = [(f["properties"]["t"], f["properties"].get("v")) for f in feats]
+            rows = [(t, v) for t, v in rows if v is not None]
+            if not rows:
+                return pd.Series(dtype=float)
+            return pd.Series([float(v) for _, v in rows],
+                             index=pd.to_datetime([t for t, _ in rows])).sort_index()
+
+        out = {}
+        for m in models:
+            try:
+                s = _series(m)
+                if not s.empty:
+                    out[m] = s
+            except Exception as exc:
+                print(f"  [annual {m}] skipped: {exc}")
         if ckey is not None:
             _cache_put(ckey, out)
         return out
