@@ -1,0 +1,52 @@
+{
+  "case": "Emilia-Romagna / Bologna \u2014 May 2023 flood",
+  "notes": "Validation-stage screening pilot for the May 2023 Emilia-Romagna flood (main flooding 16-17 May 2023).",
+  "event_window": {
+    "climate": [
+      "2023-05-01",
+      "2023-05-18"
+    ],
+    "sentinel": [
+      "2023-05-17",
+      "2023-05-27"
+    ]
+  },
+  "region": {
+    "lat": 44.494,
+    "lon": 11.343,
+    "radius_km": 60
+  },
+  "confusion": {
+    "tp": 10,
+    "fp": 20486,
+    "fn": 0,
+    "tn": 0
+  },
+  "scores": {
+    "precision": 0.0004879000780640125,
+    "pod_recall": 1.0,
+    "far": 0.999512099921936,
+    "csi_iou": 0.0004879000780640125,
+    "f1": 0.0009753242953281966,
+    "frequency_bias": 2049.6,
+    "accuracy": 0.0004879000780640125
+  },
+  "climate": {
+    "driver": "ERA5-Land reanalysis (observed)",
+    "best_model": null,
+    "trusted_models": null,
+    "trust_weights": null,
+    "precip_mean": 15.217,
+    "precip_spread": 3.417,
+    "precip_anomaly": 2.0678,
+    "clim_mean": 3.01,
+    "n_kept": null,
+    "n_models": null
+  },
+  "sentinel_image_count": 4,
+  "grid_shape": [
+    122,
+    168
+  ],
+  "threshold": 0.5
+}
