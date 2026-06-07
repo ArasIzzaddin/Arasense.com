@@ -16,20 +16,21 @@ or a board.
 
 **What Arasense does.** For any location, we score *every* climate model against the
 observed record using the peer-reviewed **Aras Diagram** (Izzaddin et al., 2024,
-*SERRA*), keep only the models that earn trust, weight them by skill, and project how
-the hazard changes — **flood-driving rainfall, heat, and drought** — with the
-uncertainty reported, not hidden.
+*SERRA*), so you can see *which* models are reliable and *why* (bias, variability,
+timing). We screen out the models that fail a skill benchmark, project the change in
+each hazard — **flood-driving rainfall, heat, and drought** — and report the
+across-model **uncertainty and agreement**, not a single false-precision number.
 
 **Proof (live, real data).**
-- **Bologna, mid-century:** heaviest 1-day rainfall **+14%** (32 of 34 models
-  trusted, 78% agree); hottest day **37 → 41 °C**, unanimous.
+- **Bologna, mid-century:** the trusted ensemble projects heaviest 1-day rainfall
+  **+14%** (32 of 34 models trusted, 78% agree); hottest day **37 → 41 °C**, unanimous.
 - **Portfolio view:** rank a set of exposures by which worsens most —
   e.g. Rome **+19%** vs. Venice **+3%** for extreme rainfall.
 
-**Why it's defensible.** Every number traces to a peer-reviewed method; only trusted
-models contribute; uncertainty and model-agreement are shown; and where models have
-no skill, we say so rather than fake a number. Built and authored by the method's
-inventor.
+**Why it's defensible.** It's not a black box: every number traces to a peer-reviewed
+method, you see which models were trusted and why, no-skill models are screened out,
+and uncertainty and model-agreement are shown rather than hidden. We don't claim a
+single "right" number — we make the basis for the number transparent and auditable.
 
 > **For reinsurers / insurers:** a per-location, defensible climate signal for
 > underwriting and portfolio exposure — the credibility regulators increasingly
@@ -81,6 +82,11 @@ Aras Izzaddin · Founder, Arasense · ‹email›
 - **Honesty wins here.** Keep "where models have no skill, we say so" — senior risk
   people trust restraint over confidence. Do **not** mention the flood-event GNN as
   operational; it's validation-stage.
+- **Do NOT claim superior accuracy.** Our perfect-model validation shows the
+  trust-weighted projection is *not* more accurate than a plain ensemble mean
+  (see `papers/.../E4_FINDINGS.md`). Claim **transparency, model diagnosis,
+  no-skill screening, and honest uncertainty** — never "more accurate than the
+  ensemble" until that is validated. A reviewer or a sharp CRO will check.
 - **The ask is a call, not a sale.** Low friction. The pilot is the conversion step.
 - **Attach proof:** a screenshot of the multi-hazard report or the portfolio ranking
   (the Rome-topped table) makes the email concrete.

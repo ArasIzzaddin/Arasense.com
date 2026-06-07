@@ -24,29 +24,42 @@ paper turns that **two-dimensional error decomposition (bias, variability, timin
 into a transparent, benchmark-anchored scheme for weighting and projecting a CMIP6
 ensemble**, and shows it across three hazards and two emission scenarios.
 
+## Framing (revised after the E4 validation — read `analysis/E4_FINDINGS.md`)
+A perfect-model test on the real CMIP6 ensemble showed that **trust-weighting does
+not improve projection accuracy over a plain ensemble mean** (rx1day −0.3%, mean
++0.0% at Bologna) — consistent with the literature that historical performance is
+a weak predictor of future projection. So the paper's contribution is **not** a
+more-accurate projection. It is an **interpretable model-evaluation and weighting
+framework, plus a candid evaluation of when performance weighting helps and when it
+does not.** This honesty is the strength, not a weakness — the field values it.
+
 ## Novelty (state explicitly — reviewers will look for it)
-1. A **performance-weighting** scheme grounded in an interpretable, peer-reviewed
-   error decomposition (not a black-box skill score) — each model's weight is
-   traceable to *why* it is (un)trusted: bias vs. variability vs. timing.
+1. An **interpretable, benchmark-anchored** weighting scheme grounded in a
+   peer-reviewed error decomposition (not a black-box skill score) — each weight is
+   traceable to *why* a model is (un)trusted: bias vs. variability vs. timing.
 2. A **benchmark-anchored rejection** (KGE = −0.41 mean-flow benchmark, Knoben et
    al. 2019): models that don't beat the climatological mean get zero weight.
 3. **Honest declination**: locations/variables where no model earns trust are
-   reported as out-of-skill rather than projected — a property most weighting
-   schemes lack.
-4. A **multi-hazard, reproducible** application (flood-rainfall, heat, drought)
+   reported as out-of-skill rather than projected.
+4. A **candid perfect-model evaluation** (E4): when does scoring on the historical
+   climatology inform the future, and when does it not — a contribution in its own
+   right, and a caution against unvalidated accuracy claims.
+5. A **multi-hazard, reproducible** application (flood-rainfall, heat, drought)
    with open, tested code.
 
 ---
 
 ## Abstract (draft skeleton, ~200 words)
-Problem (ensemble disagreement, equal-weight averaging blends skilful and
-unskilful models) → gap (weighting schemes are often opaque or performance-only) →
-method (Aras Diagram total error → tiers, skill weights, benchmark rejection →
-weighted projection) → experiments (Mediterranean/Italy, full CMIP6, SSP2-4.5 &
-SSP5-8.5, three hazards) → key results (extremes intensify with high model
-agreement while mean change is small/uncertain; weighting changes the projected
-signal and narrows/ągrounds uncertainty vs equal weight; comparison to ClimWIP) →
-significance (transparent, reproducible, declines out-of-skill).
+Problem (ensemble disagreement; opaque skill scores) → method (Aras Diagram total
+error → interpretable tiers, skill weights, benchmark rejection) → experiments
+(Mediterranean/Italy, full CMIP6, SSP2-4.5 & SSP5-8.5, three hazards; equal-weight
+baseline; ClimWIP comparison; perfect-model validation) → **key results: the
+decomposition gives transparent, traceable model evaluation; however, a
+perfect-model test shows trust-weighting does not improve projection accuracy over
+the ensemble mean (consistent with weak historical→future skill links)** → so the
+value is in transparency, diagnosis, screening, and honest uncertainty rather than
+accuracy gains → significance (an interpretable evaluation standard + a candid
+weighting assessment).
 
 ## 1. Introduction
 - CMIP6 ensemble spread; the cost of equal-weight averaging for risk decisions.
