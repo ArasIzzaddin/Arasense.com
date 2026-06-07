@@ -130,7 +130,10 @@ Eyring et al. (2016, CMIP6) · Eyring et al. (2019, ESMValTool) · IPCC AR6 WG1.
 - Reproducible, tested code → Code & data availability.
 
 ## What still needs building for publication-grade
+- ✅ **E4 (perfect-model validation)** — **built**: `src/validation/perfect_model.py`
+  (tested; +58% RMSE improvement on a structured synthetic ensemble) +
+  `analysis/e4_perfect_model.py` (real full-ensemble runner). *Still to add:
+  out-of-sample skill over a held-out historical period.*
 - **E2 (equal-weight baseline)** and **E3 (ClimWIP comparison)** — add an equal-weight
   projection option and implement/adopt ClimWIP weights for comparison.
-- **E4 (validation)** — perfect-model and out-of-sample tests (the reviewers' first ask).
 - Full-ensemble runs over a regular spatial grid (not just point cities) for maps.
