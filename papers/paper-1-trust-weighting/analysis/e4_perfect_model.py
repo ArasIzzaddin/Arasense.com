@@ -25,8 +25,11 @@ from climate.data_fetcher import ArasenseDataFetcher
 from common.gee import initialize_earth_engine
 from validation.perfect_model import perfect_model_test
 
-# metric -> (variable, extreme-stat, threshold)
+# metric -> (variable, extreme-stat, threshold). "mean" is handled specially
+# (future value = mean of the future monthly series) to test whether weighting
+# helps for the climatological quantity the trust is actually scored on.
 _METRIC = {
+    "mean": ("precipitation", "mean", 0.0),
     "rx1day": ("precipitation", "rx1day", 20.0),
     "p95": ("precipitation", "p95", 20.0),
     "heavy_precip_frac": ("precipitation", "heavy_frac", 20.0),
@@ -65,10 +68,17 @@ def main():
     models = list(hist_df.columns)
 
     print(f"Fetching future '{args.metric}' for {len(models)} models ({args.scenario})…")
-    future = fetcher.get_extreme_stat(
-        geometry=roi, start_date=args.future[0], end_date=args.future[1],
-        variable=variable, models=models, stat=stat, threshold=threshold,
-        scenario=args.scenario, loc_key=loc)
+    if stat == "mean":
+        _, fut_models = fetcher.get_monthly_series(
+            geometry=roi, start_date=args.future[0], end_date=args.future[1],
+            variable=variable, models=models, fast_mode=args.fast_mode,
+            scenario=args.scenario, loc_key=loc)
+        future = {m: float(s.mean()) for m, s in fut_models.items() if not s.empty}
+    else:
+        future = fetcher.get_extreme_stat(
+            geometry=roi, start_date=args.future[0], end_date=args.future[1],
+            variable=variable, models=models, stat=stat, threshold=threshold,
+            scenario=args.scenario, loc_key=loc)
 
     hist_by_model = {m: hist_df[m].values for m in models if m in future}
     future_by_model = {m: future[m] for m in models if m in future}

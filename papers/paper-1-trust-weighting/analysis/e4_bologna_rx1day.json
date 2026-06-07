@@ -1,0 +1,322 @@
+{
+  "n_models": 33,
+  "rmse_weighted": 7.317502580811683,
+  "rmse_equal": 7.292137477586083,
+  "mae_weighted": 6.123520879376475,
+  "mae_equal": 6.090575465205526,
+  "rmse_improvement_pct": -0.34784181323467017,
+  "n_truth_weighting_better": 11,
+  "per_truth": [
+    {
+      "truth": "ACCESS-CM2",
+      "truth_future": 49.80412129008658,
+      "pred_weighted": 45.69777137211599,
+      "pred_equal": 45.82030611889181,
+      "err_weighted": 4.10634991797059,
+      "err_equal": 3.9838151711947702,
+      "n_kept": 32
+    },
+    {
+      "truth": "ACCESS-ESM1-5",
+      "truth_future": 45.697887533540374,
+      "pred_weighted": 45.87653723360289,
+      "pred_equal": 45.94862592378388,
+      "err_weighted": 0.17864970006251468,
+      "err_equal": 0.2507383902435052,
+      "n_kept": 32
+    },
+    {
+      "truth": "BCC-CSM2-MR",
+      "truth_future": 50.388632501190045,
+      "pred_weighted": 45.70941225363792,
+      "pred_equal": 45.80204014354482,
+      "err_weighted": 4.679220247552124,
+      "err_equal": 4.586592357645223,
+      "n_kept": 32
+    },
+    {
+      "truth": "CESM2-WACCM",
+      "truth_future": 48.52395342342819,
+      "pred_weighted": 45.76695339146468,
+      "pred_equal": 45.86031136472488,
+      "err_weighted": 2.757000031963507,
+      "err_equal": 2.66364205870331,
+      "n_kept": 32
+    },
+    {
+      "truth": "CESM2",
+      "truth_future": 49.93410011006093,
+      "pred_weighted": 45.75669616629642,
+      "pred_equal": 45.816244280767606,
+      "err_weighted": 4.17740394376451,
+      "err_equal": 4.117855829293326,
+      "n_kept": 32
+    },
+    {
+      "truth": "CMCC-CM2-SR5",
+      "truth_future": 54.12173409837375,
+      "pred_weighted": 45.72255723609525,
+      "pred_equal": 45.685380718632835,
+      "err_weighted": 8.399176862278502,
+      "err_equal": 8.436353379740915,
+      "n_kept": 31
+    },
+    {
+      "truth": "CMCC-ESM2",
+      "truth_future": 42.07472202912315,
+      "pred_weighted": 46.01801760974276,
+      "pred_equal": 46.061849845796914,
+      "err_weighted": 3.943295580619612,
+      "err_equal": 3.9871278166737625,
+      "n_kept": 32
+    },
+    {
+      "truth": "CNRM-CM6-1",
+      "truth_future": 40.58998324310628,
+      "pred_weighted": 46.15284448100985,
+      "pred_equal": 46.10824793285994,
+      "err_weighted": 5.562861237903569,
+      "err_equal": 5.518264689753657,
+      "n_kept": 30
+    },
+    {
+      "truth": "CNRM-ESM2-1",
+      "truth_future": 45.49619102691021,
+      "pred_weighted": 45.97072077886708,
+      "pred_equal": 45.95492893961607,
+      "err_weighted": 0.4745297519568723,
+      "err_equal": 0.45873791270585684,
+      "n_kept": 32
+    },
+    {
+      "truth": "CanESM5",
+      "truth_future": 29.139208026334337,
+      "pred_weighted": 46.46332519575492,
+      "pred_equal": 46.46608465838406,
+      "err_weighted": 17.32411716942058,
+      "err_equal": 17.326876632049725,
+      "n_kept": 31
+    },
+    {
+      "truth": "EC-Earth3-Veg-LR",
+      "truth_future": 47.57314513316706,
+      "pred_weighted": 46.07857681503513,
+      "pred_equal": 45.89002412379554,
+      "err_weighted": 1.4945683181319325,
+      "err_equal": 1.6831210093715185,
+      "n_kept": 32
+    },
+    {
+      "truth": "EC-Earth3",
+      "truth_future": 41.21519725912447,
+      "pred_weighted": 46.167926433065034,
+      "pred_equal": 46.08870999485937,
+      "err_weighted": 4.952729173940561,
+      "err_equal": 4.873512735734899,
+      "n_kept": 31
+    },
+    {
+      "truth": "FGOALS-g3",
+      "truth_future": 36.001367452888765,
+      "pred_weighted": 46.3716886999496,
+      "pred_equal": 46.251642176304244,
+      "err_weighted": 10.370321247060836,
+      "err_equal": 10.25027472341548,
+      "n_kept": 32
+    },
+    {
+      "truth": "GFDL-CM4",
+      "truth_future": 51.11545790326722,
+      "pred_weighted": 45.81287313603613,
+      "pred_equal": 45.77932684972991,
+      "err_weighted": 5.302584767231089,
+      "err_equal": 5.336131053537308,
+      "n_kept": 32
+    },
+    {
+      "truth": "GFDL-ESM4",
+      "truth_future": 56.31963136461046,
+      "pred_weighted": 45.58165026487515,
+      "pred_equal": 45.61669642906294,
+      "err_weighted": 10.737981099735308,
+      "err_equal": 10.702934935547518,
+      "n_kept": 32
+    },
+    {
+      "truth": "GISS-E2-1-G",
+      "truth_future": 34.958381740691486,
+      "pred_weighted": 46.37987191174702,
+      "pred_equal": 46.284235479810405,
+      "err_weighted": 11.421490171055531,
+      "err_equal": 11.32585373911892,
+      "n_kept": 32
+    },
+    {
+      "truth": "HadGEM3-GC31-LL",
+      "truth_future": 49.20765774320586,
+      "pred_weighted": 46.24984941710734,
+      "pred_equal": 45.83894560473183,
+      "err_weighted": 2.9578083260985153,
+      "err_equal": 3.3687121384740237,
+      "n_kept": 29
+    },
+    {
+      "truth": "IITM-ESM",
+      "truth_future": 43.155777716623355,
+      "pred_weighted": 46.125803564279444,
+      "pred_equal": 46.028066855562535,
+      "err_weighted": 2.970025847656089,
+      "err_equal": 2.8722891389391805,
+      "n_kept": 32
+    },
+    {
+      "truth": "INM-CM4-8",
+      "truth_future": 39.57094610822327,
+      "pred_weighted": 45.98815647647554,
+      "pred_equal": 46.140092843325036,
+      "err_weighted": 6.41721036825227,
+      "err_equal": 6.569146735101768,
+      "n_kept": 32
+    },
+    {
+      "truth": "INM-CM5-0",
+      "truth_future": 49.163220130285694,
+      "pred_weighted": 45.68714153906222,
+      "pred_equal": 45.840334280135586,
+      "err_weighted": 3.4760785912234766,
+      "err_equal": 3.322885850150108,
+      "n_kept": 32
+    },
+    {
+      "truth": "IPSL-CM6A-LR",
+      "truth_future": 44.39711156575658,
+      "pred_weighted": 46.19502129172,
+      "pred_equal": 45.98927517277712,
+      "err_weighted": 1.7979097259634216,
+      "err_equal": 1.592163607020538,
+      "n_kept": 32
+    },
+    {
+      "truth": "KACE-1-0-G",
+      "truth_future": 31.85116224645704,
+      "pred_weighted": 46.4256092687972,
+      "pred_equal": 46.38133608900523,
+      "err_weighted": 14.574447022340163,
+      "err_equal": 14.53017384254819,
+      "n_kept": 32
+    },
+    {
+      "truth": "KIOST-ESM",
+      "truth_future": 53.21172954915025,
+      "pred_weighted": 45.51520989839131,
+      "pred_equal": 45.71381836079607,
+      "err_weighted": 7.696519650758937,
+      "err_equal": 7.4979111883541805,
+      "n_kept": 32
+    },
+    {
+      "truth": "MIROC-ES2L",
+      "truth_future": 35.52003677300007,
+      "pred_weighted": 46.10994676174569,
+      "pred_equal": 46.26668376005076,
+      "err_weighted": 10.589909988745617,
+      "err_equal": 10.746646987050688,
+      "n_kept": 32
+    },
+    {
+      "truth": "MIROC6",
+      "truth_future": 54.687797517632724,
+      "pred_weighted": 45.65688790147189,
+      "pred_equal": 45.66769123678099,
+      "err_weighted": 9.030909616160834,
+      "err_equal": 9.020106280851735,
+      "n_kept": 32
+    },
+    {
+      "truth": "MPI-ESM1-2-HR",
+      "truth_future": 49.292903191946145,
+      "pred_weighted": 46.15105020996256,
+      "pred_equal": 45.8362816844587,
+      "err_weighted": 3.1418529819835825,
+      "err_equal": 3.456621507487448,
+      "n_kept": 32
+    },
+    {
+      "truth": "MPI-ESM1-2-LR",
+      "truth_future": 40.17501000064103,
+      "pred_weighted": 46.34839085501439,
+      "pred_equal": 46.12121584668698,
+      "err_weighted": 6.173380854373356,
+      "err_equal": 5.946205846045949,
+      "n_kept": 32
+    },
+    {
+      "truth": "MRI-ESM2-0",
+      "truth_future": 52.90350934022769,
+      "pred_weighted": 45.48989949759193,
+      "pred_equal": 45.7234502423249,
+      "err_weighted": 7.413609842635765,
+      "err_equal": 7.180059097902792,
+      "n_kept": 31
+    },
+    {
+      "truth": "NESM3",
+      "truth_future": 41.82322669548405,
+      "pred_weighted": 46.14538079789773,
+      "pred_equal": 46.06970907497313,
+      "err_weighted": 4.322154102413677,
+      "err_equal": 4.2464823794890805,
+      "n_kept": 32
+    },
+    {
+      "truth": "NorESM2-LM",
+      "truth_future": 55.669776860060885,
+      "pred_weighted": 45.871912436768085,
+      "pred_equal": 45.637004382330105,
+      "err_weighted": 9.7978644232928,
+      "err_equal": 10.03277247773078,
+      "n_kept": 32
+    },
+    {
+      "truth": "NorESM2-MM",
+      "truth_future": 47.96086191532001,
+      "pred_weighted": 45.81045864611913,
+      "pred_equal": 45.87790797435326,
+      "err_weighted": 2.150403269200879,
+      "err_equal": 2.082953940966746,
+      "n_kept": 32
+    },
+    {
+      "truth": "TaiESM1",
+      "truth_future": 55.727871691960985,
+      "pred_weighted": 45.54597828685967,
+      "pred_equal": 45.63518891883324,
+      "err_weighted": 10.181893405101313,
+      "err_equal": 10.092682773127748,
+      "n_kept": 31
+    },
+    {
+      "truth": "UKESM1-0-LL",
+      "truth_future": 48.78160391274541,
+      "pred_weighted": 45.27967213017005,
+      "pred_equal": 45.852259786933715,
+      "err_weighted": 3.5019317825753618,
+      "err_equal": 2.9293441258116957,
+      "n_kept": 30
+    }
+  ],
+  "meta": {
+    "lat": 44.494,
+    "lon": 11.343,
+    "metric": "rx1day",
+    "scenario": "ssp245",
+    "hist": [
+      "1995-01-01",
+      "2014-12-31"
+    ],
+    "future": [
+      "2040-01-01",
+      "2059-12-31"
+    ]
+  }
+}
