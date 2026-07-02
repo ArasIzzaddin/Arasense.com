@@ -1,0 +1,196 @@
+{
+ "case": "European Trust Atlas",
+ "notes": "rx1day, SSP2-4.5, 1995-2014 vs 2040-2059, 50 km radius, fast_mode 5-model screening ensemble (same method as the Italian flood portfolio).",
+ "cities": {
+  "London": {
+   "lat": 51.507,
+   "lon": -0.128,
+   "historical": 29.61438166467851,
+   "future": 36.27009311034386,
+   "change": 6.6557114456653474,
+   "pct_change": 22.47459197705859,
+   "agreement": 1.0,
+   "n_trusted": 4
+  },
+  "Paris": {
+   "lat": 48.857,
+   "lon": 2.352,
+   "historical": 30.82119222330727,
+   "future": 29.21581244317355,
+   "change": -1.6053797801337224,
+   "pct_change": -5.208688127643938,
+   "agreement": 0.46351651367979474,
+   "n_trusted": 4
+  },
+  "Berlin": {
+   "lat": 52.52,
+   "lon": 13.405,
+   "historical": 26.729059618370947,
+   "future": 29.57129084961813,
+   "change": 2.842231231247185,
+   "pct_change": 10.633487566819271,
+   "agreement": 0.7938266346879231,
+   "n_trusted": 5
+  },
+  "Madrid": {
+   "lat": 40.417,
+   "lon": -3.704,
+   "historical": 42.74527897192423,
+   "future": 45.97413679001079,
+   "change": 3.228857818086551,
+   "pct_change": 7.553717967795498,
+   "agreement": 0.8014088443572327,
+   "n_trusted": 5
+  },
+  "Barcelona": {
+   "lat": 41.387,
+   "lon": 2.17,
+   "historical": 46.001391594731466,
+   "future": 50.40720770020053,
+   "change": 4.40581610546906,
+   "pct_change": 9.57757135758836,
+   "agreement": 0.7486026755588637,
+   "n_trusted": 5
+  },
+  "Lisbon": {
+   "lat": 38.722,
+   "lon": -9.139,
+   "historical": 59.94261915822631,
+   "future": 65.4141840823979,
+   "change": 5.471564924171596,
+   "pct_change": 9.128004416571608,
+   "agreement": 0.6225938576232983,
+   "n_trusted": 5
+  },
+  "Amsterdam": {
+   "lat": 52.368,
+   "lon": 4.904,
+   "historical": 31.076384917296423,
+   "future": 38.38747590604991,
+   "change": 7.311090988753487,
+   "pct_change": 23.526195238636966,
+   "agreement": 1.0,
+   "n_trusted": 5
+  },
+  "Brussels": {
+   "lat": 50.847,
+   "lon": 4.352,
+   "historical": 33.90820459739946,
+   "future": 39.81055855560811,
+   "change": 5.902353958208653,
+   "pct_change": 17.40686075328602,
+   "agreement": 1.0,
+   "n_trusted": 4
+  },
+  "Vienna": {
+   "lat": 48.208,
+   "lon": 16.373,
+   "historical": 36.95547953729897,
+   "future": 37.82764461576766,
+   "change": 0.8721650784686863,
+   "pct_change": 2.3600426496655653,
+   "agreement": 0.6182166290425911,
+   "n_trusted": 5
+  },
+  "Zurich": {
+   "lat": 47.377,
+   "lon": 8.541,
+   "historical": 46.63986648506685,
+   "future": 52.96614306174207,
+   "change": 6.326276576675223,
+   "pct_change": 13.564096669746622,
+   "agreement": 1.0,
+   "n_trusted": 5
+  },
+  "Munich": {
+   "lat": 48.135,
+   "lon": 11.582,
+   "historical": 40.12761870620172,
+   "future": 40.38238122919317,
+   "change": 0.25476252299144964,
+   "pct_change": 0.6348807410096231,
+   "agreement": 0.5894620448866984,
+   "n_trusted": 5
+  },
+  "Prague": {
+   "lat": 50.075,
+   "lon": 14.437,
+   "historical": 29.476011470715513,
+   "future": 31.720547928774586,
+   "change": 2.2445364580590716,
+   "pct_change": 7.6147902856158955,
+   "agreement": 0.7939031101040968,
+   "n_trusted": 5
+  },
+  "Warsaw": {
+   "lat": 52.23,
+   "lon": 21.011,
+   "historical": 23.941433629122656,
+   "future": 29.567030393852672,
+   "change": 5.625596764730021,
+   "pct_change": 23.4973262331583,
+   "agreement": 1.0,
+   "n_trusted": 5
+  },
+  "Budapest": {
+   "lat": 47.498,
+   "lon": 19.04,
+   "historical": 27.87541438438952,
+   "future": 32.609037027379415,
+   "change": 4.733622642989895,
+   "pct_change": 16.98135345259931,
+   "agreement": 0.8012898767965022,
+   "n_trusted": 5
+  },
+  "Copenhagen": {
+   "lat": 55.676,
+   "lon": 12.568,
+   "historical": 30.480671977493113,
+   "future": 33.127779115981596,
+   "change": 2.6471071384884732,
+   "pct_change": 8.684543242495092,
+   "agreement": 0.8014985833819482,
+   "n_trusted": 5
+  },
+  "Stockholm": {
+   "lat": 59.329,
+   "lon": 18.069,
+   "historical": 37.21784503815414,
+   "future": 33.425651102425505,
+   "change": -3.792193935728634,
+   "pct_change": -10.18918191486111,
+   "agreement": 0.21086273011796242,
+   "n_trusted": 5
+  },
+  "Oslo": {
+   "lat": 59.913,
+   "lon": 10.752,
+   "historical": 36.1970639028009,
+   "future": 46.089710004084274,
+   "change": 9.892646101283374,
+   "pct_change": 27.329968330712838,
+   "agreement": 1.0,
+   "n_trusted": 5
+  },
+  "Dublin": {
+   "lat": 53.349,
+   "lon": -6.26,
+   "historical": 36.166046210108334,
+   "future": 37.29038868414069,
+   "change": 1.1243424740323607,
+   "pct_change": 3.1088343677394,
+   "agreement": 0.6139635313598403,
+   "n_trusted": 5
+  },
+  "Athens": {
+   "lat": 37.984,
+   "lon": 23.728,
+   "historical": 48.908030005306344,
+   "future": 52.328639828431,
+   "change": 3.4206098231246664,
+   "pct_change": 6.9939636144689175,
+   "agreement": 0.5738024716786237,
+   "n_trusted": 5
+  }
+ }
+}

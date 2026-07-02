@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Climate Model Trust Atlas — Arasense</title>
-  <meta name="description" content="An interactive atlas of climate-model trust: click an Italian city to see its trust-weighted 2050 rainfall signal, model agreement, and how the projection earned its number.">
+  <meta name="description" content="An interactive atlas of climate-model trust across Europe: click a city to see its trust-weighted 2050 rainfall signal, model agreement, and how the projection earned its number.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://www.arasense.com/atlas.html">
   <meta property="og:type" content="website">
   <meta property="og:title" content="The Climate Model Trust Atlas — Arasense">
-  <meta property="og:description" content="Click a city. See which climate models earned trust there, and what they say about 2050.">
+  <meta property="og:description" content="Click a European city. See which climate models earned trust there, and what they say about 2050.">
   <meta property="og:url" content="https://www.arasense.com/atlas.html">
   <meta property="og:image" content="https://www.arasense.com/og/atlas.png">
   <meta property="og:image:width" content="1200">
@@ -28,7 +28,7 @@
     /* ---- atlas layout ---- */
     .atlas {
       display: grid;
-      grid-template-columns: 1fr 0.9fr;
+      grid-template-columns: 1.05fr 0.85fr;
       gap: 16px;
       margin-top: 44px;
       align-items: stretch;
@@ -40,19 +40,19 @@
       padding: 20px;
       position: relative;
     }
-    .map-panel svg { display: block; width: 100%; height: auto; max-height: 640px; margin: 0 auto; }
+    .map-panel svg { display: block; width: 100%; height: auto; max-height: 660px; margin: 0 auto; }
 
     .country {
-      fill: rgba(52, 211, 153, 0.05);
-      stroke: rgba(110, 231, 183, 0.35);
-      stroke-width: 1.2;
+      fill: rgba(52, 211, 153, 0.045);
+      stroke: rgba(110, 231, 183, 0.22);
+      stroke-width: 1;
     }
 
     .pin { cursor: pointer; }
     .pin circle.core {
       fill: var(--accent);
       stroke: #04120c;
-      stroke-width: 1.5;
+      stroke-width: 1.4;
       transition: r .2s;
     }
     .pin.pilot circle.core { fill: var(--amber); }
@@ -71,28 +71,33 @@
       100% { transform: scale(2.6); opacity: 0; }
     }
     .pin text {
-      fill: var(--muted);
+      fill: var(--text);
       font-family: var(--font-mono);
-      font-size: 11.5px;
+      font-size: 12px;
+      paint-order: stroke;
+      stroke: #050d0b;
+      stroke-width: 3px;
       pointer-events: none;
+      opacity: 0;
+      transition: opacity .15s;
     }
-    .pin.active text { fill: var(--text); }
+    .pin:hover text, .pin.active text, .pin:focus text { opacity: 1; }
 
     .city-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 7px;
       margin-top: 16px;
     }
     .chip {
       font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: 0.06em;
+      font-size: 11.5px;
+      letter-spacing: 0.05em;
       color: var(--muted);
       background: none;
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 8px 14px;
+      padding: 7px 12px;
       cursor: pointer;
       transition: color .15s, border-color .15s, background .15s;
     }
@@ -143,6 +148,7 @@
       margin: 6px 0 4px;
       font-variant-numeric: tabular-nums;
     }
+    .detail-change.negative { color: var(--amber); }
     .detail-values {
       font-family: var(--font-mono);
       font-size: 14px;
@@ -198,17 +204,17 @@
     .compare { margin-top: 16px; }
     .bar-row {
       display: grid;
-      grid-template-columns: 110px 1fr 90px;
+      grid-template-columns: 118px 1fr 84px;
       align-items: center;
       gap: 14px;
-      padding: 10px 0;
+      padding: 8px 0;
       border-bottom: 1px solid var(--line);
       cursor: pointer;
     }
     .bar-row:last-child { border-bottom: 0; }
     .bar-row .city { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
     .bar-row.active .city { color: var(--text); }
-    .bar-track { height: 10px; border-radius: 999px; background: rgba(110,231,183,.08); overflow: hidden; }
+    .bar-track { height: 9px; border-radius: 999px; background: rgba(110,231,183,.08); overflow: hidden; }
     .bar-track i {
       display: block; height: 100%;
       background: linear-gradient(90deg, var(--accent), var(--accent-bright));
@@ -227,7 +233,7 @@
     @media (max-width: 920px) {
       .page-hero { padding-top: 48px; }
       .atlas { grid-template-columns: 1fr; }
-      .bar-row { grid-template-columns: 84px 1fr 70px; }
+      .bar-row { grid-template-columns: 92px 1fr 70px; }
     }
   </style>
 </head>
@@ -253,30 +259,30 @@
   <div class="shell">
     <main>
       <section class="page-hero">
-        <span class="eyebrow">The Climate Model Trust Atlas</span>
+        <span class="eyebrow">The Climate Model Trust Atlas · Europe</span>
         <h1>Click a city. See who <em>earned</em> the projection.</h1>
         <p class="lead">
-          Every pin is a real Arasense run: climate models scored against observed local climate, then trust-weighted into a mid-century flood-driving-rainfall signal. Model agreement is shown for every number — because a projection without it is just a guess with confidence.
+          Every pin is a real Arasense run — one consistent method across Europe. Climate models are scored against observed local climate, then trust-weighted into a mid-century flood-driving-rainfall signal. Model agreement is shown for every number, because a projection without it is just a guess with confidence.
         </p>
       </section>
 
       <div class="atlas">
         <div class="map-panel reveal">
-          <svg id="atlas-svg" viewBox="0 0 560 657" role="img" aria-label="Map of Italy with six city pins: Rome, Milan, Florence, Bologna, Venice with trust-weighted rainfall projections, and Bari as a pilot region."></svg>
+          <svg id="atlas-svg" role="img" aria-label="Map of Europe with city pins showing trust-weighted 2050 rainfall projections; Bari is marked as a pilot region."></svg>
           <div class="city-chips" id="city-chips" role="tablist" aria-label="Select a city"></div>
         </div>
 
         <aside class="detail reveal" id="detail" aria-live="polite">
           <div class="detail-head">
-            <h2 id="d-name">Rome</h2>
-            <span class="rank-badge" id="d-rank">RANK 1 / 5</span>
+            <h2 id="d-name"></h2>
+            <span class="rank-badge" id="d-rank"></span>
           </div>
-          <div class="metric-label" id="d-metric">Max 1-day precipitation · SSP2-4.5 · 2040–2059</div>
-          <div class="detail-change num" id="d-change">+18.8%</div>
-          <div class="detail-values" id="d-values">39.91 mm → 47.40 mm (+7.49 mm)</div>
+          <div class="metric-label" id="d-metric"></div>
+          <div class="detail-change num" id="d-change"></div>
+          <div class="detail-values" id="d-values"></div>
           <div class="agree-row" id="d-agree-row">
-            <div class="lbl"><span>trusted-model agreement on increase</span><b id="d-agree-val">100%</b></div>
-            <div class="agree-bar"><i id="d-agree-bar" style="width:100%"></i></div>
+            <div class="lbl"><span>trusted-model agreement on increase</span><b id="d-agree-val"></b></div>
+            <div class="agree-bar"><i id="d-agree-bar"></i></div>
           </div>
           <div class="deep-dive" id="d-deep">
             Full 34-model deep dive available for this city: <b>+14.2%</b> with 32 of 34 CMIP6 models passing skill screening — see the <a href="case-studies.html#bologna">Bologna case study</a> or the <a href="index.html#lab">live trust visual</a>.
@@ -289,7 +295,7 @@
         <div class="section-head reveal">
           <span class="eyebrow">Side by side</span>
           <h2>Same method, every city — <em>ranked</em></h2>
-          <p>Trust-weighted mid-century change in maximum 1-day precipitation. Click a row to inspect the city.</p>
+          <p>Trust-weighted mid-century change in maximum 1-day precipitation, SSP2-4.5. Click a row to inspect the city.</p>
         </div>
         <div class="panel compare reveal" id="compare"></div>
       </section>
@@ -305,21 +311,21 @@
           <div class="card reveal">
             <span class="label">Ensembles</span>
             <h3>Two depths of analysis</h3>
-            <p>Portfolio cities were screened with a 5-model trust ensemble. Bologna additionally has a full 34-model CMIP6 deep dive — which is why its two numbers (+10.8% screening, +14.2% full ensemble) differ. Both are shown, on purpose.</p>
+            <p>Atlas cities are screened with a 5-model trust ensemble. Bologna additionally has a full 34-model CMIP6 deep dive — which is why its two numbers (+10.8% screening, +14.2% full ensemble) differ. Both are shown, on purpose.</p>
           </div>
           <div class="card reveal">
             <span class="label">Data</span>
             <h3>What's underneath</h3>
-            <p>ERA5-Land observations score each model's local skill via the Aras Diagram; trusted models are weighted into the projection. Baseline 1995–2014, future 2040–2059, scenario SSP2-4.5.</p>
+            <p>ERA5-Land observations score each model's local skill via the Aras Diagram; trusted models are weighted into the projection. Baseline 1995–2014, future 2040–2059, scenario SSP2-4.5, 50 km radius per city.</p>
           </div>
           <div class="card reveal">
             <span class="label">Coverage</span>
-            <h3>Six pins today, more with every pilot</h3>
-            <p>Each new engagement adds analyzed locations to the atlas. Bari / Puglia is the current pilot region — its full evidence pack is in preparation.</p>
+            <h3 id="coverage-title">Cities across Europe, more with every pilot</h3>
+            <p>Every ranked pin was computed with the same pipeline on the same settings — the ranking is comparable by construction. Bari / Puglia is the current pilot region; its evidence pack is in preparation.</p>
           </div>
         </div>
         <div class="notice reveal" style="margin-top:16px;">
-          <strong>Scope note.</strong> Atlas signals are screening-level evidence for prioritization and planning conversations — not a substitute for site-specific engineering studies.
+          <strong>Scope note.</strong> Atlas signals are screening-level evidence for prioritization and planning conversations — not a substitute for site-specific engineering studies. Screening ensembles are small by design; a full-ensemble deep dive is how a pin becomes decision evidence.
         </div>
       </section>
 
@@ -363,39 +369,24 @@
     </main>
   </div>
 
+  <script src="atlas-data.js"></script>
   <script src="site.js" defer></script>
   <script>
   /* ================================================================
-     Trust Atlas — real outputs from docs/portfolios/italian-flood-
-     portfolio.json (5-model screening ensemble, SSP2-4.5, rx1day)
-     plus the Bologna full-ensemble deep dive. Bari is a pilot pin.
+     Trust Atlas (Europe) — geometry and per-city numbers come from
+     atlas-data.js, generated by scripts/build_atlas_data.py from the
+     portfolio JSONs in docs/portfolios/. No hand-edited numbers.
      ================================================================ */
   (function () {
     "use strict";
 
-    var CITIES = [
-      { id:"rome",     name:"Rome",     x:270.4, y:328.8, rank:1, hist:39.91, fut:47.40, chg:7.49, pct:18.8, agree:100,
-        note:"Highest worsening signal in the portfolio — and with 100% of trusted-model weight agreeing on the increase, the ranking is not an artefact of one loud model." },
-      { id:"milan",    name:"Milan",    x:124.0, y:115.6, rank:2, hist:63.90, fut:72.10, chg:8.20, pct:12.8, agree:79,
-        note:"The largest absolute change (+8.2 mm) on the highest baseline — but 79% agreement earns it a more cautious read than Rome." },
-      { id:"florence", name:"Florence", x:215.8, y:216.7, rank:3, hist:46.17, fut:51.45, chg:5.28, pct:11.4, agree:80,
-        note:"A solid mid-table signal: +11.4% with 80% of trusted-model weight agreeing on the direction." },
-      { id:"bologna",  name:"Bologna",  x:219.7, y:173.5, rank:4, hist:44.20, fut:48.95, chg:4.75, pct:10.8, agree:100, deep:true,
-        note:"The atlas benchmark city: screening says +10.8% with full agreement, and the 34-model deep dive refines it to +14.2%. Comparing the two is exactly the transparency this method exists for." },
-      { id:"venice",   name:"Venice",   x:263.8, y:117.2, rank:5, hist:52.96, fut:54.70, chg:1.74, pct:3.3, agree:56,
-        note:"The cautionary tale: +3.3% sounds reassuring until you see only 56% model agreement. A single ranking score would bury that doubt — the atlas shows it." },
-      { id:"bari",     name:"Bari",     x:465.4, y:375.2, pilot:true,
-        note:"Current pilot region. The Bari / Puglia evidence pack applies the same trust-first workflow to Puglia locations — the regional brief is available now, and atlas numbers will follow the pilot." }
-    ];
+    var A = window.ATLAS;
+    var svg = document.getElementById("atlas-svg");
+    if (!A || !svg) return;
 
-    var ITALY = ["M27.6,88.0L32.4,90.7L50.6,84.9L61.7,88.3L76.7,74.0L75.4,67.4L89.9,57.0L91.5,68.9L107.5,79.0L105.7,83.8L113.5,93.7L116.6,92.8L115.7,82.7L126.7,66.5L129.1,54.0L134.6,54.8L139.1,65.3L157.3,62.0L163.6,70.0L166.5,68.5L161.7,54.7L163.9,47.8L179.1,50.8L180.1,31.9L204.1,37.2L215.3,25.3L238.9,24.7L256.4,19.0L255.7,27.8L266.1,41.6L324.4,52.5L310.1,68.0L321.4,73.0L315.0,84.4L320.0,84.8L319.3,94.8L332.2,106.6L325.3,108.2L328.1,105.9L321.3,97.3L314.0,100.9L302.5,97.2L294.7,105.2L261.1,116.7L258.9,128.9L272.2,145.2L266.0,155.4L261.3,153.3L259.9,159.9L266.5,189.7L279.6,203.3L318.4,228.6L338.2,281.3L361.8,307.9L389.7,326.4L434.0,328.6L433.4,336.9L422.8,345.1L422.2,351.6L475.7,378.4L513.6,402.7L536.0,428.7L537.1,435.6L533.0,447.6L530.8,452.5L519.0,445.6L509.6,425.1L488.7,421.6L479.1,411.8L467.9,414.5L456.4,433.7L449.9,456.9L453.2,463.4L463.3,467.0L476.2,478.9L478.9,501.7L475.5,506.4L469.0,505.2L454.1,513.5L450.9,536.9L439.2,546.4L429.2,564.8L414.4,564.9L410.8,550.8L418.8,543.2L423.4,521.2L435.4,516.0L436.0,505.1L431.4,500.2L427.7,480.5L413.0,442.5L395.3,437.7L380.0,427.6L379.9,413.8L371.8,402.0L352.9,406.1L358.2,398.4L351.5,393.3L339.7,393.4L325.9,368.1L304.3,364.9L297.3,367.6L276.9,354.1L252.2,326.0L240.3,317.5L232.8,305.3L217.6,297.2L209.0,297.6L212.7,295.2L211.9,290.5L191.5,266.5L182.9,264.7L183.1,250.6L174.2,232.1L170.9,211.9L162.1,201.8L128.4,184.0L105.1,177.8L95.6,182.4L71.3,210.4L48.6,216.9L48.1,211.1L56.8,198.1L55.0,193.2L40.8,194.8L22.2,183.0L19.7,172.5L28.0,160.2L26.3,153.6L15.0,148.0L10.4,139.2L13.0,134.7L30.1,129.0L33.2,120.5L17.4,99.1L18.0,94.7L27.6,88.0Z",
-      "M410.4,545.3L392.6,574.1L386.6,593.6L395.4,617.7L387.4,630.6L387.2,639.6L360.1,633.0L349.3,618.2L328.9,612.9L290.0,586.9L277.3,585.5L268.2,572.1L273.2,558.1L281.5,550.4L289.0,559.2L300.4,549.9L306.3,549.9L328.4,562.4L360.3,558.6L372.9,551.3L387.5,552.2L404.4,543.9L410.4,545.3Z",
-      "M140.2,386.2L151.3,412.0L144.1,425.8L147.0,440.9L140.6,491.7L118.1,487.3L114.1,503.7L99.9,506.0L89.7,489.3L88.8,472.8L95.5,451.5L89.2,446.8L92.1,424.4L79.6,403.0L81.1,387.3L96.5,391.1L107.6,385.1L125.7,366.8L142.9,381.1L140.2,386.2Z"];
+    svg.setAttribute("viewBox", "0 0 " + A.w + " " + Math.ceil(A.h));
 
     var svgNS = "http://www.w3.org/2000/svg";
-    var svg = document.getElementById("atlas-svg");
-    if (!svg) return;
-
     function el(tag, attrs, parent) {
       var e = document.createElementNS(svgNS, tag);
       for (var k in attrs) e.setAttribute(k, attrs[k]);
@@ -403,19 +394,17 @@
       return e;
     }
 
-    ITALY.forEach(function (d) { el("path", { d: d, "class": "country" }); });
+    A.paths.forEach(function (d) { el("path", { d: d, "class": "country" }); });
 
-    /* label placement: offset per city so labels don't collide */
-    var LABEL = { rome:[12,4], milan:[-14,-10], florence:[12,14], bologna:[12,-6], venice:[12,-8], bari:[12,-8] };
-    var ANCHOR = { milan:"end" };
-
+    /* pins — label side flips for cities near the right edge */
     var pins = {};
-    CITIES.forEach(function (c) {
+    A.cities.forEach(function (c) {
       var g = el("g", { "class": "pin" + (c.pilot ? " pilot" : ""), transform: "translate(" + c.x + "," + c.y + ")", tabindex: "0", role: "button", "aria-label": c.name });
-      el("circle", { "class": "halo", r: 9 }, g);
-      el("circle", { "class": "core", r: 6.5 }, g);
-      var t = el("text", { x: LABEL[c.id][0], y: LABEL[c.id][1] }, g);
-      if (ANCHOR[c.id]) t.setAttribute("text-anchor", ANCHOR[c.id]);
+      el("circle", { "class": "halo", r: 8 }, g);
+      el("circle", { "class": "core", r: 5.5 }, g);
+      var onRight = c.x > A.w - 120;
+      var t = el("text", { x: onRight ? -10 : 10, y: 4 }, g);
+      if (onRight) t.setAttribute("text-anchor", "end");
       t.textContent = c.name.toUpperCase();
       g.addEventListener("click", function () { select(c.id); });
       g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(c.id); } });
@@ -425,7 +414,7 @@
     /* chips */
     var chipsWrap = document.getElementById("city-chips");
     var chips = {};
-    CITIES.forEach(function (c) {
+    A.cities.forEach(function (c) {
       var b = document.createElement("button");
       b.className = "chip" + (c.pilot ? " pilot" : "");
       b.textContent = c.pilot ? c.name + " · pilot" : c.name;
@@ -438,17 +427,20 @@
     /* comparison bars (ranked cities only) */
     var cmpWrap = document.getElementById("compare");
     var rows = {};
-    var maxPct = Math.max.apply(null, CITIES.filter(function (c) { return !c.pilot; }).map(function (c) { return c.pct; }));
-    CITIES.filter(function (c) { return !c.pilot; }).forEach(function (c) {
+    var ranked = A.cities.filter(function (c) { return !c.pilot; });
+    var maxPct = Math.max.apply(null, ranked.map(function (c) { return Math.abs(c.pct); }));
+    ranked.forEach(function (c) {
       var row = document.createElement("div");
       row.className = "bar-row";
-      row.innerHTML = '<span class="city">' + c.name + '</span><div class="bar-track"><i data-w="' + (c.pct / maxPct * 100) + '"></i></div><span class="val">+' + c.pct.toFixed(1) + '%</span>';
+      var sign = c.pct >= 0 ? "+" : "";
+      var neg = c.pct < 0 ? ' style="color:var(--amber)"' : "";
+      var negBar = c.pct < 0 ? ' style="background:linear-gradient(90deg,var(--amber),#f8dba8)"' : "";
+      row.innerHTML = '<span class="city">' + c.name + '</span><div class="bar-track"><i' + negBar + ' data-w="' + (Math.abs(c.pct) / maxPct * 100) + '"></i></div><span class="val"' + neg + '>' + sign + c.pct.toFixed(1) + '%</span>';
       row.addEventListener("click", function () { select(c.id); });
       cmpWrap.appendChild(row);
       rows[c.id] = row;
     });
 
-    /* animate bars on scroll into view */
     if ("IntersectionObserver" in window) {
       var bio = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
@@ -457,17 +449,21 @@
             bio.disconnect();
           }
         });
-      }, { threshold: 0.3 });
+      }, { threshold: 0.15 });
       bio.observe(cmpWrap);
     } else {
       cmpWrap.querySelectorAll(".bar-track i").forEach(function (i) { i.style.width = i.getAttribute("data-w") + "%"; });
     }
 
+    /* coverage card count */
+    var cov = document.getElementById("coverage-title");
+    if (cov) cov.textContent = A.n_ranked + " cities across Europe, more with every pilot";
+
     /* detail panel */
     var $ = function (id) { return document.getElementById(id); };
     function select(id) {
-      var c = CITIES.filter(function (x) { return x.id === id; })[0];
-      CITIES.forEach(function (x) {
+      var c = A.cities.filter(function (x) { return x.id === id; })[0];
+      A.cities.forEach(function (x) {
         pins[x.id].classList.toggle("active", x.id === id);
         chips[x.id].classList.toggle("active", x.id === id);
         if (rows[x.id]) rows[x.id].classList.toggle("active", x.id === id);
@@ -479,20 +475,23 @@
         $("d-rank").textContent = "PILOT REGION";
         $("d-metric").textContent = "Bari / Puglia · evidence pack in preparation";
         $("d-change").textContent = "—";
+        $("d-change").classList.remove("negative");
         $("d-values").textContent = "trust-scored atlas numbers follow the pilot";
         $("d-agree-row").style.visibility = "hidden";
       } else {
-        $("d-rank").textContent = "RANK " + c.rank + " / 5";
+        var sign = c.pct >= 0 ? "+" : "";
+        $("d-rank").textContent = "RANK " + c.rank + " / " + A.n_ranked;
         $("d-metric").textContent = "Max 1-day precipitation · SSP2-4.5 · 2040–2059";
-        $("d-change").textContent = "+" + c.pct.toFixed(1) + "%";
-        $("d-values").textContent = c.hist.toFixed(2) + " mm → " + c.fut.toFixed(2) + " mm (+" + c.chg.toFixed(2) + " mm)";
+        $("d-change").textContent = sign + c.pct.toFixed(1) + "%";
+        $("d-change").classList.toggle("negative", c.pct < 0);
+        $("d-values").textContent = c.hist.toFixed(2) + " mm → " + c.fut.toFixed(2) + " mm (" + (c.chg >= 0 ? "+" : "") + c.chg.toFixed(2) + " mm)";
         $("d-agree-row").style.visibility = "visible";
         $("d-agree-val").textContent = c.agree + "%";
         $("d-agree-bar").style.width = c.agree + "%";
       }
     }
 
-    select("rome");
+    select(ranked[0].id);
   })();
   </script>
 </body>
