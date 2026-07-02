@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo Console — Arasense</title>
+  <meta name="description" content="A public preview of the Arasense console: map-first climate diagnostics, model-trust scoring, 2050 projections, portfolio ranking, and flood-pilot evidence.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://www.arasense.com/demo.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Demo Console — Arasense">
+  <meta property="og:description" content="Map-first climate diagnostics, model-trust scoring, and 2050 projections — previewed with real sample outputs.">
+  <meta property="og:url" content="https://www.arasense.com/demo.html">
+  <meta property="og:image" content="https://www.arasense.com/product-console.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .page-hero { padding: 72px 0 0; }
+    .page-hero h1 { max-width: 880px; margin: 0 0 22px; }
+
+    .workspace { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 16px; margin-top: 40px; }
+    .results { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 16px; margin-top: 16px; }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      padding: 7px 12px;
+      color: var(--accent-bright);
+      white-space: nowrap;
+    }
+
+    .map {
+      position: relative;
+      min-height: 400px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background:
+        linear-gradient(90deg, rgba(110, 231, 183, 0.05) 1px, transparent 1px),
+        linear-gradient(rgba(110, 231, 183, 0.05) 1px, transparent 1px),
+        radial-gradient(circle at 44% 48%, rgba(52, 211, 153, 0.2), transparent 12%),
+        linear-gradient(140deg, #0b211a, #071310);
+      background-size: 42px 42px, 42px 42px, auto, auto;
+    }
+    .map::before {
+      content: "";
+      position: absolute;
+      left: 18%; top: 16%;
+      width: 54%; height: 64%;
+      border: 2px solid rgba(110, 231, 183, 0.4);
+      border-radius: 42% 38% 48% 35%;
+      transform: rotate(-12deg);
+    }
+    .map::after {
+      content: "BOLOGNA PILOT REGION";
+      position: absolute;
+      left: 42%; top: 44%;
+      transform: translate(-50%, -50%);
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      padding: 9px 14px;
+      background: rgba(5, 13, 11, 0.85);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+    }
+    .flood-box {
+      position: absolute;
+      left: 38%; top: 40%;
+      width: 28%; height: 22%;
+      border: 2px dashed var(--amber);
+      background: rgba(244, 199, 125, 0.06);
+    }
+    .pin {
+      position: absolute;
+      left: 48%; top: 45%;
+      width: 14px; height: 14px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 10px rgba(52, 211, 153, 0.15);
+    }
+    .pin::after {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      border-radius: 999px;
+      border: 1px solid rgba(52, 211, 153, 0.5);
+      animation: ping 2.2s ease-out infinite;
+    }
+    @keyframes ping {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+
+    .toolbar { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-top: 14px; }
+    .tool {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+      background: rgba(255,255,255,0.02);
+    }
+    .tool strong {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .tool span { color: var(--muted); font-size: 14px; line-height: 1.55; }
+
+    .modules { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .module {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      background: rgba(255,255,255,0.02);
+    }
+    .module h3 { font-size: 16px; }
+    .module span { color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+
+    .json {
+      white-space: pre-wrap;
+      color: #bfe8da;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      background: #050f0c;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 18px;
+      overflow-x: auto;
+    }
+    .json .k { color: var(--faint); }
+    .json .v { color: var(--accent-bright); }
+
+    @media (max-width: 920px) {
+      .page-hero { padding-top: 48px; }
+      .workspace, .results, .modules, .toolbar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="nav-wrap">
+    <header class="nav">
+      <a class="brand" href="index.html">
+        <img src="brand-mark-classic.svg" alt="Arasense logo">
+        <strong>Arasense</strong>
+      </a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+      <nav class="nav-links" id="nav-links" aria-label="Main navigation">
+        <a href="demo.html">Demo</a>
+        <a href="case-studies.html">Case studies</a>
+        <a href="evidence.html">Evidence</a>
+        <a href="bari-puglia.html">Bari / Puglia</a>
+        <a class="nav-cta" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing">Request briefing</a>
+      </nav>
+    </header>
+  </div>
+
+  <div class="shell">
+    <main>
+      <section class="page-hero">
+        <span class="eyebrow">Product preview</span>
+        <h1>Click a map. Leave with <em>defensible evidence.</em></h1>
+        <p class="lead">
+          The Arasense console is map-first: one click sets a climate point, one drawn box scopes a flood-screening region, and every module downstream — trust scoring, projection, portfolio ranking — reads from those spatial inputs.
+        </p>
+        <div class="actions">
+          <a class="button" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing">Request a guided demo</a>
+          <a class="button-secondary" href="evidence.html">Open sample evidence</a>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="panel reveal">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow" style="margin-bottom:6px;">Spatial command map</span>
+              <h3 style="font-size:20px;">Bologna pilot geography</h3>
+            </div>
+            <span class="badge">PREVIEW</span>
+          </div>
+          <div class="map" aria-label="Stylized map preview of the Bologna pilot region">
+            <div class="flood-box"></div>
+            <div class="pin"></div>
+          </div>
+          <div class="toolbar">
+            <div class="tool">
+              <strong>Climate target</strong>
+              <span class="num">Lat 44.494 · Lon 11.343 · Radius 50 km</span>
+            </div>
+            <div class="tool">
+              <strong>Flood validation window</strong>
+              <span>Emilia-Romagna / Bologna, May 2023 event</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel reveal">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow" style="margin-bottom:6px;">Console modules</span>
+              <h3 style="font-size:20px;">From spatial input to structured evidence</h3>
+            </div>
+          </div>
+          <div class="modules">
+            <div class="module">
+              <h3>Climate diagnostic</h3>
+              <span>Aras Diagram scoring, model ranking, trust tiers, and time-series comparison.</span>
+            </div>
+            <div class="module">
+              <h3>Forward projection</h3>
+              <span>Trust-weighted 2040–2059 changes for rainfall, heat, drought, and scenario gaps.</span>
+            </div>
+            <div class="module">
+              <h3>Portfolio ranking</h3>
+              <span>Multi-location screening for exposure prioritization and advisory workflows.</span>
+            </div>
+            <div class="module">
+              <h3>Flood pilot</h3>
+              <span>Terrain graph, climate signal, GNN screening, and Sentinel-1 validation evidence.</span>
+            </div>
+          </div>
+          <div class="notice" style="margin-top:14px;">
+            <strong>Preview note.</strong> The panels on this page use representative sample outputs from existing Arasense reports.
+          </div>
+        </div>
+      </section>
+
+      <section class="results">
+        <div class="panel reveal">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow" style="margin-bottom:6px;">Operational summary</span>
+              <h3 style="font-size:20px;">Sample Bologna output</h3>
+            </div>
+            <span class="badge">MID-CENTURY</span>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><strong class="num">+14.2%</strong><span>Max 1-day precipitation change by mid-century.</span></div>
+            <div class="kpi"><strong class="num">32 / 34</strong><span>CMIP6 models passed skill screening.</span></div>
+            <div class="kpi"><strong class="num">78%</strong><span>Trusted-model weight agreeing on increase.</span></div>
+          </div>
+          <p style="margin-top:14px; font-size:14px;">
+            Bologna's flood-driving rainfall sample shows maximum 1-day precipitation rising from 40.23 mm to 45.97 mm under SSP2-4.5 — with uncertainty reported rather than hidden.
+          </p>
+        </div>
+
+        <div class="panel reveal">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow" style="margin-bottom:6px;">Model trust table</span>
+              <h3 style="font-size:20px;">Top contributing projection models</h3>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Model</th><th class="num">Weight</th><th class="num">Historical</th><th class="num">2050</th><th class="num">Change</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>CESM2</strong></td><td class="num">4%</td><td class="num">48.30 mm</td><td class="num">49.93 mm</td><td class="num">+1.64 mm</td></tr>
+                <tr><td><strong>CMCC-CM2-SR5</strong></td><td class="num">4%</td><td class="num">44.75 mm</td><td class="num">54.12 mm</td><td class="num">+9.37 mm</td></tr>
+                <tr><td><strong>ACCESS-CM2</strong></td><td class="num">4%</td><td class="num">48.58 mm</td><td class="num">49.80 mm</td><td class="num">+1.23 mm</td></tr>
+                <tr><td><strong>GFDL-ESM4</strong></td><td class="num">3%</td><td class="num">46.58 mm</td><td class="num">56.32 mm</td><td class="num">+9.74 mm</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="results">
+        <div class="panel reveal">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow" style="margin-bottom:6px;">Multi-hazard profile</span>
+              <h3 style="font-size:20px;">Rainfall, heat, and drought</h3>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Hazard</th><th class="num">Today</th><th class="num">2050</th><th class="num">Change</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>Max 1-day rainfall</strong></td><td class="num">44.20 mm</td><td class="num">48.95 mm</td><td class="num">+4.75 mm</td></tr>
+                <tr><td><strong>Max temperature</strong></td><td class="num">37.4 °C</td><td class="num">40.8 °C</td><td class="num">+3.4 K</td></tr>
+                <tr><td><strong>Dry-day frequency</strong></td><td class="num">62.8%</td><td class="num">64.2%</td><td class="num">+1.4 pts</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel reveal">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow" style="margin-bottom:6px;">Response console</span>
+              <h3 style="font-size:20px;">Structured sample JSON</h3>
+            </div>
+          </div>
+          <div class="json">{
+  <span class="k">"location"</span>: <span class="v">"Bologna"</span>,
+  <span class="k">"module"</span>: <span class="v">"trust-weighted projection"</span>,
+  <span class="k">"hazard"</span>: <span class="v">"maximum 1-day precipitation"</span>,
+  <span class="k">"historical_mm"</span>: <span class="v">40.23</span>,
+  <span class="k">"future_2050_mm"</span>: <span class="v">45.97</span>,
+  <span class="k">"change_pct"</span>: <span class="v">14.2</span>,
+  <span class="k">"trusted_models"</span>: <span class="v">"32 of 34"</span>,
+  <span class="k">"agreement_on_increase"</span>: <span class="v">"78%"</span>
+}</div>
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <section class="section">
+        <div class="notice reveal">
+          <strong>Validation note.</strong> Flood outputs are validation-stage screening evidence. They are not a replacement for hydraulic modelling, field validation, local calibration, or engineering-grade flood forecasting.
+        </div>
+        <div class="panel reveal" style="margin-top:36px; padding:40px; text-align:center;">
+          <h2 style="margin-bottom:12px;">See the console live, on <em>your</em> region</h2>
+          <div class="actions" style="justify-content:center; margin-top:20px;">
+            <a class="button" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing">Request a guided demo</a>
+            <a class="button-secondary" href="case-studies.html">Read the case studies</a>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="footer-grid">
+          <div>
+            <span class="eyebrow">Founder</span>
+            <h3>Aras Izzaddin</h3>
+            <p>Founder &amp; Lead Researcher — Politecnico di Bari</p>
+            <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
+          </div>
+          <div>
+            <span class="eyebrow">Explore</span>
+            <p><a href="case-studies.html">Case studies</a></p>
+            <p><a href="evidence.html">Sample evidence</a></p>
+            <p><a href="bari-puglia.html">Bari / Puglia regional brief</a></p>
+          </div>
+        </div>
+        <div class="footer-meta">
+          <span>© 2026 Arasense — www.arasense.com</span>
+          <span>Guided demos, pilot studies, and selected collaborations</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="site.js" defer></script>
+</body>
+</html>

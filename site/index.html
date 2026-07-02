@@ -3,554 +3,617 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Arasense | Climate Intelligence for Infrastructure and Risk</title>
-  <meta name="description" content="Arasense helps institutions and infrastructure teams interpret climate and flood risk with faster diagnostics, clearer evidence, and decision-ready analytics.">
+  <title>Arasense — Know which climate models to trust</title>
+  <meta name="description" content="Arasense scores every climate model against decades of observed weather at your location, then builds 2050 risk projections only from the models that earn trust. Transparent, auditable, defensible.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://www.arasense.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Arasense — Know which climate models to trust">
+  <meta property="og:description" content="Climate models disagree. Arasense measures which ones to believe — location by location — and turns them into defensible 2050 risk evidence.">
+  <meta property="og:url" content="https://www.arasense.com/">
+  <meta property="og:image" content="https://www.arasense.com/product-console.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
   <style>
-    :root {
-      --bg: #07141b;
-      --bg-soft: #0d212b;
-      --panel: rgba(10, 25, 33, 0.84);
-      --panel-strong: rgba(8, 20, 27, 0.96);
-      --line: rgba(129, 215, 193, 0.18);
-      --text: #edf8f3;
-      --muted: #9ebeb5;
-      --accent: #90efc9;
-      --accent-strong: #2fc38f;
-      --warm: #f4c77d;
-      --shadow: 0 26px 60px rgba(0, 0, 0, 0.28);
-      --max: 1180px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Segoe UI", system-ui, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 15% 15%, rgba(47, 195, 143, 0.17), transparent 26%),
-        radial-gradient(circle at 82% 12%, rgba(244, 199, 125, 0.14), transparent 20%),
-        linear-gradient(180deg, #031017 0%, var(--bg) 100%);
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 34px 34px;
-      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 88%);
-    }
-
-    a {
-      color: inherit;
-    }
-
-    .shell {
-      width: min(var(--max), calc(100% - 32px));
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .nav {
-      margin-top: 20px;
-      padding: 16px 18px;
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      background: rgba(7, 20, 26, 0.74);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      display: block;
-      flex: 0 0 auto;
-      filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.28));
-    }
-
-    .brand-copy strong,
-    .eyebrow,
-    .mini-label {
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-size: 12px;
-    }
-
-    .brand-copy strong,
-    .eyebrow {
-      color: var(--accent);
-    }
-
-    .brand-copy span,
-    .copy,
-    .card p,
-    .timeline p,
-    .footer-note,
-    .cta-note,
-    .signal-list li {
-      color: var(--muted);
-      line-height: 1.65;
-    }
-
-    .nav-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .nav-links a,
-    .button,
-    .button-secondary {
-      text-decoration: none;
-      border-radius: 999px;
-      padding: 11px 16px;
-      font-size: 14px;
-      border: 1px solid var(--line);
-    }
-
-    .nav-links a {
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .button,
-    .button-secondary {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 46px;
-    }
-
-    .button {
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      color: #04140f;
-      border-color: transparent;
-      font-weight: 700;
-    }
-
-    .button-secondary {
-      background: rgba(255, 255, 255, 0.03);
-    }
-
+    /* ---- page-specific: hero ---- */
     .hero {
-      margin-top: 22px;
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 20px;
+      padding: 92px 0 20px;
     }
-
-    .hero-card,
-    .hero-side,
-    .card,
-    .cta,
-    .footer-box {
-      border: 1px solid var(--line);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-    }
-
-    .hero-card {
-      padding: 34px;
-      background:
-        radial-gradient(circle at top right, rgba(144, 239, 201, 0.13), transparent 24%),
-        linear-gradient(160deg, rgba(10, 29, 37, 0.94), rgba(6, 18, 25, 0.98));
-    }
-
-    .hero-side,
-    .card,
-    .footer-box {
-      padding: 26px;
-      background: var(--panel);
-    }
-
-    h1,
-    h2,
-    h3 {
-      margin: 0;
-      line-height: 1.02;
-      letter-spacing: -0.03em;
-    }
-
-    h1 {
-      font-size: clamp(44px, 7vw, 82px);
-      max-width: 760px;
-      margin: 14px 0 18px;
-    }
-
-    h2 {
-      font-size: clamp(28px, 4vw, 42px);
-      margin-bottom: 14px;
-    }
-
-    h3 {
-      font-size: 22px;
-      margin-bottom: 12px;
-    }
-
-    .lead {
-      max-width: 720px;
-      font-size: 18px;
-      line-height: 1.75;
-      color: var(--muted);
-      margin: 0 0 24px;
-    }
-
-    .hero-actions {
+    .hero h1 { max-width: 900px; margin: 0 0 26px; }
+    .hero .lead { margin-bottom: 34px; }
+    .trust-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 26px;
+      gap: 10px 28px;
+      margin-top: 40px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      letter-spacing: 0.06em;
+      color: var(--faint);
     }
-
-    .stats,
-    .grid,
-    .signal-grid,
-    .path-grid,
-    .footer-grid,
-    .audience-grid,
-    .proof-grid {
-      display: grid;
-      gap: 16px;
-    }
-
-    .stats {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .stat,
-    .mini-panel {
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .stat strong {
-      display: block;
-      font-size: 28px;
+    .trust-row span::before {
+      content: "◆";
       color: var(--accent);
-      margin-bottom: 6px;
+      font-size: 8px;
+      margin-right: 9px;
+      vertical-align: 2px;
     }
 
-    .section {
-      margin-top: 20px;
+    /* ---- page-specific: live trust visual ---- */
+    .lab {
+      margin-top: 64px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(175deg, #0b1c16, #071310 65%);
+      overflow: hidden;
     }
-
-    .grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+    .lab-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 22px 26px 0;
     }
-
-    .copy {
-      font-size: 16px;
-      max-width: 760px;
-      margin: 0 0 10px;
+    .lab-head .eyebrow { margin-bottom: 6px; }
+    .lab-title { font-family: var(--font-ui); font-weight: 600; font-size: 17px; }
+    .lab-readout {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 20px;
     }
-
-    .signal-grid,
-    .path-grid,
-    .audience-grid,
-    .proof-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      margin-top: 16px;
-    }
-
-    .mini-label {
-      color: var(--warm);
-      display: block;
-      margin-bottom: 10px;
-    }
-
-    .signal-list {
-      margin: 0;
-      padding-left: 18px;
-    }
-
-    .timeline {
-      border-left: 2px solid rgba(144, 239, 201, 0.18);
-      padding-left: 16px;
-      margin-top: 14px;
-    }
-
-    .timeline strong {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .cta {
-      margin-top: 20px;
-      padding: 30px;
-      background:
-        radial-gradient(circle at top left, rgba(244, 199, 125, 0.16), transparent 26%),
-        linear-gradient(150deg, rgba(14, 35, 44, 0.96), rgba(7, 18, 24, 0.98));
-    }
-
-    .cta-row {
+    .lab-readout b { color: var(--accent-bright); font-weight: 500; }
+    .lab svg { display: block; width: 100%; height: auto; }
+    .lab-controls {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      justify-content: space-between;
-      gap: 18px;
+      gap: 8px;
+      padding: 0 26px 22px;
+    }
+    .lab-step {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .lab-step:hover { color: var(--text); }
+    .lab-step.active { color: var(--ink); background: var(--accent); border-color: transparent; }
+    .lab-note {
+      margin-left: auto;
+      font-size: 12.5px;
+      color: var(--faint);
+    }
+    .lab-note a { color: var(--accent-bright); }
+
+    .dot { transition: transform 1s cubic-bezier(.22,1,.36,1); cursor: pointer; }
+    .dot circle {
+      fill: rgba(52, 211, 153, 0.28);
+      stroke: var(--accent);
+      stroke-width: 1.2;
+      transition: fill .4s, stroke .4s, opacity .6s;
+    }
+    .dot:hover circle { fill: rgba(125, 240, 195, 0.55); }
+    .dot.rejected circle { fill: rgba(240, 143, 132, 0.12); stroke: var(--red); stroke-dasharray: 3 3; }
+    .stage-0 .dot.rejected circle { stroke-dasharray: none; fill: rgba(52,211,153,.28); stroke: var(--accent); }
+
+    .axis line, .axis path { stroke: rgba(110,231,183,.16); }
+    .axis .zero { stroke: rgba(110,231,183,.4); }
+    .axis text { fill: var(--faint); font-family: var(--font-mono); font-size: 11px; }
+
+    .verdict { opacity: 0; transition: opacity .8s .3s; }
+    .stage-2 .verdict { opacity: 1; }
+    .band { fill: rgba(52, 211, 153, 0.07); stroke: rgba(52,211,153,.18); stroke-dasharray: 4 4; }
+    .meanline { stroke: var(--accent-bright); stroke-width: 2; }
+    .verdict-label { fill: var(--accent-bright); font-family: var(--font-mono); }
+    .verdict-sub { fill: var(--muted); font-family: var(--font-ui); font-size: 12px; }
+    .rejected-label { fill: var(--red); font-family: var(--font-mono); font-size: 11px; opacity: 0; transition: opacity .6s .8s; }
+    .stage-1 .rejected-label, .stage-2 .rejected-label { opacity: .9; }
+
+    .lab-tip {
+      position: absolute;
+      pointer-events: none;
+      background: #0d241c;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--muted);
+      transform: translate(-50%, calc(-100% - 12px));
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .15s;
+      z-index: 5;
+    }
+    .lab-tip b { color: var(--text); font-weight: 500; }
+    .lab-tip .up { color: var(--accent-bright); }
+    .lab-tip .down { color: var(--red); }
+
+    /* ---- problem section ---- */
+    .disagree {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 16px;
+    }
+    .disagree .card strong.big { font-size: 40px; }
+    .disagree .card:nth-child(1) .big { color: var(--red); }
+    .disagree .card:nth-child(2) .big { color: var(--accent-bright); }
+    .disagree .card:nth-child(3) .big { color: var(--amber); }
+
+    /* ---- proof section ---- */
+    .console-shot {
+      display: block;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-top: 20px;
     }
 
-    .footer-grid {
-      grid-template-columns: 1.1fr 0.9fr;
-      margin: 20px 0 32px;
-    }
-
-    .footer-note {
-      margin-top: 14px;
-      font-size: 14px;
-    }
-
-    code {
-      font-family: Consolas, "Courier New", monospace;
-      color: var(--accent);
-    }
-
-    @media (max-width: 960px) {
-      .hero,
-      .grid,
-      .signal-grid,
-      .path-grid,
-      .audience-grid,
-      .proof-grid,
-      .footer-grid,
-      .stats {
-        grid-template-columns: 1fr;
-      }
-
-      .nav {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      h1 {
-        font-size: clamp(38px, 10vw, 62px);
-      }
+    @media (max-width: 920px) {
+      .hero { padding-top: 56px; }
+      .disagree { grid-template-columns: 1fr; }
+      .lab-note { margin-left: 0; }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
+  <div class="nav-wrap">
     <header class="nav">
-      <div class="brand">
-        <img class="brand-mark" src="brand-mark-classic.svg" alt="Arasense logo">
-        <div class="brand-copy">
-          <strong>Arasense</strong>
-          <span>Climate intelligence and flood analytics</span>
-        </div>
-      </div>
-      <nav class="nav-links" aria-label="Main navigation">
-        <a href="#platform">Platform</a>
-        <a href="#audience">Who It Serves</a>
-        <a href="#approach">Approach</a>
-        <a href="#launch-path">Use Cases</a>
-        <a href="#contact">Contact</a>
+      <a class="brand" href="index.html">
+        <img src="brand-mark-classic.svg" alt="Arasense logo">
+        <strong>Arasense</strong>
+      </a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+      <nav class="nav-links" id="nav-links" aria-label="Main navigation">
+        <a href="demo.html">Demo</a>
+        <a href="case-studies.html">Case studies</a>
+        <a href="evidence.html">Evidence</a>
+        <a href="bari-puglia.html">Bari / Puglia</a>
+        <a class="nav-cta" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing">Request briefing</a>
       </nav>
     </header>
+  </div>
 
+  <div class="shell">
     <main>
+      <!-- ============ HERO ============ -->
       <section class="hero">
-        <div class="hero-card">
-          <span class="eyebrow">Climate analytics for decision makers</span>
-          <h1>Turn climate and flood complexity into defensible risk decisions.</h1>
+        <span class="eyebrow">Model-trust intelligence for climate risk</span>
+        <h1>Climate models disagree.<br><em>Know which to trust.</em></h1>
+        <p class="lead">
+          Every 2050 risk number depends on which climate models you believe. Arasense scores each model against decades of observed weather at your location, then builds projections only from the models that earn their place — transparently, so a technical reviewer can audit every step.
+        </p>
+        <div class="actions">
+          <a class="button" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing">Request a briefing</a>
+          <a class="button-secondary" href="#lab">See it work ↓</a>
+        </div>
+        <div class="trust-row">
+          <span>Peer-reviewed method — the Aras Diagram</span>
+          <span>CMIP6 × ERA5-Land</span>
+          <span>Politecnico di Bari</span>
+        </div>
+
+        <!-- ============ LIVE TRUST VISUAL ============ -->
+        <div class="lab" id="lab" style="position:relative;">
+          <div class="lab-head">
+            <div>
+              <span class="eyebrow" style="margin-bottom:6px;">Live — real output, real numbers</span>
+              <div class="lab-title">Watch one projection earn its number: Bologna, max 1-day rainfall, 2050</div>
+            </div>
+            <div class="lab-readout" id="lab-readout"></div>
+          </div>
+          <svg id="lab-svg" viewBox="0 0 920 430" role="img" aria-label="Animated chart: 34 CMIP6 climate models are scored for trust; 2 are rejected; the remaining 32 are weighted to produce a +14.2% projected increase in Bologna's maximum 1-day rainfall by mid-century."></svg>
+          <div class="lab-controls">
+            <button class="lab-step" data-stage="0">01 · 34 models</button>
+            <button class="lab-step" data-stage="1">02 · Score trust</button>
+            <button class="lab-step" data-stage="2">03 · Project 2050</button>
+            <button class="lab-step" id="lab-replay">↺ Replay</button>
+            <span class="lab-note">Hover any model. Full detail in the <a href="case-studies.html">Bologna case study</a>.</span>
+          </div>
+          <div class="lab-tip" id="lab-tip"></div>
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ PROBLEM ============ -->
+      <section class="section">
+        <div class="section-head reveal">
+          <span class="eyebrow">The problem</span>
+          <h2>Same city. Same data. <em>Opposite answers.</em></h2>
           <p class="lead">
-            Arasense helps infrastructure, public-sector, and advisory teams move from raw climate uncertainty to structured evidence. The platform combines model diagnostics, flood intelligence, and applied research into a clearer decision workflow.
+            For Bologna's worst rain day by mid-century, credible CMIP6 models span a huge range. Pick models blindly — or average everything — and your risk number is an accident.
           </p>
-          <div class="hero-actions">
-            <a class="button" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20demo%20request">Request a demo</a>
-            <a class="button-secondary" href="#platform">Explore the platform</a>
+        </div>
+        <div class="disagree">
+          <div class="card reveal">
+            <span class="label">MIROC-ES2L says</span>
+            <strong class="big num">−5.3 mm</strong>
+            <p>Bologna's most extreme rain day gets <em>lighter</em> by 2050.</p>
           </div>
-          <div class="stats">
-            <div class="stat">
-              <strong>2D</strong>
-              <span>Aras Diagram diagnostics for interpretable model error decomposition.</span>
-            </div>
-            <div class="stat">
-              <strong>GNN</strong>
-              <span>Topology-aware flood analytics designed for faster scenario testing.</span>
-            </div>
-            <div class="stat">
-              <strong>Focus</strong>
-              <span>Research-grade methods shaped into decision-ready client workflows.</span>
-            </div>
+          <div class="card reveal">
+            <span class="label">MIROC6 says</span>
+            <strong class="big num">+17.7 mm</strong>
+            <p>The same rain day gets over 40% <em>heavier</em>. Both models sit in the same CMIP6 ensemble.</p>
+          </div>
+          <div class="card reveal">
+            <span class="label">The question that matters</span>
+            <strong class="big">Which earned trust?</strong>
+            <p>Arasense answers it with measurement — each model's skill against 20 years of observed local climate.</p>
           </div>
         </div>
+      </section>
 
-        <aside class="hero-side">
-          <span class="mini-label">Why teams look at Arasense</span>
-          <h3>Built for clarity, speed, and technical credibility</h3>
-          <p>
-            Many climate tools are either technically opaque or too slow to support real operating decisions. Arasense is built to make diagnostics more interpretable and flood intelligence more actionable.
+      <hr class="hr">
+
+      <!-- ============ HOW IT WORKS ============ -->
+      <section class="section" id="how">
+        <div class="section-head reveal">
+          <span class="eyebrow">How it works</span>
+          <h2>Trust first. <em>Then</em> project.</h2>
+        </div>
+        <div class="steps">
+          <article class="step reveal">
+            <h3>Score model trust, location by location</h3>
+            <p>Every CMIP6 model is compared against observed climate behaviour at your exact location and decomposed with the Aras Diagram — bias, variability, and phase alignment, not a single opaque score. Models that fail screening are rejected, and you see why.</p>
+          </article>
+          <article class="step reveal">
+            <h3>Project hazards with the models that earned it</h3>
+            <p>Skill-weighted models estimate mid-century change for flood-driving rainfall, heat, and drought — with uncertainty ranges and model agreement reported, never hidden.</p>
+          </article>
+          <article class="step reveal">
+            <h3>Export evidence a reviewer can audit</h3>
+            <p>Each report names the trusted models, the rejected models, the weights, the spread, and the interpretation — in language a technical reviewer, auditor, or council can interrogate.</p>
+          </article>
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ PROOF ============ -->
+      <section class="section" id="proof">
+        <div class="section-head reveal">
+          <span class="eyebrow">Proof</span>
+          <h2>Evidence from real Arasense workflows</h2>
+        </div>
+        <div class="kpis reveal">
+          <div class="kpi">
+            <strong><span data-count="14.2" data-decimals="1" data-prefix="+" data-suffix="%">+14.2%</span></strong>
+            <span>Bologna max 1-day rainfall by mid-century — trust-weighted, 78% model agreement.</span>
+          </div>
+          <div class="kpi">
+            <strong><span class="num">32 / 34</span></strong>
+            <span>CMIP6 models passing skill screening in the full Bologna projection.</span>
+          </div>
+          <div class="kpi">
+            <strong><span data-count="19" data-decimals="0" data-prefix="+" data-suffix="%">+19%</span></strong>
+            <span>Rome — highest worsening rainfall signal in a five-city Italian portfolio ranking.</span>
+          </div>
+        </div>
+        <div class="grid-3" style="margin-top:16px;">
+          <a class="card reveal" href="case-studies.html">
+            <span class="label">Case study</span>
+            <h3>Bologna flood-driving rainfall</h3>
+            <p>Full ensemble screening, per-model weights, uncertainty range, and interpretation.</p>
+          </a>
+          <a class="card reveal" href="evidence.html">
+            <span class="label">Sample evidence</span>
+            <h3>Reports &amp; scenario comparison</h3>
+            <p>SSP2-4.5 vs SSP5-8.5, multi-hazard profiles, portfolio ranking, validation notes.</p>
+          </a>
+          <a class="card reveal" href="bari-puglia.html">
+            <span class="label">Regional brief</span>
+            <h3>Bari / Puglia application</h3>
+            <p>The workflow applied to Puglia for adaptation, infrastructure, and advisory work.</p>
+          </a>
+        </div>
+        <a href="demo.html" class="reveal" style="text-decoration:none; display:block;">
+          <img class="console-shot" src="product-console.jpg" alt="Arasense console: map-first climate-risk workflow with model-trust scoring and projections" loading="lazy">
+        </a>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ FOUNDATION ============ -->
+      <section class="section" id="foundation">
+        <div class="section-head reveal">
+          <span class="eyebrow">Scientific foundation</span>
+          <h2>Research-grounded, <em>honestly</em> framed</h2>
+        </div>
+        <div class="grid-3">
+          <div class="card reveal">
+            <span class="label">Method</span>
+            <h3>The Aras Diagram</h3>
+            <p>A peer-reviewed framework decomposing model error into bias, variability, and phase alignment — supporting clearer judgement than any single aggregate score.</p>
+          </div>
+          <div class="card reveal">
+            <span class="label">Data</span>
+            <h3>ERA5-Land × CMIP6</h3>
+            <p>Diagnostics and projections built on established reanalysis and the full CMIP6 ensemble, with each model's skill made explicit.</p>
+          </div>
+          <div class="card reveal">
+            <span class="label">Earth observation</span>
+            <h3>Sentinel-1 validation</h3>
+            <p>Flood-screening pilots are compared against satellite-derived evidence windows, documenting where the workflow performs and where it remains uncertain.</p>
+          </div>
+        </div>
+        <div class="notice reveal" style="margin-top:16px;">
+          <strong>Validation note.</strong> Flood outputs are validation-stage screening evidence — not a replacement for hydraulic modelling, field validation, local calibration, or engineering-grade flood forecasting. We publish what works and what doesn't.
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ WHO ============ -->
+      <section class="section" id="institutions">
+        <div class="section-head reveal">
+          <span class="eyebrow">Who it's for</span>
+          <h2>Teams that must <em>defend</em> their climate numbers</h2>
+        </div>
+        <div class="grid-2">
+          <div class="card reveal">
+            <span class="label">Public &amp; infrastructure</span>
+            <h3>Authorities, utilities, asset owners</h3>
+            <p>Resilience planning, regional screening, and adaptation decisions backed by evidence that survives technical review — not dashboard scores nobody can explain.</p>
+          </div>
+          <div class="card reveal">
+            <span class="label">Advisory &amp; finance</span>
+            <h3>Consultancies, analysts, risk teams</h3>
+            <p>Client deliverables and due-diligence work strengthened with transparent model-trust reasoning and clearly communicated uncertainty.</p>
+          </div>
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ CTA ============ -->
+      <section class="section" id="contact">
+        <div class="panel reveal" style="padding:48px; text-align:center;">
+          <span class="eyebrow" style="justify-content:center;">Contact</span>
+          <h2 style="max-width:640px; margin:0 auto 16px;">Start with one location. <em>Leave with evidence.</em></h2>
+          <p style="max-width:520px; margin:0 auto 28px;">
+            Pilot engagements begin with a geography, an asset class, or a single decision question — and produce a defensible evidence pack.
           </p>
-          <div class="timeline">
-            <strong>Interpret model performance</strong>
-            <p>Understand bias, variability, and alignment instead of relying on a single headline metric.</p>
-          </div>
-          <div class="timeline">
-            <strong>Screen flood-sensitive exposure faster</strong>
-            <p>Use graph-based flood logic to support rapid exploratory analysis before heavier engineering workflows.</p>
-          </div>
-          <div class="timeline">
-            <strong>Bridge research and delivery</strong>
-            <p>Translate peer-reviewed methods into applied tools for institutions, infrastructure, and advisory use cases.</p>
-          </div>
-        </aside>
-      </section>
-
-      <section class="section card" id="platform">
-        <span class="eyebrow">Platform</span>
-        <h2>What the platform is built to deliver</h2>
-        <p class="copy">
-          Arasense combines climate model evaluation, bias-aware interpretation, and flood-risk analytics into one technical stack. The objective is not another generic dashboard. The objective is a more defensible basis for planning, screening, and risk communication.
-        </p>
-        <div class="grid">
-          <article class="mini-panel">
-            <h3>Climate Intelligence</h3>
-            <p>Compare climate model behavior through structured signal decomposition instead of oversimplified ranking alone.</p>
-          </article>
-          <article class="mini-panel">
-            <h3>Flood Analytics</h3>
-            <p>Use graph-based hydrological structure to approximate flood propagation faster for early-stage assessment and scenario review.</p>
-          </article>
-          <article class="mini-panel">
-            <h3>Decision Support</h3>
-            <p>Support institutions, infrastructure owners, planners, and advisory teams with clearer evidence for adaptation and risk decisions.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section card" id="audience">
-        <span class="eyebrow">Who It Serves</span>
-        <h2>Designed for teams that need better climate evidence, not more noise</h2>
-        <p class="copy">
-          Arasense is best suited to organizations that need climate and flood interpretation to support planning, prioritization, advisory work, or investment-facing communication.
-        </p>
-        <div class="audience-grid">
-          <div class="mini-panel">
-            <span class="mini-label">Public and infrastructure</span>
-            <h3>Authorities, utilities, and asset owners</h3>
-            <p>Support resilience planning, regional screening, asset prioritization, and early-stage adaptation decisions with more structured evidence.</p>
-          </div>
-          <div class="mini-panel">
-            <span class="mini-label">Advisory and finance</span>
-            <h3>Consultancies, analysts, and risk teams</h3>
-            <p>Strengthen client deliverables, due diligence workflows, and comparative climate-risk assessments with clearer interpretability.</p>
+          <div class="actions" style="justify-content:center;">
+            <a class="button" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing">Request a briefing</a>
+            <a class="button-secondary" href="demo.html">Explore the demo console</a>
           </div>
         </div>
       </section>
 
-      <section class="section card" id="approach">
-        <span class="eyebrow">Approach</span>
-        <h2>Why the approach is credible</h2>
-        <div class="signal-grid">
-          <div class="mini-panel">
-            <span class="mini-label">Scientific basis</span>
-            <ul class="signal-list">
-              <li>Aras Diagram framework for structured climate-model evaluation.</li>
-              <li>Regional and multi-model assessment logic grounded in research practice.</li>
-              <li>Focus on bias, variability, and alignment rather than presentation-only summary scores.</li>
-            </ul>
-          </div>
-          <div class="mini-panel">
-            <span class="mini-label">Technical basis</span>
-            <ul class="signal-list">
-              <li>FastAPI backend for deployable diagnostics and API workflows.</li>
-              <li>Graph neural network pipeline for flood inference and scenario support.</li>
-              <li>Cloud-ready deployment path for private client access and production workflows.</li>
-            </ul>
-          </div>
-        </div>
-        <div class="proof-grid">
-          <div class="mini-panel">
-            <span class="mini-label">What clients should expect</span>
-            <h3>Faster first-pass insight</h3>
-            <p>Arasense is aimed at shortening the path from complex data to a first defensible interpretation, especially where teams need to compare scenarios or communicate uncertainty clearly.</p>
-          </div>
-          <div class="mini-panel">
-            <span class="mini-label">How work can start</span>
-            <h3>Pilot-led engagement</h3>
-            <p>Early collaborations can begin with a geography, asset class, or decision question, then expand into repeatable workflows as the value is demonstrated.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section card" id="launch-path">
-        <span class="eyebrow">Use Cases</span>
-        <h2>Where Arasense can add value first</h2>
-        <p class="copy">
-          The strongest early fit is with teams that need a sharper view of climate-model reliability or a faster first-pass understanding of flood-sensitive territory.
-        </p>
-        <div class="path-grid">
-          <div class="mini-panel">
-            <span class="mini-label">Near-term applications</span>
-            <h3>Advisory and screening workflows</h3>
-            <p>Climate risk screening, regional comparison, infrastructure prioritization, and client-facing evidence packs are natural early use cases.</p>
-          </div>
-          <div class="mini-panel">
-            <span class="mini-label">Delivery model</span>
-            <h3>Custom pilot, then platform access</h3>
-            <p>Start with focused pilots or decision-support engagements, then expand into live product access and private API workflows as needs mature.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="cta" id="contact">
-        <div class="cta-row">
+      <!-- ============ FOOTER ============ -->
+      <footer class="footer">
+        <div class="footer-grid">
           <div>
-            <span class="eyebrow">Contact</span>
-            <h2>Discuss a pilot, collaboration, or client use case.</h2>
-            <p class="cta-note">If you want to test Arasense against a concrete geography, asset class, or planning question, get in touch.</p>
+            <span class="eyebrow">Founder</span>
+            <h3>Aras Izzaddin</h3>
+            <p>Founder &amp; Lead Researcher — Politecnico di Bari</p>
+            <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
+            <p style="margin-top:14px;">Arasense sits at the intersection of climate science, risk interpretation, and deployable analytical tooling.</p>
           </div>
-          <div class="hero-actions">
-            <a class="button" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20client%20inquiry">Email Arasense</a>
-            <a class="button-secondary" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20partnership%20inquiry">Partnership inquiry</a>
+          <div>
+            <span class="eyebrow">Explore</span>
+            <p><a href="demo.html">Demo console</a></p>
+            <p><a href="case-studies.html">Case studies</a></p>
+            <p><a href="evidence.html">Sample evidence</a></p>
+            <p><a href="bari-puglia.html">Bari / Puglia regional brief</a></p>
           </div>
         </div>
-      </section>
-
-      <section class="footer-grid">
-        <div class="footer-box">
-          <span class="eyebrow">Founder</span>
-          <h3>Aras Izzaddin</h3>
-          <p>Technical University of Bari (Poliba)</p>
-          <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
-          <p class="footer-note">Arasense is positioned at the intersection of climate science, risk interpretation, and deployable analytical tooling.</p>
-          <p class="footer-note">For early conversations, the most useful outreach includes your geography of interest, asset context, and the specific planning or risk question you want to test.</p>
+        <div class="footer-meta">
+          <span>© 2026 Arasense — www.arasense.com</span>
+          <span>Guided demos, pilot studies, and selected collaborations</span>
         </div>
-        <div class="footer-box">
-          <span class="eyebrow">Current availability</span>
-          <h3><code>www.arasense.com</code></h3>
-          <p>Public landing page live for outreach and early client conversations.</p>
-          <p>Private backend and advanced workflows can be activated as product access is expanded.</p>
-          <p class="footer-note">Current access is best framed as pilot, collaboration, or tailored analytical support rather than a mass-market self-serve product.</p>
-        </div>
-      </section>
+      </footer>
     </main>
   </div>
+
+  <script src="site.js" defer></script>
+  <script>
+  /* ================================================================
+     Live trust visual — real per-model output from the Bologna
+     rx1day projection (docs/projections/bologna-flood-driving-
+     rainfall-mid-century.json). No synthetic numbers.
+     ================================================================ */
+  (function () {
+    "use strict";
+
+    var MODELS = [{"n":"ACCESS-CM2","w":0.0352,"h":48.6,"f":49.8,"c":1.2},{"n":"ACCESS-ESM1-5","w":0.0291,"h":38.2,"f":45.7,"c":7.5},{"n":"BCC-CSM2-MR","w":0.0295,"h":40.5,"f":50.4,"c":9.9},{"n":"CESM2-WACCM","w":0.0324,"h":43.6,"f":48.5,"c":5.0},{"n":"CESM2","w":0.0366,"h":48.3,"f":49.9,"c":1.6},{"n":"CMCC-CM2-SR5","w":0.0352,"h":44.7,"f":54.1,"c":9.4},{"n":"CMCC-ESM2","w":0.0345,"h":42.7,"f":42.1,"c":-0.6},{"n":"CNRM-CM6-1","w":0.0273,"h":38.4,"f":40.6,"c":2.2},{"n":"CNRM-ESM2-1","w":0.0288,"h":39.4,"f":45.5,"c":6.1},{"n":"CanESM5","w":0.0303,"h":32.3,"f":29.1,"c":-3.2},{"n":"EC-Earth3","w":0.0292,"h":46.1,"f":41.2,"c":-4.9},{"n":"FGOALS-g3","w":0.0328,"h":30.4,"f":36.0,"c":5.6},{"n":"GFDL-CM4","w":0.0331,"h":39.5,"f":51.1,"c":11.6},{"n":"GFDL-ESM4","w":0.0345,"h":46.6,"f":56.3,"c":9.7},{"n":"GISS-E2-1-G","w":0.0335,"h":35.6,"f":35.0,"c":-0.6},{"n":"HadGEM3-GC31-LL","w":0.0292,"h":40.2,"f":49.2,"c":9.0},{"n":"IITM-ESM","w":0.0251,"h":41.4,"f":43.2,"c":1.8},{"n":"INM-CM4-8","w":0.0272,"h":44.2,"f":39.6,"c":-4.6},{"n":"INM-CM5-0","w":0.0274,"h":40.1,"f":49.2,"c":9.1},{"n":"IPSL-CM6A-LR","w":0.0303,"h":33.0,"f":44.4,"c":11.4},{"n":"KACE-1-0-G","w":0.0297,"h":20.4,"f":31.9,"c":11.4},{"n":"KIOST-ESM","w":0.028,"h":42.9,"f":53.2,"c":10.3},{"n":"MIROC-ES2L","w":0.0291,"h":40.9,"f":35.5,"c":-5.3},{"n":"MIROC6","w":0.0248,"h":37.0,"f":54.7,"c":17.7},{"n":"MPI-ESM1-2-HR","w":0.0323,"h":41.7,"f":49.3,"c":7.6},{"n":"MPI-ESM1-2-LR","w":0.0299,"h":35.0,"f":40.2,"c":5.2},{"n":"MRI-ESM2-0","w":0.0279,"h":50.8,"f":52.9,"c":2.1},{"n":"NESM3","w":0.0276,"h":44.0,"f":41.8,"c":-2.2},{"n":"NorESM2-LM","w":0.0325,"h":39.6,"f":55.7,"c":16.1},{"n":"NorESM2-MM","w":0.0271,"h":37.3,"f":48.0,"c":10.7},{"n":"TaiESM1","w":0.0282,"h":44.8,"f":55.7,"c":11.0},{"n":"UKESM1-0-LL","w":0.0323,"h":36.6,"f":48.8,"c":12.2}];
+    /* The projection screened 34 models; 2 were rejected and carry no
+       published per-model detail, so they render as anonymous dots. */
+    var N_SCORED = 34;
+    var MEAN_CHANGE = 5.73, BAND_LO = -0.26, BAND_HI = 11.73;
+    var PCT = 14.2, AGREE = 78, BASELINE = 40.2;
+
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.getElementById("lab-svg");
+    var tip = document.getElementById("lab-tip");
+    var readout = document.getElementById("lab-readout");
+    var lab = document.getElementById("lab");
+    if (!svg) return;
+
+    var W = 920, H = 430;
+    var X0 = 64, X1 = 856;            /* plot x-range */
+    var DMIN = -8, DMAX = 19;          /* change (mm) domain */
+    var SWARM_CY = 210;                /* beeswarm centre line */
+    var REJECT_Y = 385;                /* rejected tray */
+
+    function x(v) { return X0 + (v - DMIN) / (DMAX - DMIN) * (X1 - X0); }
+    function r(w) { return 6 + (w - 0.0248) / (0.0366 - 0.0248) * 4.5; }
+
+    function el(tag, attrs, parent) {
+      var e = document.createElementNS(svgNS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      (parent || svg).appendChild(e);
+      return e;
+    }
+
+    /* ---- axis ---- */
+    var axis = el("g", { "class": "axis" });
+    [-5, 0, 5, 10, 15].forEach(function (t) {
+      el("line", { x1: x(t), y1: 60, x2: x(t), y2: 330, "class": t === 0 ? "zero" : "" }, axis);
+      var lbl = el("text", { x: x(t), y: 350, "text-anchor": "middle" }, axis);
+      lbl.textContent = (t > 0 ? "+" : "") + t + " mm";
+    });
+    var axisTitle = el("text", { x: X1, y: 374, "text-anchor": "end" }, axis);
+    axisTitle.textContent = "change in max 1-day rainfall, 1995-2014 → 2040-2059";
+    axisTitle.setAttribute("fill", "var(--faint)");
+    axisTitle.setAttribute("font-family", "var(--font-mono)");
+    axisTitle.setAttribute("font-size", "11");
+
+    /* ---- verdict layer (stage 2) ---- */
+    var verdict = el("g", { "class": "verdict" });
+    el("rect", { x: x(BAND_LO), y: 60, width: x(BAND_HI) - x(BAND_LO), height: 270, "class": "band", rx: 6 }, verdict);
+    el("line", { x1: x(MEAN_CHANGE), y1: 52, x2: x(MEAN_CHANGE), y2: 330, "class": "meanline" }, verdict);
+    var vLabel = el("text", { x: x(MEAN_CHANGE) + 10, y: 78, "class": "verdict-label", "font-size": "30" }, verdict);
+    vLabel.textContent = "+" + PCT + "%";
+    var vSub1 = el("text", { x: x(MEAN_CHANGE) + 10, y: 98, "class": "verdict-sub" }, verdict);
+    vSub1.textContent = "trust-weighted change: " + BASELINE + " → 46.0 mm";
+    var vSub2 = el("text", { x: x(MEAN_CHANGE) + 10, y: 116, "class": "verdict-sub" }, verdict);
+    vSub2.textContent = AGREE + "% of trusted-model weight agrees on increase";
+
+    /* rejected tray label */
+    var rejLabel = el("text", { x: X0, y: REJECT_Y + 4, "class": "rejected-label" });
+    rejLabel.textContent = "rejected by skill screening → 2 of 34";
+
+    /* ---- beeswarm placement (deterministic greedy) ---- */
+    var placed = [];
+    function swarmY(cx, rad) {
+      for (var row = 0; row < 40; row++) {
+        var offsets = row === 0 ? [0] : [row * 13, -row * 13];
+        for (var oi = 0; oi < offsets.length; oi++) {
+          var cy = SWARM_CY + offsets[oi];
+          if (cy < 72 || cy > 322) continue;
+          var ok = placed.every(function (p) {
+            var dx = p.x - cx, dy = p.y - cy;
+            return dx * dx + dy * dy > (p.r + rad + 2.5) * (p.r + rad + 2.5);
+          });
+          if (ok) { placed.push({ x: cx, y: cy, r: rad }); return cy; }
+        }
+      }
+      return SWARM_CY;
+    }
+
+    /* grid positions for stage 0 (34 dots: 32 named + 2 anonymous) */
+    function gridPos(i) {
+      var cols = 12, gapX = 62, gapY = 74;
+      var gx = X0 + 40 + (i % cols) * gapX;
+      var gy = 92 + Math.floor(i / cols) * gapY;
+      return [gx, gy];
+    }
+
+    var sorted = MODELS.slice().sort(function (a, b) { return a.c - b.c; });
+    var dots = [];
+
+    sorted.forEach(function (m, i) {
+      var rad = r(m.w);
+      m._grid = gridPos(i);
+      m._swarm = [x(m.c), swarmY(x(m.c), rad)];
+      var g = el("g", { "class": "dot" });
+      el("circle", { r: rad }, g);
+      g.__m = m;
+      dots.push(g);
+      g.addEventListener("mousemove", function (ev) {
+        var pct = (m.c / BASELINE * 100);
+        tip.innerHTML = "<b>" + m.n + "</b><br>weight " + (m.w * 100).toFixed(1) + "%<br>" +
+          m.h.toFixed(1) + " → " + m.f.toFixed(1) + " mm<br>" +
+          "<span class='" + (m.c >= 0 ? "up" : "down") + "'>" + (m.c >= 0 ? "+" : "") + m.c.toFixed(1) +
+          " mm (" + (pct >= 0 ? "+" : "") + pct.toFixed(0) + "%)</span>";
+        var box = lab.getBoundingClientRect();
+        tip.style.left = (ev.clientX - box.left) + "px";
+        tip.style.top = (ev.clientY - box.top) + "px";
+        tip.style.opacity = 1;
+      });
+      g.addEventListener("mouseleave", function () { tip.style.opacity = 0; });
+    });
+
+    /* two anonymous rejected dots */
+    var rejectedDots = [0, 1].map(function (i) {
+      var g = el("g", { "class": "dot rejected" });
+      el("circle", { r: 7 }, g);
+      g.__grid = gridPos(32 + i);
+      g.__tray = [X0 + 305 + i * 32, REJECT_Y];
+      g.addEventListener("mousemove", function (ev) {
+        tip.innerHTML = "<b>Rejected model</b><br>failed Aras Diagram skill<br>screening for this location";
+        var box = lab.getBoundingClientRect();
+        tip.style.left = (ev.clientX - box.left) + "px";
+        tip.style.top = (ev.clientY - box.top) + "px";
+        tip.style.opacity = 1;
+      });
+      g.addEventListener("mouseleave", function () { tip.style.opacity = 0; });
+      return g;
+    });
+
+    /* ---- stages ---- */
+    var READOUTS = [
+      "<b>34</b> CMIP6 models, one question: what happens to Bologna's worst rain day?",
+      "each model scored against <b>20 years</b> of observed climate — <b>2 rejected</b>",
+      "trust-weighted answer: <b>+14.2%</b> · spread and agreement reported, not hidden"
+    ];
+
+    function setStage(s) {
+      lab.className = "lab stage-" + s;
+      lab.style.position = "relative";
+      readout.innerHTML = READOUTS[s];
+      document.querySelectorAll(".lab-step[data-stage]").forEach(function (b) {
+        b.classList.toggle("active", +b.getAttribute("data-stage") === s);
+      });
+      dots.forEach(function (g, i) {
+        var m = g.__m;
+        var p = s === 0 ? m._grid : m._swarm;
+        g.style.transitionDelay = (s === 1 ? i * 18 : 0) + "ms";
+        g.style.transform = "translate(" + p[0] + "px," + p[1] + "px)";
+      });
+      rejectedDots.forEach(function (g, i) {
+        var p = s === 0 ? g.__grid : g.__tray;
+        g.style.transitionDelay = (s === 1 ? 500 + i * 120 : 0) + "ms";
+        g.style.transform = "translate(" + p[0] + "px," + p[1] + "px)";
+      });
+    }
+
+    var timers = [];
+    function play() {
+      timers.forEach(clearTimeout);
+      timers = [];
+      setStage(0);
+      timers.push(setTimeout(function () { setStage(1); }, 1400));
+      timers.push(setTimeout(function () { setStage(2); }, 3600));
+    }
+
+    document.querySelectorAll(".lab-step[data-stage]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        timers.forEach(clearTimeout);
+        setStage(+b.getAttribute("data-stage"));
+      });
+    });
+    document.getElementById("lab-replay").addEventListener("click", play);
+
+    setStage(0);
+
+    /* autoplay on first scroll into view */
+    if ("IntersectionObserver" in window) {
+      var seen = false;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting && !seen) { seen = true; play(); io.disconnect(); }
+        });
+      }, { threshold: 0.35 });
+      io.observe(lab);
+    } else {
+      play();
+    }
+  })();
+  </script>
 </body>
 </html>
