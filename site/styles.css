@@ -2,7 +2,40 @@
    Arasense design system — shared across all public pages
    Palette: deep green-black, emerald accent, amber signal
    Type: Instrument Serif (display) / Inter (UI) / JetBrains Mono (data)
+   Fonts are self-hosted (see fonts/) — no third-party requests.
    ============================================================ */
+
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/instrument-serif-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/instrument-serif-400-italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/inter-var.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("fonts/jetbrains-mono-var.woff2") format("woff2");
+}
 
 :root {
   --bg0: #050d0b;
@@ -446,6 +479,39 @@ tr.highlight td { background: rgba(52, 211, 153, 0.06); color: var(--text); }
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
   * { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+}
+
+/* ---------------- Print ---------------- */
+/* Evidence pages get printed for meetings — make paper look deliberate. */
+
+@media print {
+  body { background: #fff; color: #111; }
+  body::before { display: none; }
+
+  .nav-wrap, .nav-toggle, .button, .button-secondary, .actions, .footer-meta { display: none !important; }
+
+  .shell { width: 100%; }
+
+  h1, h2, h3, p, .lead, .kpi span, td, th { color: #111 !important; }
+  .eyebrow, .label, .card .label { color: #555 !important; }
+  .kpi strong, .card .big { color: #0a7a52 !important; }
+
+  .panel, .card, .kpi, .kpis, .notice, .step {
+    background: #fff !important;
+    border-color: #ccc !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  table { color: #111; }
+  th, td { border-bottom-color: #ccc; }
+  tr.highlight td { background: #f0f7f3 !important; }
+
+  .reveal { opacity: 1 !important; transform: none !important; }
+
+  a { color: #0a7a52; text-decoration: none; }
+
+  .footer { border-top-color: #ccc; }
 }
 
 /* ---------------- Responsive ---------------- */

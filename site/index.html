@@ -11,12 +11,33 @@
   <meta property="og:title" content="Arasense — Know which climate models to trust">
   <meta property="og:description" content="Climate models disagree. Arasense measures which ones to believe — location by location — and turns them into defensible 2050 risk evidence.">
   <meta property="og:url" content="https://www.arasense.com/">
-  <meta property="og:image" content="https://www.arasense.com/product-console.jpg">
+  <meta property="og:image" content="https://www.arasense.com/og/home.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:image" content="https://www.arasense.com/og/home.png">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preload" href="fonts/instrument-serif-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Arasense",
+    "url": "https://www.arasense.com/",
+    "logo": "https://www.arasense.com/brand-mark-classic.svg",
+    "description": "Model-trust intelligence for climate risk: Arasense scores climate models against observed local climate and builds trust-weighted 2050 hazard projections.",
+    "founder": {
+      "@type": "Person",
+      "name": "Aras Izzaddin",
+      "affiliation": { "@type": "CollegeOrUniversity", "name": "Politecnico di Bari" }
+    },
+    "email": "arasbotan.izzaddin@poliba.it",
+    "knowsAbout": ["climate risk", "climate model evaluation", "CMIP6", "flood risk screening", "Aras Diagram"]
+  }
+  </script>
   <style>
     /* ---- page-specific: hero ---- */
     .hero {
@@ -177,6 +198,7 @@
       </a>
       <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
       <nav class="nav-links" id="nav-links" aria-label="Main navigation">
+        <a href="atlas.html">Atlas</a>
         <a href="demo.html">Demo</a>
         <a href="case-studies.html">Case studies</a>
         <a href="evidence.html">Evidence</a>
@@ -302,6 +324,14 @@
             <span>Rome — highest worsening rainfall signal in a five-city Italian portfolio ranking.</span>
           </div>
         </div>
+        <a class="card reveal" href="atlas.html" style="margin-top:16px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; border-color:var(--line-strong);">
+          <div style="max-width:640px;">
+            <span class="label">New — interactive</span>
+            <h3 style="font-size:24px; margin-bottom:6px;">The Climate Model Trust Atlas</h3>
+            <p style="margin:0;">Click any analyzed city on the map and see its trust-weighted 2050 signal, model agreement, and how the number was earned.</p>
+          </div>
+          <span class="button" style="pointer-events:none;">Open the Atlas →</span>
+        </a>
         <div class="grid-3" style="margin-top:16px;">
           <a class="card reveal" href="case-studies.html">
             <span class="label">Case study</span>
