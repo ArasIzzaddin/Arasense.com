@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face {
+    font-family: "Instrument Serif";
+    src: url("../site/fonts/instrument-serif-400.woff2") format("woff2");
+    font-weight: 400; font-style: normal;
+  }
+  @font-face {
+    font-family: "Instrument Serif";
+    src: url("../site/fonts/instrument-serif-400-italic.woff2") format("woff2");
+    font-weight: 400; font-style: italic;
+  }
+  @font-face {
+    font-family: "Inter";
+    src: url("../site/fonts/inter-var.woff2") format("woff2");
+    font-weight: 100 900;
+  }
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("../site/fonts/jetbrains-mono-var.woff2") format("woff2");
+    font-weight: 100 800;
+  }
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: #050d0b;
+    color: #eaf6f0;
+    font-family: "Inter", sans-serif;
+    position: relative;
+  }
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(110,231,183,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110,231,183,.045) 1px, transparent 1px);
+    background-size: 46px 46px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.8), transparent 80%);
+  }
+  .glow-a {
+    position: absolute; right: -320px; top: -380px;
+    width: 900px; height: 900px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(52,211,153,.16), rgba(52,211,153,.05) 40%, transparent 65%);
+  }
+  .glow-b {
+    position: absolute; left: -300px; bottom: -420px;
+    width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(244,199,125,.07), transparent 60%);
+  }
+  .frame {
+    position: absolute; inset: 26px;
+    border: 1px solid rgba(110,231,183,.16);
+    border-radius: 20px;
+  }
+  .content { position: absolute; inset: 26px; padding: 54px 62px; display: flex; flex-direction: column; }
+  .brand { display: flex; align-items: center; gap: 15px; }
+  .brand img { width: 46px; height: 46px; }
+  .brand strong {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 21px; letter-spacing: .16em; font-weight: 600;
+  }
+  .eyebrow {
+    margin-top: 52px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 17px; letter-spacing: .24em;
+    color: #34d399;
+  }
+  h1 {
+    margin-top: 20px;
+    font-family: "Instrument Serif", serif;
+    font-weight: 400;
+    font-size: 88px; line-height: 1.02; letter-spacing: -0.015em;
+    max-width: 980px;
+  }
+  h1 em { font-style: italic; color: #7df0c3; text-shadow: 0 0 44px rgba(52,211,153,.45); }
+  .motif { position: absolute; right: 88px; top: 96px; }
+  .foot {
+    margin-top: auto;
+    display: flex; gap: 34px; align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 16.5px; letter-spacing: .06em;
+    color: #5f8073;
+  }
+  .foot b { color: #93b4a7; font-weight: 500; }
+  .foot .gem { color: #34d399; font-size: 11px; }
+
+  /* motifs */
+  .dots span {
+    display: inline-block; border-radius: 50%;
+    background: rgba(52,211,153,.3); border: 1.6px solid #34d399;
+    margin-left: 10px;
+  }
+  .dots span.r { background: rgba(240,143,132,.15); border-color: #f08f84; border-style: dashed; }
+  .cols { display: flex; align-items: flex-end; gap: 7px; height: 120px; }
+  .cols i { width: 15px; border-radius: 3px; background: #34d399; opacity: .8; }
+  .cols i.neg { background: #f08f84; opacity: .65; }
+  .term {
+    font-family: "JetBrains Mono", monospace; font-size: 19px;
+    background: rgba(5,15,12,.85); border: 1px solid rgba(110,231,183,.25);
+    border-radius: 12px; padding: 18px 24px; color: #eaf6f0;
+  }
+  .term .ps { color: #34d399; margin-right: 10px; }
+  .term .caret { display: inline-block; width: 10px; height: 20px; background: #7df0c3; vertical-align: -3px; margin-left: 4px; }
+  .band { width: 330px; }
+  .band .track { position: relative; height: 54px; border: 1px solid rgba(110,231,183,.2); border-radius: 12px; background: rgba(5,15,12,.7); }
+  .band .fill { position: absolute; top: 8px; bottom: 8px; left: 12%; width: 80%; background: rgba(52,211,153,.14); border: 1.5px dashed rgba(52,211,153,.4); border-radius: 8px; }
+  .band .mean { position: absolute; top: 0; bottom: 0; left: 52%; width: 3px; background: #7df0c3; }
+  .band .lbl { font-family: "JetBrains Mono", monospace; font-size: 14px; color: #7df0c3; margin-top: 10px; text-align: center; }
+  .pulse { position: relative; width: 150px; height: 150px; }
+  .pulse .core { position: absolute; left: 62px; top: 62px; width: 26px; height: 26px; border-radius: 50%; background: #f4c77d; box-shadow: 0 0 34px rgba(244,199,125,.8); }
+  .pulse .ring { position: absolute; border-radius: 50%; border: 1.6px solid rgba(244,199,125,.4); }
+  .pulse .r1 { inset: 28px; }
+  .pulse .r2 { inset: 6px; border-color: rgba(244,199,125,.2); }
+  .pulse .lbl { position: absolute; top: 156px; left: 50%; transform: translateX(-50%); font-family: "JetBrains Mono", monospace; font-size: 14px; color: #f4c77d; white-space: nowrap; letter-spacing: .1em; }
+</style>
+</head>
+<body>
+  <div class="glow-a"></div>
+  <div class="glow-b"></div>
+  <div class="grid"></div>
+  <div class="frame"></div>
+  <div class="content">
+    <div class="brand">
+      <img src="../site/brand-mark-classic.svg" alt="">
+      <strong>ARASENSE</strong>
+    </div>
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1 id="title"></h1>
+    <div class="motif" id="motif"></div>
+    <div class="foot" id="foot"></div>
+  </div>
+<script>
+  var V = {
+    home: {
+      eyebrow: "MODEL-TRUST INTELLIGENCE FOR CLIMATE RISK",
+      title: "Climate models disagree.<br><em>Know which to trust.</em>",
+      foot: "<b>www.arasense.com</b><span class='gem'>◆</span>CMIP6 × ERA5-Land<span class='gem'>◆</span>peer-reviewed method",
+      motif: "<div class='dots'>" +
+        [16,26,20,34,24].map(function(s,i){ return "<span style='width:"+s+"px;height:"+s+"px;" + (i===1?"":"") + "'></span>"; }).join("") +
+        "<span class='r' style='width:20px;height:20px;'></span></div>"
+    },
+    atlas: {
+      eyebrow: "THE CLIMATE MODEL TRUST ATLAS — EUROPE",
+      title: "24 cities. One method.<br><em>Every number earned.</em>",
+      foot: "<b>www.arasense.com/atlas</b><span class='gem'>◆</span>trust-weighted 2050 signals<span class='gem'>◆</span>agreement shown for every city",
+      motif: "<div class='dots'>" +
+        [18,24,18,30,18,22].map(function(s){ return "<span style='width:"+s+"px;height:"+s+"px;'></span>"; }).join("") + "</div>"
+    },
+    demo: {
+      eyebrow: "LIVE SESSION REPLAY",
+      title: "Watch a projection<br><em>earn its number.</em>",
+      foot: "<b>www.arasense.com/demo</b><span class='gem'>◆</span>real atlas outputs<span class='gem'>◆</span>eight cities, one command",
+      motif: "<div class='term'><span class='ps'>$</span>arasense project --city bologna<span class='caret'></span></div>",
+      motifWide: true
+    },
+    "case-studies": {
+      eyebrow: "CASE STUDIES",
+      title: "Every number here<br>can be <em>interrogated.</em>",
+      foot: "<b>www.arasense.com/case-studies</b><span class='gem'>◆</span>32 trusted models, every vote shown",
+      motif: "<div class='cols'>" +
+        [-30,-18,-10,14,22,30,38,46,58,70,86,104].map(function(h){
+          return "<i class='" + (h<0?"neg":"") + "' style='height:" + Math.abs(h) + "px'></i>";
+        }).join("") + "</div>"
+    },
+    evidence: {
+      eyebrow: "SAMPLE EVIDENCE",
+      title: "Reports that show<br>their <em>working.</em>",
+      foot: "<b>www.arasense.com/evidence</b><span class='gem'>◆</span>uncertainty drawn to scale, not hidden",
+      motif: "<div class='band'><div class='track'><div class='fill'></div><div class='mean'></div></div><div class='lbl'>−0.26 … +5.73 … +11.73 mm</div></div>"
+    },
+    "bari-puglia": {
+      eyebrow: "REGIONAL APPLICATION — PILOT ACTIVE",
+      title: "Climate-risk evidence,<br><em>made in Puglia.</em>",
+      foot: "<b>www.arasense.com/bari-puglia</b><span class='gem'>◆</span>41.13°N · 16.87°E<span class='gem'>◆</span>evidence pack available now",
+      motif: "<div class='pulse'><div class='ring r1'></div><div class='ring r2'></div><div class='core'></div><div class='lbl'>BARI · PILOT</div></div>"
+    }
+  };
+  var id = (location.search.replace("?v=", "") || "home");
+  var v = V[id] || V.home;
+  document.getElementById("eyebrow").textContent = v.eyebrow;
+  document.getElementById("title").innerHTML = v.title;
+  document.getElementById("foot").innerHTML = v.foot;
+  var m = document.getElementById("motif");
+  m.innerHTML = v.motif;
+  if (v.motifWide) { m.style.right = "62px"; m.style.top = "70px"; }
+</script>
+</body>
+</html>
