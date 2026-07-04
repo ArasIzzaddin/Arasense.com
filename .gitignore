@@ -18,6 +18,9 @@ Thumbs.db
 *.log
 uvicorn.out.log
 uvicorn.err.log
+env.cloudrun.yaml
+cloudflare-worker/wrangler.toml
+*service-account*.json
 
 # Local run artifacts
 full_*.json
@@ -30,3 +33,6 @@ dry_check.json
 cdd_check.json
 heat_check.json
 hazard_profile.json
+
+# wrangler local cache (any depth)
+**/.wrangler/
