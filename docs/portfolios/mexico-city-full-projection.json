@@ -1,0 +1,1011 @@
+{
+ "project_id": "valid-shine-488311-d6",
+ "input": {
+  "lat": 19.433,
+  "lon": -99.133,
+  "radius_km": 50.0,
+  "variable": "precipitation",
+  "metric": "rx1day",
+  "scenario": "ssp245",
+  "hist_start": "1995-01-01",
+  "hist_end": "2014-12-31",
+  "future_start": "2040-01-01",
+  "future_end": "2059-12-31",
+  "fast_mode": false
+ },
+ "scenario": "ssp245",
+ "windows": {
+  "historical": [
+   "1995-01-01",
+   "2014-12-31"
+  ],
+  "future": [
+   "2040-01-01",
+   "2059-12-31"
+  ]
+ },
+ "n_models_scored": 34,
+ "trust_models": [
+  {
+   "name": "ACCESS-CM2",
+   "kge": 0.7637133440997282,
+   "correlation": 0.829919608281439,
+   "bias_ratio_minus_1": -0.15533995784154997,
+   "variability_ratio_minus_1": -0.05266442449300812,
+   "error_total_pct": 23.62866559002718,
+   "trust_tier": "trusted",
+   "error_attribution": {
+    "bias": 0.43220319609919655,
+    "variability": 0.04967710668384054,
+    "phase": 0.5181196972169629,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 1.1737133440997283,
+   "weight": 0.035558308492447656
+  },
+  {
+   "name": "ACCESS-ESM1-5",
+   "kge": 0.5978800465082978,
+   "correlation": 0.7405511277732281,
+   "bias_ratio_minus_1": -0.26900269444670655,
+   "variability_ratio_minus_1": -0.14840582898537635,
+   "error_total_pct": 40.21199534917022,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.44750924619404564,
+    "variability": 0.1362042537539557,
+    "phase": 0.41628650005199874,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0078800465082978,
+   "weight": 0.030534295104750392
+  },
+  {
+   "name": "BCC-CSM2-MR",
+   "kge": 0.2532187251926874,
+   "correlation": 0.4102101705730788,
+   "bias_ratio_minus_1": -0.08321939858239524,
+   "variability_ratio_minus_1": 0.4504495101639945,
+   "error_total_pct": 74.67812748073126,
+   "trust_tier": "weak",
+   "error_attribution": {
+    "bias": 0.01241830454924886,
+    "variability": 0.3638357739663218,
+    "phase": 0.6237459214844294,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 0.6632187251926873,
+   "weight": 0.020092585763739637
+  },
+  {
+   "name": "CESM2-WACCM",
+   "kge": 0.6746014830470786,
+   "correlation": 0.8117526130050992,
+   "bias_ratio_minus_1": -0.2455458417448796,
+   "variability_ratio_minus_1": -0.10076882318729008,
+   "error_total_pct": 32.53985169529215,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.5694217205132881,
+    "variability": 0.09590058027413356,
+    "phase": 0.3346776992125783,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0846014830470785,
+   "weight": 0.032858614345171254
+  },
+  {
+   "name": "CESM2",
+   "kge": 0.6530638894053691,
+   "correlation": 0.7657013737759861,
+   "bias_ratio_minus_1": -0.23540657316040026,
+   "variability_ratio_minus_1": -0.10026247501905627,
+   "error_total_pct": 34.69361105946309,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.46040301581286996,
+    "variability": 0.083517566478223,
+    "phase": 0.456079417708907,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.063063889405369,
+   "weight": 0.0322061207846722
+  },
+  {
+   "name": "CMCC-CM2-SR5",
+   "kge": 0.5718356640728873,
+   "correlation": 0.7783289349884545,
+   "bias_ratio_minus_1": -0.28110500421198203,
+   "variability_ratio_minus_1": -0.2348757418371129,
+   "error_total_pct": 42.81643359271127,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.4310386108023349,
+    "variability": 0.3009229773014311,
+    "phase": 0.2680384118962339,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 0.9818356640728874,
+   "weight": 0.02974526583300436
+  },
+  {
+   "name": "CMCC-ESM2",
+   "kge": 0.5721768963473595,
+   "correlation": 0.6328738464925396,
+   "bias_ratio_minus_1": -0.207210798820592,
+   "variability_ratio_minus_1": -0.07290185376193636,
+   "error_total_pct": 42.782310365264046,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.2345828735796408,
+    "variability": 0.029036794806396985,
+    "phase": 0.7363803316139622,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 0.9821768963473594,
+   "weight": 0.029755603657435046
+  },
+  {
+   "name": "CNRM-CM6-1",
+   "kge": 0.6206668100215111,
+   "correlation": 0.7478505568056324,
+   "bias_ratio_minus_1": -0.26421084092080205,
+   "variability_ratio_minus_1": -0.10250345777557612,
+   "error_total_pct": 37.93331899784888,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.48513161792222786,
+    "variability": 0.07301890991842902,
+    "phase": 0.44184947215934306,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.030666810021511,
+   "weight": 0.031224632971845856
+  },
+  {
+   "name": "CNRM-ESM2-1",
+   "kge": 0.6717414904683867,
+   "correlation": 0.8173703286800811,
+   "bias_ratio_minus_1": -0.24242918887941745,
+   "variability_ratio_minus_1": -0.1250125618198521,
+   "error_total_pct": 32.82585095316132,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.5454285040235034,
+    "variability": 0.14503583633786385,
+    "phase": 0.30953565963863267,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0817414904683866,
+   "weight": 0.032771969255115434
+  },
+  {
+   "name": "CanESM5",
+   "kge": 0.679800004645206,
+   "correlation": 0.824139382923489,
+   "bias_ratio_minus_1": -0.19869176137361633,
+   "variability_ratio_minus_1": -0.17922796754114245,
+   "error_total_pct": 32.01999953547941,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.38504995495079003,
+    "variability": 0.3133061480639713,
+    "phase": 0.30164389698523886,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0898000046452059,
+   "weight": 0.03301610649231273
+  },
+  {
+   "name": "EC-Earth3-Veg-LR",
+   "kge": 0.6266000886065219,
+   "correlation": 0.756947448482006,
+   "bias_ratio_minus_1": -0.22762418772498205,
+   "variability_ratio_minus_1": -0.168938391704764,
+   "error_total_pct": 37.3399911393478,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.37161085962809237,
+    "variability": 0.20469549733760084,
+    "phase": 0.42369364303430673,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 1.0366000886065219,
+   "weight": 0.03140438499678281
+  },
+  {
+   "name": "EC-Earth3",
+   "kge": 0.6761844074556707,
+   "correlation": 0.7634736440950767,
+   "bias_ratio_minus_1": -0.21561744009407713,
+   "variability_ratio_minus_1": -0.049203053405756814,
+   "error_total_pct": 32.38155925443294,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.44337607716822036,
+    "variability": 0.02308812126746704,
+    "phase": 0.5335358015643126,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 1.0861844074556706,
+   "weight": 0.03290656993392203
+  },
+  {
+   "name": "FGOALS-g3",
+   "kge": 0.6909044164806397,
+   "correlation": 0.8474111614362805,
+   "bias_ratio_minus_1": -0.23558586230319567,
+   "variability_ratio_minus_1": -0.1294450755332497,
+   "error_total_pct": 30.909558351936028,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.5809153463309555,
+    "variability": 0.17538218121073787,
+    "phase": 0.2437024724583066,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.1009044164806396,
+   "weight": 0.03335252091893272
+  },
+  {
+   "name": "GFDL-CM4",
+   "kge": 0.6883125838388131,
+   "correlation": 0.8240916789979672,
+   "bias_ratio_minus_1": -0.21274450854485927,
+   "variability_ratio_minus_1": -0.14472415858967347,
+   "error_total_pct": 31.168741616118684,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.4658844122738496,
+    "variability": 0.2155974049431789,
+    "phase": 0.31851818278297145,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.098312583838813,
+   "weight": 0.03327399988557976
+  },
+  {
+   "name": "GFDL-ESM4",
+   "kge": 0.6081230500556121,
+   "correlation": 0.7622865103295401,
+   "bias_ratio_minus_1": -0.25507315106659945,
+   "variability_ratio_minus_1": -0.17887852954271566,
+   "error_total_pct": 39.18769499443879,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.4236722861074018,
+    "variability": 0.20836126904963823,
+    "phase": 0.36796644484295987,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.018123050055612,
+   "weight": 0.03084461268089076
+  },
+  {
+   "name": "GISS-E2-1-G",
+   "kge": 0.6603103126208666,
+   "correlation": 0.8421813020195708,
+   "bias_ratio_minus_1": -0.2623153714764599,
+   "variability_ratio_minus_1": -0.14721748594057127,
+   "error_total_pct": 33.96896873791334,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.5963246426735966,
+    "variability": 0.18782529048246935,
+    "phase": 0.21585006684393393,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0703103126208666,
+   "weight": 0.03242565526765206
+  },
+  {
+   "name": "HadGEM3-GC31-LL",
+   "kge": 0.6824159902317999,
+   "correlation": 0.8101652574206215,
+   "bias_ratio_minus_1": -0.22928804992657936,
+   "variability_ratio_minus_1": -0.11067684460236393,
+   "error_total_pct": 31.758400976820017,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.5212494213701698,
+    "variability": 0.1214496541246991,
+    "phase": 0.35730092450513107,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0924159902317998,
+   "weight": 0.033095359252765286
+  },
+  {
+   "name": "HadGEM3-GC31-MM",
+   "kge": 0.6777542985737126,
+   "correlation": 0.8266422304759803,
+   "bias_ratio_minus_1": -0.24463403603200284,
+   "variability_ratio_minus_1": -0.11808287025673758,
+   "error_total_pct": 32.224570142628735,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.5763144320307665,
+    "variability": 0.1342763528013308,
+    "phase": 0.28940921516790274,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0877542985737125,
+   "weight": 0.03295413067177639
+  },
+  {
+   "name": "IITM-ESM",
+   "kge": 0.6375937141300381,
+   "correlation": 0.6596723438276506,
+   "bias_ratio_minus_1": -0.12343344685653157,
+   "variability_ratio_minus_1": 0.016720845654797145,
+   "error_total_pct": 36.2406285869962,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.11600434863554217,
+    "variability": 0.002128751820835947,
+    "phase": 0.8818668995436219,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 1.047593714130038,
+   "weight": 0.03173744308952817
+  },
+  {
+   "name": "INM-CM4-8",
+   "kge": 0.6460336715515026,
+   "correlation": 0.811510241546977,
+   "bias_ratio_minus_1": -0.22308188654558092,
+   "variability_ratio_minus_1": -0.1999956112740856,
+   "error_total_pct": 35.39663284484974,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.3971958615711424,
+    "variability": 0.3192397991547889,
+    "phase": 0.28356433927406866,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0560336715515026,
+   "weight": 0.03199313636520252
+  },
+  {
+   "name": "INM-CM5-0",
+   "kge": 0.6095030062888971,
+   "correlation": 0.8045678752174202,
+   "bias_ratio_minus_1": -0.2619185268527413,
+   "variability_ratio_minus_1": -0.21375891090587362,
+   "error_total_pct": 39.0496993711103,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.44988037585360496,
+    "variability": 0.2996491614297155,
+    "phase": 0.2504704627166796,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.019503006288897,
+   "weight": 0.03088641923416537
+  },
+  {
+   "name": "IPSL-CM6A-LR",
+   "kge": 0.7137129309631318,
+   "correlation": 0.8309675688873738,
+   "bias_ratio_minus_1": -0.19675593091836074,
+   "variability_ratio_minus_1": -0.12114217588571319,
+   "error_total_pct": 28.628706903686822,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.472337253677484,
+    "variability": 0.1790553390289384,
+    "phase": 0.34860740729357764,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.1237129309631317,
+   "weight": 0.034043517743924084
+  },
+  {
+   "name": "KACE-1-0-G",
+   "kge": 0.5588370399038496,
+   "correlation": 0.6903537613579358,
+   "bias_ratio_minus_1": -0.27472684771846156,
+   "variability_ratio_minus_1": -0.15254220202388813,
+   "error_total_pct": 44.11629600961505,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.3877967113783301,
+    "variability": 0.11955890768387768,
+    "phase": 0.4926443809377922,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 0.9688370399038495,
+   "weight": 0.02935146517417777
+  },
+  {
+   "name": "KIOST-ESM",
+   "kge": -1.4834769962795482,
+   "correlation": 0.07202514114359261,
+   "bias_ratio_minus_1": 0.30395278815645277,
+   "variability_ratio_minus_1": 2.2834476904348033,
+   "error_total_pct": 248.34769962795482,
+   "trust_tier": "reject",
+   "error_attribution": {
+    "bias": 0.014979315902754498,
+    "variability": 0.8453992362285042,
+    "phase": 0.13962144786874123,
+    "dominant": "variability",
+    "dominant_label": "variability / amplitude mismatch (\u03b1)"
+   },
+   "skill": 0.0,
+   "weight": 0.0
+  },
+  {
+   "name": "MIROC-ES2L",
+   "kge": 0.6042283204790395,
+   "correlation": 0.7842764783941905,
+   "bias_ratio_minus_1": -0.29338423524725854,
+   "variability_ratio_minus_1": -0.15499766141852234,
+   "error_total_pct": 39.57716795209604,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.5495207796928631,
+    "variability": 0.15337722059432352,
+    "phase": 0.29710199971281337,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0142283204790394,
+   "weight": 0.030726619649223685
+  },
+  {
+   "name": "MIROC6",
+   "kge": 0.6219358567614737,
+   "correlation": 0.7735582686648773,
+   "bias_ratio_minus_1": -0.23775494124732133,
+   "variability_ratio_minus_1": -0.18742792381370454,
+   "error_total_pct": 37.806414323852636,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.39548327714268444,
+    "variability": 0.24577494628056412,
+    "phase": 0.3587417765767514,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0319358567614736,
+   "weight": 0.03126307945939562
+  },
+  {
+   "name": "MPI-ESM1-2-HR",
+   "kge": 0.6899479749920479,
+   "correlation": 0.7921712196743085,
+   "bias_ratio_minus_1": -0.2088812794030035,
+   "variability_ratio_minus_1": -0.09647832603663675,
+   "error_total_pct": 31.00520250079521,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.4538683444742144,
+    "variability": 0.09682563967601682,
+    "phase": 0.44930601584976876,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0999479749920478,
+   "weight": 0.03332354498398464
+  },
+  {
+   "name": "MPI-ESM1-2-LR",
+   "kge": 0.36078953927698054,
+   "correlation": 0.4649748489443833,
+   "bias_ratio_minus_1": -0.14944708546983954,
+   "variability_ratio_minus_1": 0.3162335679212751,
+   "error_total_pct": 63.92104607230195,
+   "trust_tier": "weak",
+   "error_attribution": {
+    "bias": 0.05466220573063084,
+    "variability": 0.24475309301380022,
+    "phase": 0.700584701255569,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 0.7707895392769806,
+   "weight": 0.02335150431588999
+  },
+  {
+   "name": "MRI-ESM2-0",
+   "kge": -0.7258449232137201,
+   "correlation": 0.22980658018660374,
+   "bias_ratio_minus_1": -0.07367466882866847,
+   "variability_ratio_minus_1": 1.5426972607195824,
+   "error_total_pct": 172.584492321372,
+   "trust_tier": "reject",
+   "error_attribution": {
+    "bias": 0.0018223544264035366,
+    "variability": 0.7990204193095797,
+    "phase": 0.19915722626401672,
+    "dominant": "variability",
+    "dominant_label": "variability / amplitude mismatch (\u03b1)"
+   },
+   "skill": 0.0,
+   "weight": 0.0
+  },
+  {
+   "name": "NESM3",
+   "kge": 0.5730547290447008,
+   "correlation": 0.6122302856013128,
+   "bias_ratio_minus_1": -0.13768505287077037,
+   "variability_ratio_minus_1": 0.11384085032284097,
+   "error_total_pct": 42.694527095529914,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.10399900312491987,
+    "variability": 0.07109709354071797,
+    "phase": 0.8249039033343621,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 0.9830547290447007,
+   "weight": 0.02978219809466602
+  },
+  {
+   "name": "NorESM2-LM",
+   "kge": 0.5696041548038695,
+   "correlation": 0.6283827457517603,
+   "bias_ratio_minus_1": -0.20788950227202596,
+   "variability_ratio_minus_1": -0.06263509201861228,
+   "error_total_pct": 43.039584519613044,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.2333076495649468,
+    "variability": 0.021178700027497003,
+    "phase": 0.7455136504075562,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 0.9796041548038694,
+   "weight": 0.029677660999685915
+  },
+  {
+   "name": "NorESM2-MM",
+   "kge": 0.6522927943347252,
+   "correlation": 0.6981468021008962,
+   "bias_ratio_minus_1": -0.1693568790352069,
+   "variability_ratio_minus_1": 0.03321438412935618,
+   "error_total_pct": 34.77072056652747,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.2372347485472153,
+    "variability": 0.009124835133904913,
+    "phase": 0.7536404163188798,
+    "dominant": "phase",
+    "dominant_label": "timing / correlation mismatch (r)"
+   },
+   "skill": 1.0622927943347251,
+   "weight": 0.03218276002411103
+  },
+  {
+   "name": "TaiESM1",
+   "kge": 0.6467206109251467,
+   "correlation": 0.7918425804343054,
+   "bias_ratio_minus_1": -0.22987312158632123,
+   "variability_ratio_minus_1": -0.16921927607992338,
+   "error_total_pct": 35.327938907485326,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.42338920955314124,
+    "variability": 0.22943679334058448,
+    "phase": 0.34717399710627417,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0567206109251466,
+   "weight": 0.03201394758140487
+  },
+  {
+   "name": "UKESM1-0-LL",
+   "kge": 0.6345742584852297,
+   "correlation": 0.8097416748984334,
+   "bias_ratio_minus_1": -0.2633226724074369,
+   "variability_ratio_minus_1": -0.16732875570974626,
+   "error_total_pct": 36.54257415147703,
+   "trust_tier": "usable",
+   "error_attribution": {
+    "bias": 0.5192520672420174,
+    "variability": 0.20967318356446574,
+    "phase": 0.27107474919351693,
+    "dominant": "bias",
+    "dominant_label": "systematic mean offset (\u03b2)"
+   },
+   "skill": 1.0445742584852298,
+   "weight": 0.03164596697584412
+  }
+ ],
+ "projection": {
+  "metric": "rx1day",
+  "variable": "precipitation",
+  "n_models_trusted": 31,
+  "n_models_total": 34,
+  "models_used": [
+   "ACCESS-CM2",
+   "ACCESS-ESM1-5",
+   "BCC-CSM2-MR",
+   "CESM2-WACCM",
+   "CESM2",
+   "CMCC-CM2-SR5",
+   "CMCC-ESM2",
+   "CNRM-CM6-1",
+   "CNRM-ESM2-1",
+   "CanESM5",
+   "EC-Earth3-Veg-LR",
+   "EC-Earth3",
+   "FGOALS-g3",
+   "GFDL-CM4",
+   "GFDL-ESM4",
+   "GISS-E2-1-G",
+   "HadGEM3-GC31-LL",
+   "IITM-ESM",
+   "INM-CM4-8",
+   "INM-CM5-0",
+   "IPSL-CM6A-LR",
+   "KACE-1-0-G",
+   "MIROC-ES2L",
+   "MIROC6",
+   "MPI-ESM1-2-HR",
+   "MPI-ESM1-2-LR",
+   "NESM3",
+   "NorESM2-LM",
+   "NorESM2-MM",
+   "TaiESM1",
+   "UKESM1-0-LL"
+  ],
+  "weights": [
+   0.03677003296353346,
+   0.03157481570751303,
+   0.02077728306486364,
+   0.033978341035670934,
+   0.03330361237884691,
+   0.030758898596679244,
+   0.030769588704313816,
+   0.03228867829561862,
+   0.03388874333115252,
+   0.03414120006039422,
+   0.03247455575049242,
+   0.034027930812404156,
+   0.034489078519203714,
+   0.03440788171578062,
+   0.031895708010538884,
+   0.033530627963053235,
+   0.03422315352606344,
+   0.03281896350126098,
+   0.03308337006540046,
+   0.03193893921042359,
+   0.03520362252058741,
+   0.030351678348584755,
+   0.03177369411708309,
+   0.0323284349284415,
+   0.034459115168066906,
+   0.024147256150436322,
+   0.03079708940316841,
+   0.030688989985864945,
+   0.033279455551025086,
+   0.03310489046775408,
+   0.03272437014577972
+  ],
+  "historical_level": 230.87246397026246,
+  "future_level": 160.96034820030863,
+  "change": -69.91211576995383,
+  "change_spread": 307.6831059889614,
+  "change_low": -377.5952217589153,
+  "change_high": 237.7709902190076,
+  "pct_change": -30.28170383236299,
+  "agreement_on_increase": 0.39090903856073084,
+  "per_model": [
+   {
+    "name": "ACCESS-CM2",
+    "weight": 0.035558308492447656,
+    "trust_tier": "trusted",
+    "historical": 112.97667680845343,
+    "future": 87.69023198979257,
+    "change": -25.28644481866087
+   },
+   {
+    "name": "ACCESS-ESM1-5",
+    "weight": 0.030534295104750392,
+    "trust_tier": "usable",
+    "historical": 88.26591544544122,
+    "future": 81.22241849022068,
+    "change": -7.043496955220547
+   },
+   {
+    "name": "BCC-CSM2-MR",
+    "weight": 0.020092585763739637,
+    "trust_tier": "weak",
+    "historical": 1512.773824269718,
+    "future": 163.78278188490546,
+    "change": -1348.9910423848125
+   },
+   {
+    "name": "CESM2-WACCM",
+    "weight": 0.032858614345171254,
+    "trust_tier": "usable",
+    "historical": 43.17836976940889,
+    "future": 56.572864027978056,
+    "change": 13.394494258569168
+   },
+   {
+    "name": "CESM2",
+    "weight": 0.0322061207846722,
+    "trust_tier": "usable",
+    "historical": 38.77728858555998,
+    "future": 46.448089484055195,
+    "change": 7.670800898495216
+   },
+   {
+    "name": "CMCC-CM2-SR5",
+    "weight": 0.02974526583300436,
+    "trust_tier": "usable",
+    "historical": 160.02080547444092,
+    "future": 471.4663802387533,
+    "change": 311.44557476431237
+   },
+   {
+    "name": "CMCC-ESM2",
+    "weight": 0.029755603657435046,
+    "trust_tier": "usable",
+    "historical": 684.0054951510309,
+    "future": 397.48551809862624,
+    "change": -286.51997705240467
+   },
+   {
+    "name": "CNRM-CM6-1",
+    "weight": 0.031224632971845856,
+    "trust_tier": "usable",
+    "historical": 40.96463191804298,
+    "future": 40.240690519504106,
+    "change": -0.7239413985388765
+   },
+   {
+    "name": "CNRM-ESM2-1",
+    "weight": 0.032771969255115434,
+    "trust_tier": "usable",
+    "historical": 33.100476477390124,
+    "future": 42.068193677346294,
+    "change": 8.96771719995617
+   },
+   {
+    "name": "CanESM5",
+    "weight": 0.03301610649231273,
+    "trust_tier": "usable",
+    "historical": 144.88716657883052,
+    "future": 112.31550016991541,
+    "change": -32.57166640891511
+   },
+   {
+    "name": "EC-Earth3-Veg-LR",
+    "weight": 0.03140438499678281,
+    "trust_tier": "usable",
+    "historical": 89.56165967165522,
+    "future": 183.1860845965304,
+    "change": 93.62442492487519
+   },
+   {
+    "name": "EC-Earth3",
+    "weight": 0.03290656993392203,
+    "trust_tier": "usable",
+    "historical": 77.91084473028278,
+    "future": 76.25773181640491,
+    "change": -1.6531129138778624
+   },
+   {
+    "name": "FGOALS-g3",
+    "weight": 0.03335252091893272,
+    "trust_tier": "usable",
+    "historical": 40.56780223613919,
+    "future": 31.386182157941356,
+    "change": -9.181620078197831
+   },
+   {
+    "name": "GFDL-CM4",
+    "weight": 0.03327399988557976,
+    "trust_tier": "usable",
+    "historical": 326.38463285183366,
+    "future": 203.0555583445137,
+    "change": -123.32907450731994
+   },
+   {
+    "name": "GFDL-ESM4",
+    "weight": 0.03084461268089076,
+    "trust_tier": "usable",
+    "historical": 281.43684691875507,
+    "future": 138.4521923960026,
+    "change": -142.98465452275246
+   },
+   {
+    "name": "GISS-E2-1-G",
+    "weight": 0.03242565526765206,
+    "trust_tier": "usable",
+    "historical": 49.358078955547114,
+    "future": 39.72321576194919,
+    "change": -9.634863193597923
+   },
+   {
+    "name": "HadGEM3-GC31-LL",
+    "weight": 0.033095359252765286,
+    "trust_tier": "usable",
+    "historical": 40.54890251864267,
+    "future": 41.689028676163026,
+    "change": 1.1401261575203563
+   },
+   {
+    "name": "IITM-ESM",
+    "weight": 0.03173744308952817,
+    "trust_tier": "usable",
+    "historical": 330.9427450861402,
+    "future": 292.6743554015595,
+    "change": -38.268389684580654
+   },
+   {
+    "name": "INM-CM4-8",
+    "weight": 0.03199313636520252,
+    "trust_tier": "usable",
+    "historical": 36.488875769934715,
+    "future": 59.13176002544719,
+    "change": 22.642884255512477
+   },
+   {
+    "name": "INM-CM5-0",
+    "weight": 0.03088641923416537,
+    "trust_tier": "usable",
+    "historical": 53.79042627893343,
+    "future": 46.081315150858075,
+    "change": -7.709111128075357
+   },
+   {
+    "name": "IPSL-CM6A-LR",
+    "weight": 0.034043517743924084,
+    "trust_tier": "usable",
+    "historical": 46.05362820704573,
+    "future": 43.988493232036554,
+    "change": -2.0651349750091796
+   },
+   {
+    "name": "KACE-1-0-G",
+    "weight": 0.02935146517417777,
+    "trust_tier": "usable",
+    "historical": 155.41895025666895,
+    "future": 156.0444391361233,
+    "change": 0.6254888794543376
+   },
+   {
+    "name": "MIROC-ES2L",
+    "weight": 0.030726619649223685,
+    "trust_tier": "usable",
+    "historical": 40.11094288144291,
+    "future": 38.7849116330663,
+    "change": -1.3260312483766086
+   },
+   {
+    "name": "MIROC6",
+    "weight": 0.03126307945939562,
+    "trust_tier": "usable",
+    "historical": 48.45377470480811,
+    "future": 53.46116867178166,
+    "change": 5.007393966973545
+   },
+   {
+    "name": "MPI-ESM1-2-HR",
+    "weight": 0.03332354498398464,
+    "trust_tier": "usable",
+    "historical": 141.76688454483195,
+    "future": 45.634225979210676,
+    "change": -96.13265856562128
+   },
+   {
+    "name": "MPI-ESM1-2-LR",
+    "weight": 0.02335150431588999,
+    "trust_tier": "weak",
+    "historical": 1372.989589472032,
+    "future": 300.0791375851077,
+    "change": -1072.9104518869244
+   },
+   {
+    "name": "NESM3",
+    "weight": 0.02978219809466602,
+    "trust_tier": "usable",
+    "historical": 1006.1226124264983,
+    "future": 398.4417292225349,
+    "change": -607.6808832039635
+   },
+   {
+    "name": "NorESM2-LM",
+    "weight": 0.029677660999685915,
+    "trust_tier": "usable",
+    "historical": 345.41811838139466,
+    "future": 518.150869023549,
+    "change": 172.73275064215437
+   },
+   {
+    "name": "NorESM2-MM",
+    "weight": 0.03218276002411103,
+    "trust_tier": "usable",
+    "historical": 616.1013210368502,
+    "future": 297.59649361003403,
+    "change": -318.5048274268162
+   },
+   {
+    "name": "TaiESM1",
+    "weight": 0.03201394758140487,
+    "trust_tier": "usable",
+    "historical": 49.35637814028924,
+    "future": 621.8776495602021,
+    "change": 572.5212714199129
+   },
+   {
+    "name": "UKESM1-0-LL",
+    "weight": 0.03164596697584412,
+    "trust_tier": "usable",
+    "historical": 44.155165797368525,
+    "future": 44.58591567857882,
+    "change": 0.43074988121029634
+   }
+  ],
+  "trust_summary": {
+   "n_models": 34,
+   "tier_counts": {
+    "trusted": 1,
+    "usable": 29,
+    "weak": 2,
+    "reject": 2
+   },
+   "n_trusted_or_usable": 30,
+   "n_kept": 32,
+   "effective_ensemble_size": 31.734279493828147,
+   "best_model": "ACCESS-CM2",
+   "best_kge": 0.7637133440997282,
+   "recommendation": "Project from the 32 skill-weighted model(s). Best model 'ACCESS-CM2' (total Aras error 24%); its residual error is dominated by timing / correlation mismatch (r), which is the priority target for bias correction."
+  },
+  "confidence": {
+   "score": 54,
+   "label": "medium",
+   "drivers": [
+    "91% of scored models retained",
+    "22% directional agreement strength",
+    "0% uncertainty-band support",
+    "100% effective ensemble balance"
+   ],
+   "components": {
+    "trust_share": 0.9117647058823529,
+    "agreement_strength": 0.21818192287853833,
+    "spread_score": 0.0,
+    "effective_ensemble_score": 1.0
+   }
+  },
+  "adaptation_options": [
+   {
+    "category": "Rainfall monitoring",
+    "action": "Keep drainage assumptions under review; the trusted ensemble does not show a stronger extreme-rain signal here.",
+    "why": "Low or negative projected change still needs monitoring when assets are highly exposed."
+   }
+  ]
+ },
+ "report_markdown": "# Arasense Climate Intelligence Report\n\n**Report type:** Climate Projection Report\n**Case:** Lat 19.433, Lon -99.133\n**Indicator:** Maximum 1-day precipitation\n**Analysis window:** historical 1995-01-01 to 2014-12-31 vs future 2040-01-01 to 2059-12-31\n**Region: lat 19.433, lon -99.133, radius 50.0 km**\n\n> Arasense reports only skill-screened, trust-weighted climate projections. Uncertainty is shown explicitly as trusted-model spread.\n\n## Executive summary\n\n- **Maximum 1-day precipitation: -69.91 mm (-30.3%)** by mid-century\n- Historical 230.87 mm -> future 160.96 mm\n- Across-model spread (+/- 1 sigma): -377.60 to +237.77 mm\n- Model agreement on decrease: **39%** of trusted-model weight\n\n## Interpretation\n\nThe trusted ensemble indicates a decrease in maximum 1-day precipitation by mid-century. The result is strongest when agreement is high and the spread band does not cross zero.\n\n## Model trust\n\n- **31 of 34** CMIP6 models passed skill screening and were skill-weighted.\n- Best model: ACCESS-CM2.\n\n## Top contributing models\n\n| Model | Weight | Historical (mm) | Future (mm) | Change (mm) |\n| --- | --- | --- | --- | --- |\n| ACCESS-CM2 | 4% | 112.98 | 87.69 | -25.29 |\n| IPSL-CM6A-LR | 3% | 46.05 | 43.99 | -2.07 |\n| FGOALS-g3 | 3% | 40.57 | 31.39 | -9.18 |\n| MPI-ESM1-2-HR | 3% | 141.77 | 45.63 | -96.13 |\n| GFDL-CM4 | 3% | 326.38 | 203.06 | -123.33 |\n| HadGEM3-GC31-LL | 3% | 40.55 | 41.69 | +1.14 |\n| CanESM5 | 3% | 144.89 | 112.32 | -32.57 |\n| EC-Earth3 | 3% | 77.91 | 76.26 | -1.65 |\n\n## Confidence\n\n- Overall confidence: **54/100 (medium)**\n- 91% of scored models retained\n- 22% directional agreement strength\n- 0% uncertainty-band support\n- 100% effective ensemble balance\n\n## Practical next actions\n\n- **Rainfall monitoring:** Keep drainage assumptions under review; the trusted ensemble does not show a stronger extreme-rain signal here. Low or negative projected change still needs monitoring when assets are highly exposed.\n\n## Scientific method\n\n- Observational baseline: ERA5-Land historical climatology for the selected location and window.\n- Model source: CMIP6 climate-model ensemble, evaluated locally against the baseline.\n- Aras Diagram score: KGE = 1 - E_total.\n- Total Aras error: E_total = sqrt((1 - r)^2 + (beta - 1)^2 + (alpha - 1)^2).\n- Mean Bias Ratio Error: beta - 1, where beta = mean(model) / mean(obs).\n- Variability Ratio Error: alpha - 1, where alpha = std(model) / std(obs).\n- Model Trust Engine: models below the mean-flow benchmark (KGE <= -0.41) receive zero weight; remaining models are weighted by skill.\n- Uncertainty band: across-model spread of the trusted weighted projection, reported instead of hidden.\n\n---\n_Note: Generated from the Arasense console._\n"
+}

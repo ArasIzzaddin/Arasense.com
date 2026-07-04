@@ -104,12 +104,14 @@ def main() -> None:
                "cities": cities, "n_ranked": len(rows)}
 
     # ---- global preview tier (optional: present once the world runner has run) ----
-    # Cities excluded from publication pending investigation of implausible
-    # pipeline output. We do not publish numbers we believe are artifacts.
+    # Cities excluded from publication: we do not publish numbers we believe
+    # are artifacts. See docs/mexico-city-rx1day-investigation.md.
     WORLD_EXCLUDE = {
-        "Mexico City": "historical rx1day baseline of 263 mm is implausible for "
-                       "the altiplano — likely a broken model in the 5-model "
-                       "screening ensemble; needs a full-ensemble check.",
+        "Mexico City": "diagnosed: several NEX-GDDP-CMIP6 models produce "
+                       "physically impossible rx1day baselines (up to 1,513 mm) "
+                       "over this high-relief domain — a downscaling artifact "
+                       "that mean-climate trust screening does not catch. "
+                       "Withheld until the pipeline screens extremes explicitly.",
     }
     if os.path.exists(WORLD) and os.path.exists(GEO_WORLD):
         wgeo = json.load(open(GEO_WORLD, encoding="utf-8"))
