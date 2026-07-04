@@ -23,6 +23,116 @@
    "pct_change": 20.31892010539037,
    "agreement": 0.782714908099385,
    "n_trusted": 5
+  },
+  "Mexico City": {
+   "lat": 19.433,
+   "lon": -99.133,
+   "confidence": "moderate",
+   "historical": 262.9791876967681,
+   "future": 80.95094229418783,
+   "change": -182.0282454025803,
+   "pct_change": -69.21773810194841,
+   "agreement": 0.43018028173501155,
+   "n_trusted": 5
+  },
+  "Sao Paulo": {
+   "lat": -23.551,
+   "lon": -46.633,
+   "confidence": "moderate",
+   "historical": 65.27614092227007,
+   "future": 71.59340655931096,
+   "change": 6.317265637040903,
+   "pct_change": 9.677755988307297,
+   "agreement": 0.8099325994291064,
+   "n_trusted": 5
+  },
+  "Lagos": {
+   "lat": 6.524,
+   "lon": 3.379,
+   "confidence": "weak",
+   "historical": 50.4286403290256,
+   "future": 72.13672997243741,
+   "change": 21.70808964341182,
+   "pct_change": 43.04714444366474,
+   "agreement": 1.0,
+   "n_trusted": 5
+  },
+  "Nairobi": {
+   "lat": -1.286,
+   "lon": 36.817,
+   "confidence": "weak",
+   "historical": 58.85658192855618,
+   "future": 70.02542241091173,
+   "change": 11.16884048235554,
+   "pct_change": 18.976366136778008,
+   "agreement": 0.8221756631584579,
+   "n_trusted": 5
+  },
+  "Cape Town": {
+   "lat": -33.925,
+   "lon": 18.424,
+   "confidence": "moderate",
+   "historical": 57.42249172254431,
+   "future": 64.62145039374562,
+   "change": 7.198958671201321,
+   "pct_change": 12.536827391582836,
+   "agreement": 0.609005747022413,
+   "n_trusted": 5
+  },
+  "Mumbai": {
+   "lat": 19.076,
+   "lon": 72.878,
+   "confidence": "moderate",
+   "historical": 145.8027374174257,
+   "future": 159.37366613424223,
+   "change": 13.570928716816502,
+   "pct_change": 9.307732459071488,
+   "agreement": 0.8145696695961432,
+   "n_trusted": 5
+  },
+  "Jakarta": {
+   "lat": -6.208,
+   "lon": 106.846,
+   "confidence": "moderate",
+   "historical": 44.152506057108546,
+   "future": 68.25694835400137,
+   "change": 24.10444229689281,
+   "pct_change": 54.59359943400539,
+   "agreement": 1.0,
+   "n_trusted": 5
+  },
+  "Tokyo": {
+   "lat": 35.677,
+   "lon": 139.65,
+   "confidence": "strong",
+   "historical": 117.55062225869158,
+   "future": 138.85801461283242,
+   "change": 21.307392354140852,
+   "pct_change": 18.1261416951499,
+   "agreement": 0.8213906772519128,
+   "n_trusted": 5
+  },
+  "Sydney": {
+   "lat": -33.869,
+   "lon": 151.209,
+   "confidence": "strong",
+   "historical": 88.96048721192987,
+   "future": 86.8849954476325,
+   "change": -2.075491764297357,
+   "pct_change": -2.3330490078734947,
+   "agreement": 0.5517056305549626,
+   "n_trusted": 4
+  },
+  "Singapore": {
+   "lat": 1.352,
+   "lon": 103.82,
+   "confidence": "moderate",
+   "historical": 45.47608164225777,
+   "future": 66.02263990539439,
+   "change": 20.546558263136603,
+   "pct_change": 45.18102158573863,
+   "agreement": 1.0,
+   "n_trusted": 5
   }
  }
 }

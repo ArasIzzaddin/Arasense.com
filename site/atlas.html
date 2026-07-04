@@ -230,6 +230,49 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* ---- global preview tier ---- */
+    .world-section { display: none; }
+    .world-section.has-data { display: block; }
+    .pin.conf-moderate circle.core { fill: var(--amber); }
+    .pin.conf-weak circle.core { fill: var(--red); }
+    .pin.conf-moderate circle.halo { stroke: rgba(244, 199, 125, 0.55); }
+    .pin.conf-weak circle.halo { stroke: rgba(240, 143, 132, 0.55); }
+    .conf-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 22px;
+      margin-top: 14px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      letter-spacing: 0.06em;
+      color: var(--faint);
+    }
+    .conf-legend span::before {
+      content: "";
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      background: var(--accent);
+    }
+    .conf-legend span.c-m::before { background: var(--amber); }
+    .conf-legend span.c-w::before { background: var(--red); }
+    .conf-chip {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 6px 12px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: var(--accent-bright);
+      background: rgba(52, 211, 153, 0.07);
+    }
+    .conf-chip.c-m { border-color: rgba(244, 199, 125, 0.4); color: var(--amber); background: rgba(244, 199, 125, 0.07); }
+    .conf-chip.c-w { border-color: rgba(240, 143, 132, 0.4); color: var(--red); background: rgba(240, 143, 132, 0.07); }
+
     @media (max-width: 920px) {
       .page-hero { padding-top: 48px; }
       .atlas { grid-template-columns: 1fr; }
@@ -259,7 +302,7 @@
   <div class="shell">
     <main>
       <section class="page-hero">
-        <span class="eyebrow">The Climate Model Trust Atlas · Europe</span>
+        <span class="eyebrow">The Climate Model Trust Atlas · Europe + global preview</span>
         <h1>Click a city. See who <em>earned</em> the projection.</h1>
         <p class="lead">
           Every pin is a real Arasense run — one consistent method across Europe. Climate models are scored against observed local climate, then trust-weighted into a mid-century flood-driving-rainfall signal. Model agreement is shown for every number, because a projection without it is just a guess with confidence.
@@ -298,6 +341,51 @@
           <p>Trust-weighted mid-century change in maximum 1-day precipitation, SSP2-4.5. Click a row to inspect the city.</p>
         </div>
         <div class="panel compare reveal" id="compare"></div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ GLOBAL PREVIEW ============ -->
+      <section class="section world-section" id="world">
+        <div class="section-head reveal">
+          <span class="eyebrow">Global preview — new</span>
+          <h2>The method is global. <em>The honesty travels with it.</em></h2>
+          <p class="lead">
+            World cities, run through the exact same pipeline as Europe. One thing changes outside Europe: how strongly ground observations constrain the reference data. So every pin carries a <b style="color:var(--text); font-weight:600;">reference-data confidence flag</b> — we trust-score our own baseline, not just the models.
+          </p>
+        </div>
+
+        <div class="atlas">
+          <div class="map-panel reveal">
+            <svg id="world-svg" role="img" aria-label="World map with preview city pins colored by reference-data confidence: emerald for strong, amber for moderate, red for weak."></svg>
+            <div class="conf-legend" aria-hidden="true">
+              <span>STRONG REFERENCE DATA</span>
+              <span class="c-m">MODERATE</span>
+              <span class="c-w">WEAK — READ WITH CARE</span>
+            </div>
+            <div class="city-chips" id="world-chips" role="tablist" aria-label="Select a preview city"></div>
+          </div>
+
+          <aside class="detail reveal" id="world-detail" aria-live="polite">
+            <div class="detail-head">
+              <h2 id="w-name"></h2>
+              <span class="rank-badge" id="w-badge">GLOBAL PREVIEW</span>
+            </div>
+            <div class="metric-label">Max 1-day precipitation · SSP2-4.5 · 2040–2059</div>
+            <span class="conf-chip" id="w-conf"></span>
+            <div class="detail-change num" id="w-change"></div>
+            <div class="detail-values" id="w-values"></div>
+            <div class="agree-row">
+              <div class="lbl"><span>trusted-model agreement on increase</span><b id="w-agree-val"></b></div>
+              <div class="agree-bar"><i id="w-agree-bar"></i></div>
+            </div>
+            <p class="detail-note" id="w-note"></p>
+          </aside>
+        </div>
+
+        <div class="notice reveal" style="margin-top:16px;">
+          <strong>Preview tier.</strong> Global cities are screening-level, unranked, and deliberately few. The confidence flag is qualitative: it reflects how densely long-record ground observations constrain the ERA5-Land baseline in each region. Where it reads <em>weak</em>, the trust scores inherit that uncertainty — publishing the flag is the point. One computed city (Mexico City) is currently withheld: its screening baseline looks implausible and is under investigation. Withholding a number we don't believe is also honesty.
+        </div>
       </section>
 
       <hr class="hr">
@@ -369,7 +457,7 @@
     </main>
   </div>
 
-  <script src="atlas-data.js"></script>
+  <script src="atlas-data.js?v=2"></script>
   <script src="site.js?v=3" defer></script>
   <script>
   /* ================================================================
@@ -494,6 +582,80 @@
     }
 
     select(ranked[0].id);
+  })();
+
+  /* ================================================================
+     Global preview tier — same generated data file; the section stays
+     hidden unless atlas-data.js carries a world payload.
+     ================================================================ */
+  (function () {
+    "use strict";
+    var W = window.ATLAS && window.ATLAS.world;
+    var section = document.getElementById("world");
+    var svg = document.getElementById("world-svg");
+    if (!W || !section || !svg || !W.cities.length) return;
+    section.classList.add("has-data");
+
+    svg.setAttribute("viewBox", "0 0 " + W.w + " " + Math.ceil(W.h));
+    var svgNS = "http://www.w3.org/2000/svg";
+    function el(tag, attrs, parent) {
+      var e = document.createElementNS(svgNS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      (parent || svg).appendChild(e);
+      return e;
+    }
+
+    W.paths.forEach(function (d) { el("path", { d: d, "class": "country" }); });
+
+    var pins = {}, chips = {};
+    var chipsWrap = document.getElementById("world-chips");
+    W.cities.forEach(function (c) {
+      var confCls = c.conf === "strong" ? "" : " conf-" + c.conf;
+      var g = el("g", { "class": "pin" + confCls, transform: "translate(" + c.x + "," + c.y + ")", tabindex: "0", role: "button", "aria-label": c.name });
+      el("circle", { "class": "halo", r: 8 }, g);
+      el("circle", { "class": "core", r: 5.5 }, g);
+      var onRight = c.x > W.w - 130;
+      var t = el("text", { x: onRight ? -10 : 10, y: 4 }, g);
+      if (onRight) t.setAttribute("text-anchor", "end");
+      t.textContent = c.name.toUpperCase();
+      g.addEventListener("click", function () { select(c.id); });
+      g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(c.id); } });
+      pins[c.id] = g;
+
+      var b = document.createElement("button");
+      b.className = "chip";
+      b.textContent = c.name;
+      b.setAttribute("role", "tab");
+      b.addEventListener("click", function () { select(c.id); });
+      chipsWrap.appendChild(b);
+      chips[c.id] = b;
+    });
+
+    var $ = function (id) { return document.getElementById(id); };
+    var CONF_LABEL = { strong: "REFERENCE DATA · STRONG", moderate: "REFERENCE DATA · MODERATE", weak: "REFERENCE DATA · WEAK" };
+    function select(id) {
+      var c = W.cities.filter(function (x) { return x.id === id; })[0];
+      W.cities.forEach(function (x) {
+        pins[x.id].classList.toggle("active", x.id === id);
+        chips[x.id].classList.toggle("active", x.id === id);
+      });
+      var sign = c.pct >= 0 ? "+" : "";
+      $("w-name").textContent = c.name;
+      $("w-change").textContent = sign + c.pct.toFixed(1) + "%";
+      $("w-change").classList.toggle("negative", c.pct < 0);
+      $("w-values").textContent = c.hist.toFixed(2) + " mm → " + c.fut.toFixed(2) + " mm (" + (c.chg >= 0 ? "+" : "") + c.chg.toFixed(2) + " mm)";
+      $("w-agree-val").textContent = c.agree + "%";
+      $("w-agree-bar").style.width = c.agree + "%";
+      var conf = $("w-conf");
+      conf.textContent = CONF_LABEL[c.conf] || CONF_LABEL.moderate;
+      conf.className = "conf-chip" + (c.conf === "moderate" ? " c-m" : c.conf === "weak" ? " c-w" : "");
+      $("w-note").innerHTML = c.note +
+        ' <a href="mailto:arasbotan.izzaddin@poliba.it?subject=' +
+        encodeURIComponent("Arasense Atlas — " + c.name + " evidence pack") +
+        '">Commission the full ' + c.name + " evidence pack →</a>";
+    }
+
+    select(W.cities[0].id);
   })();
   </script>
 </body>

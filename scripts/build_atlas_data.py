@@ -104,6 +104,13 @@ def main() -> None:
                "cities": cities, "n_ranked": len(rows)}
 
     # ---- global preview tier (optional: present once the world runner has run) ----
+    # Cities excluded from publication pending investigation of implausible
+    # pipeline output. We do not publish numbers we believe are artifacts.
+    WORLD_EXCLUDE = {
+        "Mexico City": "historical rx1day baseline of 263 mm is implausible for "
+                       "the altiplano — likely a broken model in the 5-model "
+                       "screening ensemble; needs a full-ensemble check.",
+    }
     if os.path.exists(WORLD) and os.path.exists(GEO_WORLD):
         wgeo = json.load(open(GEO_WORLD, encoding="utf-8"))
         wdata = json.load(open(WORLD, encoding="utf-8"))
@@ -111,6 +118,9 @@ def main() -> None:
         for name, r in wdata["cities"].items():
             if "error" in r:
                 print(f"world: skipping {name}: {r['error'][:80]}")
+                continue
+            if name in WORLD_EXCLUDE:
+                print(f"world: excluding {name}: {WORLD_EXCLUDE[name][:70]}")
                 continue
             if name not in wgeo["pins"]:
                 print(f"world: no pin for {name}, skipping")
