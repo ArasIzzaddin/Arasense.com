@@ -1,0 +1,28 @@
+{
+ "case": "World Trust Atlas \u2014 global preview",
+ "notes": "rx1day, SSP2-4.5, 1995-2014 vs 2040-2059, 50 km radius, fast_mode 5-model screening ensemble (same method as the European Trust Atlas). Each city carries a qualitative reference-data confidence tier.",
+ "cities": {
+  "New York": {
+   "lat": 40.713,
+   "lon": -74.006,
+   "confidence": "strong",
+   "historical": 92.66366222287206,
+   "future": 98.14592024864675,
+   "change": 5.482258025774685,
+   "pct_change": 5.916297601738329,
+   "agreement": 0.6328154094677494,
+   "n_trusted": 3
+  },
+  "Miami": {
+   "lat": 25.762,
+   "lon": -80.192,
+   "confidence": "strong",
+   "historical": 49.412145071976575,
+   "future": 59.45215935151108,
+   "change": 10.040014279534503,
+   "pct_change": 20.31892010539037,
+   "agreement": 0.782714908099385,
+   "n_trusted": 5
+  }
+ }
+}
