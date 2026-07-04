@@ -33,6 +33,62 @@
       color: var(--faint);
       margin-bottom: 20px;
     }
+    /* ---- full-ensemble column chart ---- */
+    .ens { position: relative; margin-top: 6px; }
+    .ens svg { display: block; width: 100%; height: auto; }
+    .ens .gridline { stroke: rgba(110, 231, 183, 0.12); }
+    .ens .zeroline { stroke: rgba(110, 231, 183, 0.4); }
+    .ens .axis-label { fill: var(--faint); font-family: var(--font-mono); font-size: 11px; }
+    .ens .bar { cursor: pointer; transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); transform: scaleY(0); transform-box: fill-box; }
+    .ens .bar.pos { fill: var(--accent); transform-origin: center bottom; }
+    .ens .bar.neg { fill: var(--red); transform-origin: center top; }
+    .ens.on .bar { transform: scaleY(1); }
+    .ens .bar:hover { fill: var(--accent-bright); }
+    .ens .bar.neg:hover { fill: #f7b0a8; }
+    .ens .meanline { stroke: var(--accent-bright); stroke-width: 1.5; stroke-dasharray: 5 4; opacity: 0; transition: opacity .6s .9s; }
+    .ens.on .meanline { opacity: 1; }
+    .ens .meanlabel { fill: var(--accent-bright); font-family: var(--font-mono); font-size: 12px; opacity: 0; transition: opacity .6s 1s; }
+    .ens.on .meanlabel { opacity: 1; }
+    .ens-tip {
+      position: absolute;
+      pointer-events: none;
+      background: #0d241c;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--muted);
+      transform: translate(-50%, calc(-100% - 12px));
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .15s;
+      z-index: 5;
+    }
+    .ens-tip b { color: var(--text); font-weight: 500; }
+    .ens-tip .up { color: var(--accent-bright); }
+    .ens-tip .down { color: var(--red); }
+
+    /* ---- agreement meters in tables ---- */
+    .mt { display: inline-flex; align-items: center; gap: 9px; }
+    .mt i {
+      width: 64px; height: 5px;
+      border-radius: 999px;
+      background: rgba(110, 231, 183, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    .mt i b {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: var(--w);
+      background: var(--accent);
+      border-radius: 999px;
+    }
+    .mt.warn i b { background: var(--amber); }
+    .mt.warn { color: var(--amber); }
+
     @media (max-width: 920px) { .page-hero { padding-top: 48px; } }
   </style>
 </head>
@@ -86,7 +142,15 @@
           <div class="kpi"><strong class="num">78%</strong><span>Trusted-model weight agreeing on an increase.</span></div>
         </div>
         <div class="panel reveal" style="margin-top:16px;">
-          <h3>Top contributing models</h3>
+          <h3>The full trusted ensemble — every model, every vote</h3>
+          <p style="font-size:14px; margin-top:6px;">
+            Each column is one trusted model's projected change in Bologna's maximum 1-day rainfall. Most vote for heavier rain; a handful disagree — and the disagreement is shown, not averaged away. Hover any column.
+          </p>
+          <div class="ens" id="ens">
+            <svg id="ens-svg" viewBox="0 0 900 250" role="img" aria-label="Column chart of all 32 trusted CMIP6 models' projected change in Bologna maximum 1-day rainfall; most project an increase, a few a decrease; the trust-weighted mean is +5.7 mm."></svg>
+            <div class="ens-tip" id="ens-tip"></div>
+          </div>
+          <h3 style="margin-top:26px;">Top contributing models</h3>
           <div class="table-wrap">
             <table>
               <thead>
@@ -124,11 +188,11 @@
                 <tr><th>Rank</th><th>Location</th><th class="num">Today</th><th class="num">2050</th><th class="num">Change</th><th class="num">Agreement</th></tr>
               </thead>
               <tbody>
-                <tr class="highlight"><td>1</td><td><strong>Rome</strong></td><td class="num">39.91 mm</td><td class="num">47.40 mm</td><td class="num">+7.49 mm (+19%)</td><td class="num">100%</td></tr>
-                <tr><td>2</td><td><strong>Milan</strong></td><td class="num">63.90 mm</td><td class="num">72.10 mm</td><td class="num">+8.20 mm (+13%)</td><td class="num">79%</td></tr>
-                <tr><td>3</td><td><strong>Florence</strong></td><td class="num">46.17 mm</td><td class="num">51.45 mm</td><td class="num">+5.28 mm (+11%)</td><td class="num">80%</td></tr>
-                <tr><td>4</td><td><strong>Bologna</strong></td><td class="num">44.20 mm</td><td class="num">48.95 mm</td><td class="num">+4.75 mm (+11%)</td><td class="num">100%</td></tr>
-                <tr><td>5</td><td><strong>Venice</strong></td><td class="num">52.96 mm</td><td class="num">54.70 mm</td><td class="num">+1.74 mm (+3%)</td><td class="num">56%</td></tr>
+                <tr class="highlight"><td>1</td><td><strong>Rome</strong></td><td class="num">39.91 mm</td><td class="num">47.40 mm</td><td class="num">+7.49 mm (+19%)</td><td class="num"><span class="mt"><i><b style="--w:100%"></b></i>100%</span></td></tr>
+                <tr><td>2</td><td><strong>Milan</strong></td><td class="num">63.90 mm</td><td class="num">72.10 mm</td><td class="num">+8.20 mm (+13%)</td><td class="num"><span class="mt"><i><b style="--w:79%"></b></i>79%</span></td></tr>
+                <tr><td>3</td><td><strong>Florence</strong></td><td class="num">46.17 mm</td><td class="num">51.45 mm</td><td class="num">+5.28 mm (+11%)</td><td class="num"><span class="mt"><i><b style="--w:80%"></b></i>80%</span></td></tr>
+                <tr><td>4</td><td><strong>Bologna</strong></td><td class="num">44.20 mm</td><td class="num">48.95 mm</td><td class="num">+4.75 mm (+11%)</td><td class="num"><span class="mt"><i><b style="--w:100%"></b></i>100%</span></td></tr>
+                <tr><td>5</td><td><strong>Venice</strong></td><td class="num">52.96 mm</td><td class="num">54.70 mm</td><td class="num">+1.74 mm (+3%)</td><td class="num"><span class="mt warn"><i><b style="--w:56%"></b></i>56%</span></td></tr>
               </tbody>
             </table>
           </div>
@@ -211,5 +275,87 @@
   </div>
 
   <script src="site.js?v=3" defer></script>
+  <script defer>
+  /* Full-ensemble column chart — the same real per-model output used by
+     the homepage visual (Bologna rx1day projection, 32 trusted models). */
+  window.addEventListener("DOMContentLoaded", function () {
+    "use strict";
+    var MODELS = [{"n":"ACCESS-CM2","w":0.0352,"h":48.6,"f":49.8,"c":1.2},{"n":"ACCESS-ESM1-5","w":0.0291,"h":38.2,"f":45.7,"c":7.5},{"n":"BCC-CSM2-MR","w":0.0295,"h":40.5,"f":50.4,"c":9.9},{"n":"CESM2-WACCM","w":0.0324,"h":43.6,"f":48.5,"c":5.0},{"n":"CESM2","w":0.0366,"h":48.3,"f":49.9,"c":1.6},{"n":"CMCC-CM2-SR5","w":0.0352,"h":44.7,"f":54.1,"c":9.4},{"n":"CMCC-ESM2","w":0.0345,"h":42.7,"f":42.1,"c":-0.6},{"n":"CNRM-CM6-1","w":0.0273,"h":38.4,"f":40.6,"c":2.2},{"n":"CNRM-ESM2-1","w":0.0288,"h":39.4,"f":45.5,"c":6.1},{"n":"CanESM5","w":0.0303,"h":32.3,"f":29.1,"c":-3.2},{"n":"EC-Earth3","w":0.0292,"h":46.1,"f":41.2,"c":-4.9},{"n":"FGOALS-g3","w":0.0328,"h":30.4,"f":36.0,"c":5.6},{"n":"GFDL-CM4","w":0.0331,"h":39.5,"f":51.1,"c":11.6},{"n":"GFDL-ESM4","w":0.0345,"h":46.6,"f":56.3,"c":9.7},{"n":"GISS-E2-1-G","w":0.0335,"h":35.6,"f":35.0,"c":-0.6},{"n":"HadGEM3-GC31-LL","w":0.0292,"h":40.2,"f":49.2,"c":9.0},{"n":"IITM-ESM","w":0.0251,"h":41.4,"f":43.2,"c":1.8},{"n":"INM-CM4-8","w":0.0272,"h":44.2,"f":39.6,"c":-4.6},{"n":"INM-CM5-0","w":0.0274,"h":40.1,"f":49.2,"c":9.1},{"n":"IPSL-CM6A-LR","w":0.0303,"h":33.0,"f":44.4,"c":11.4},{"n":"KACE-1-0-G","w":0.0297,"h":20.4,"f":31.9,"c":11.4},{"n":"KIOST-ESM","w":0.028,"h":42.9,"f":53.2,"c":10.3},{"n":"MIROC-ES2L","w":0.0291,"h":40.9,"f":35.5,"c":-5.3},{"n":"MIROC6","w":0.0248,"h":37.0,"f":54.7,"c":17.7},{"n":"MPI-ESM1-2-HR","w":0.0323,"h":41.7,"f":49.3,"c":7.6},{"n":"MPI-ESM1-2-LR","w":0.0299,"h":35.0,"f":40.2,"c":5.2},{"n":"MRI-ESM2-0","w":0.0279,"h":50.8,"f":52.9,"c":2.1},{"n":"NESM3","w":0.0276,"h":44.0,"f":41.8,"c":-2.2},{"n":"NorESM2-LM","w":0.0325,"h":39.6,"f":55.7,"c":16.1},{"n":"NorESM2-MM","w":0.0271,"h":37.3,"f":48.0,"c":10.7},{"n":"TaiESM1","w":0.0282,"h":44.8,"f":55.7,"c":11.0},{"n":"UKESM1-0-LL","w":0.0323,"h":36.6,"f":48.8,"c":12.2}];
+    var MEAN = 5.73, BASELINE = 40.2;
+
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.getElementById("ens-svg");
+    var tip = document.getElementById("ens-tip");
+    var ens = document.getElementById("ens");
+    if (!svg) return;
+
+    var W = 900, H = 250, PAD_L = 10, PAD_R = 64, TOP = 16, BOT = 26;
+    var DMIN = -8, DMAX = 19;
+    function y(v) { return TOP + (DMAX - v) / (DMAX - DMIN) * (H - TOP - BOT); }
+
+    function el(tag, attrs, parent) {
+      var e = document.createElementNS(svgNS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      (parent || svg).appendChild(e);
+      return e;
+    }
+
+    /* gridlines */
+    [-5, 0, 5, 10, 15].forEach(function (t) {
+      el("line", { x1: PAD_L, x2: W - PAD_R, y1: y(t), y2: y(t), "class": t === 0 ? "zeroline" : "gridline" });
+      var lbl = el("text", { x: W - PAD_R + 8, y: y(t) + 4, "class": "axis-label" });
+      lbl.textContent = (t > 0 ? "+" : "") + t + " mm";
+    });
+
+    /* trust-weighted mean */
+    el("line", { x1: PAD_L, x2: W - PAD_R, y1: y(MEAN), y2: y(MEAN), "class": "meanline" });
+    var ml = el("text", { x: PAD_L + 2, y: y(MEAN) - 7, "class": "meanlabel" });
+    ml.textContent = "trust-weighted mean +5.7 mm (+14.2%)";
+
+    /* columns, sorted ascending */
+    var sorted = MODELS.slice().sort(function (a, b) { return a.c - b.c; });
+    var wMin = 0.0248, wMax = 0.0366;
+    var span = (W - PAD_L - PAD_R) / sorted.length;
+    sorted.forEach(function (m, i) {
+      var x0 = PAD_L + i * span + span * 0.18;
+      var bw = span * 0.64;
+      var pos = m.c >= 0;
+      var rect = el("rect", {
+        x: x0,
+        y: pos ? y(m.c) : y(0),
+        width: bw,
+        height: Math.max(Math.abs(y(m.c) - y(0)), 1.5),
+        rx: 2,
+        "class": "bar " + (pos ? "pos" : "neg")
+      });
+      rect.setAttribute("fill-opacity", (0.45 + (m.w - wMin) / (wMax - wMin) * 0.5).toFixed(2));
+      rect.style.transitionDelay = (i * 22) + "ms";
+      rect.addEventListener("mousemove", function (ev) {
+        var pct = m.c / BASELINE * 100;
+        tip.innerHTML = "<b>" + m.n + "</b><br>trust weight " + (m.w * 100).toFixed(1) + "%<br>" +
+          m.h.toFixed(1) + " → " + m.f.toFixed(1) + " mm<br>" +
+          "<span class='" + (m.c >= 0 ? "up" : "down") + "'>" + (m.c >= 0 ? "+" : "") + m.c.toFixed(1) +
+          " mm (" + (pct >= 0 ? "+" : "") + pct.toFixed(0) + "%)</span>";
+        var box = ens.getBoundingClientRect();
+        tip.style.left = (ev.clientX - box.left) + "px";
+        tip.style.top = (ev.clientY - box.top) + "px";
+        tip.style.opacity = 1;
+      });
+      rect.addEventListener("mouseleave", function () { tip.style.opacity = 0; });
+    });
+
+    /* animate when scrolled into view */
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { ens.classList.add("on"); io.disconnect(); }
+        });
+      }, { threshold: 0.3 });
+      io.observe(ens);
+    } else {
+      ens.classList.add("on");
+    }
+  });
+  </script>
 </body>
 </html>

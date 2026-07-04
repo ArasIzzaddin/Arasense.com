@@ -1,38 +1,59 @@
 <title>Aras' Diagram Studio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
+  @font-face {
+    font-family: "Instrument Serif";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("fonts/instrument-serif-400.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("fonts/inter-var.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: 100 800;
+    font-display: swap;
+    src: url("fonts/jetbrains-mono-var.woff2") format("woff2");
+  }
   :root {
-    --surface: #fcfcfb;
-    --plane: #f6f7f5;
+    --surface: #fcfdfc;
+    --plane: #f4f7f5;
     --card: #ffffff;
-    --ink: #0b0b0b;
-    --ink-2: #52514e;
-    --muted: #898781;
-    --grid: #e1e0d9;
-    --baseline: #c3c2b7;
-    --border: rgba(11, 11, 11, 0.10);
-    --accent: #2a78d6;
-    --accent-ink: #1c5cab;
-    --meter-track: #cde2fb;
-    --chip: #f0f1ee;
-    --good: #006300;
+    --ink: #0b120e;
+    --ink-2: #4e5b54;
+    --muted: #85918a;
+    --grid: #dde5e0;
+    --baseline: #bcc7c1;
+    --border: rgba(11, 18, 14, 0.10);
+    --accent: #0a7a52;
+    --accent-ink: #086344;
+    --meter-track: #cfe9dd;
+    --chip: #eef3f0;
+    --good: #0a7a52;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --surface: #1a1a19;
-      --plane: #0d0d0d;
-      --card: #212120;
-      --ink: #ffffff;
-      --ink-2: #c3c2b7;
-      --muted: #898781;
-      --grid: #2c2c2a;
-      --baseline: #383835;
-      --border: rgba(255, 255, 255, 0.10);
-      --accent: #3987e5;
-      --accent-ink: #86b6ef;
-      --meter-track: #22354d;
-      --chip: #2a2a28;
-      --good: #0ca30c;
+      --surface: #050f0c;
+      --plane: #050d0b;
+      --card: #0a1a15;
+      --ink: #eaf6f0;
+      --ink-2: #93b4a7;
+      --muted: #5f8073;
+      --grid: #122a20;
+      --baseline: #1e4636;
+      --border: rgba(110, 231, 183, 0.14);
+      --accent: #34d399;
+      --accent-ink: #7df0c3;
+      --meter-track: rgba(110, 231, 183, 0.16);
+      --chip: #0d211a;
+      --good: #34d399;
     }
   }
   * { box-sizing: border-box; }
@@ -40,9 +61,38 @@
   body {
     background: var(--plane);
     color: var(--ink);
-    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+    font: 15px/1.55 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
-  .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+  .mono { font-family: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+  /* ---------- site bar ---------- */
+  .sitebar {
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+  .sitebar-in {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 11px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .sitebar a {
+    font-family: "JetBrains Mono", "JetBrains Mono", ui-monospace, Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    text-decoration: none;
+  }
+  .sitebar a:hover { text-decoration: underline; }
+  .sitebar span {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  @media (max-width: 640px) { .sitebar span { display: none; } }
   .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 64px; }
 
   /* ---------- header ---------- */
@@ -51,13 +101,13 @@
     font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
     text-transform: uppercase; color: var(--accent-ink); margin-bottom: 6px;
   }
-  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
+  h1 { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 40px; line-height: 1.08; margin: 0 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
   .cite { color: var(--ink-2); font-size: 13.5px; max-width: 72ch; }
   .cite a { color: var(--accent-ink); text-decoration: none; border-bottom: 1px solid var(--border); }
   .headrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; }
   button, label.btn {
-    font: 600 13px/1 system-ui, sans-serif; color: var(--ink);
+    font: 600 13px/1 "Inter", system-ui, sans-serif; color: var(--ink);
     background: var(--card); border: 1px solid var(--border); border-radius: 7px;
     padding: 9px 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
   }
@@ -81,7 +131,7 @@
   textarea {
     width: 100%; min-height: 130px; resize: vertical;
     background: var(--surface); color: var(--ink); border: 1px solid var(--border);
-    border-radius: 7px; padding: 9px; font: 12px/1.5 ui-monospace, Consolas, monospace;
+    border-radius: 7px; padding: 9px; font: 12px/1.5 "JetBrains Mono", ui-monospace, Consolas, monospace;
   }
   input[type="file"] { display: none; }
   .hint { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
@@ -114,7 +164,7 @@
   #tooltip h4 { margin: 0 0 7px; font-size: 13px; display: flex; align-items: center; gap: 7px; }
   #tooltip table { border-collapse: collapse; width: 100%; }
   #tooltip td { padding: 1.5px 0; color: var(--ink-2); }
-  #tooltip td:last-child { text-align: right; color: var(--ink); font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  #tooltip td:last-child { text-align: right; color: var(--ink); font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
 
   /* ---------- table ---------- */
   .tbl-scroll { overflow-x: auto; }
@@ -128,7 +178,7 @@
   table.rank th.on { color: var(--accent-ink); }
   table.rank td {
     padding: 7px 10px; border-bottom: 1px solid var(--grid); text-align: right;
-    font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; font-size: 12.5px;
+    font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; font-size: 12.5px;
     white-space: nowrap; color: var(--ink);
   }
   table.rank td.name { text-align: left; font-family: system-ui, sans-serif; font-size: 13.5px; }
@@ -150,7 +200,7 @@
   .howto { font-size: 13px; color: var(--ink-2); }
   .howto p { margin: 7px 0; }
   .howto .eq {
-    font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--ink);
+    font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; font-size: 12px; color: var(--ink);
     background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
     padding: 7px 9px; margin: 7px 0; overflow-x: auto; white-space: nowrap;
   }
@@ -159,6 +209,13 @@
     .lg-chip, button, label.btn { transition: border-color .12s ease, opacity .12s ease; }
   }
 </style>
+
+<div class="sitebar">
+  <div class="sitebar-in">
+    <a href="index.html">← Arasense</a>
+    <span>The model-trust method behind arasense.com — peer-reviewed, open source, runs entirely in your browser.</span>
+  </div>
+</div>
 
 <div class="wrap">
   <header>
@@ -243,8 +300,8 @@
 "use strict";
 /* ---------------- palette (validated, light+dark) ---------------- */
 const SERIES = {
-  light: ["#2a78d6","#1baf7a","#eda100","#008300","#4a3aa7","#e34948","#e87ba4","#eb6834"],
-  dark:  ["#3987e5","#199e70","#c98500","#008300","#9085e9","#e66767","#d55181","#d95926"]
+  light: ["#0a7a52","#2a78d6","#eda100","#4a3aa7","#e34948","#008300","#e87ba4","#eb6834"],
+  dark:  ["#34d399","#3987e5","#c98500","#9085e9","#e66767","#008300","#d55181","#d95926"]
 };
 const darkMq = window.matchMedia("(prefers-color-scheme: dark)");
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -414,7 +471,7 @@ function renderChart() {
   const plotW = W - PAD.l - PAD.r, plotH = H - PAD.t - PAD.b, S = Math.min(plotW, plotH);
   const ox = PAD.l + plotW / 2, oy = PAD.t + plotH / 2, k = (S / 2) / R;
   const X = v => ox + v * k, Y = v => oy - v * k;
-  const font = 'system-ui, -apple-system, "Segoe UI", sans-serif';
+  const font = '"Inter", system-ui, -apple-system, "Segoe UI", sans-serif';
   const monoF = 'ui-monospace, "Cascadia Code", Consolas, monospace';
 
   el("rect", { x: 0, y: 0, width: W, height: H, fill: surface }, svg);
