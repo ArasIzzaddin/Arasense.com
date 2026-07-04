@@ -11,10 +11,10 @@
   <meta property="og:title" content="Bari / Puglia Regional Application — Arasense">
   <meta property="og:description" content="Climate-risk evidence for Bari and Puglia: model trust scored locally, 2050 hazards projected transparently.">
   <meta property="og:url" content="https://www.arasense.com/bari-puglia.html">
-  <meta property="og:image" content="https://www.arasense.com/og/bari-puglia.png">
+  <meta property="og:image" content="https://www.arasense.com/og/bari-puglia.png?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta name="twitter:image" content="https://www.arasense.com/og/bari-puglia.png">
+  <meta name="twitter:image" content="https://www.arasense.com/og/bari-puglia.png?v=2">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preload" href="fonts/instrument-serif-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
@@ -33,6 +33,33 @@
     .brief-link { display: block; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); transition: border-color .2s, transform .2s; }
     .brief-link:hover { border-color: var(--accent); transform: translateY(-3px); }
     .brief-link img { display: block; width: 100%; }
+
+    .pilot-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 26px;
+      margin-top: 26px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--faint);
+    }
+    .pilot-strip b {
+      color: var(--accent-bright);
+      font-weight: 500;
+    }
+    .pilot-strip span::before {
+      content: "";
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      margin-right: 9px;
+      vertical-align: 1px;
+    }
+    .pilot-strip span.amber::before { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
     @media (max-width: 920px) {
       .page-hero { grid-template-columns: 1fr; padding-top: 48px; }
     }
@@ -70,10 +97,32 @@
             <a class="button" href="bari-puglia-climate-risk-brief.pdf">Download the PDF brief</a>
             <a class="button-secondary" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20Bari%20Puglia%20briefing">Request a briefing</a>
           </div>
+          <div class="pilot-strip">
+            <span><b>PILOT · ACTIVE</b></span>
+            <span>EVIDENCE PACK · AVAILABLE NOW</span>
+            <span class="amber">ATLAS NUMBERS · FOLLOW THE PILOT</span>
+          </div>
         </div>
         <a class="brief-link reveal" href="bari-puglia-climate-risk-brief.pdf" aria-label="Download the Bari / Puglia climate-risk evidence brief">
           <img src="bari-puglia-brief-cover.jpg" alt="Cover of the Bari / Puglia climate-risk evidence brief" loading="lazy">
         </a>
+      </section>
+
+      <hr class="hr">
+
+      <section class="section">
+        <div class="panel reveal" style="padding:34px;">
+          <span class="eyebrow">Direct line</span>
+          <h3 style="font-size:24px; margin-bottom:8px;">Get the Bari / Puglia trust brief by email</h3>
+          <p style="max-width:560px;">One email, no list, no follow-up sequence — the regional brief and a short note on how the trust-first method applies to your locations.</p>
+          <form class="lead-form" data-city="Bari / Puglia" style="margin-top:18px;">
+            <input type="text" class="lf-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <input type="email" name="email" required placeholder="you@organisation.it" aria-label="Your email address">
+            <input type="text" name="org" placeholder="Organisation (optional)" aria-label="Your organisation, optional">
+            <button class="button" type="submit">Send me the brief</button>
+            <p class="lf-msg" role="status"></p>
+          </form>
+        </div>
       </section>
 
       <hr class="hr">
