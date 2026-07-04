@@ -535,7 +535,12 @@ tr.highlight td { background: rgba(52, 211, 153, 0.06); color: var(--text); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
-  * { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+  * {
+    animation-duration: 0.001s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001s !important;
+    transition-delay: 0s !important;
+  }
 }
 
 /* ---------------- Print ---------------- */

@@ -165,6 +165,30 @@
     });
   });
 
+  /* 3D tilt on cards + magnetic buttons (fine pointers, motion allowed) */
+  var finePointer = window.matchMedia("(pointer: fine)").matches;
+  if (finePointer && !reduced) {
+    document.querySelectorAll(".card").forEach(function (c) {
+      c.addEventListener("pointermove", function (e) {
+        var r = c.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - 0.5;
+        var py = (e.clientY - r.top) / r.height - 0.5;
+        c.style.transform = "perspective(700px) rotateX(" + (py * -3.5).toFixed(2) +
+          "deg) rotateY(" + (px * 4.5).toFixed(2) + "deg) translateY(-2px)";
+      });
+      c.addEventListener("pointerleave", function () { c.style.transform = ""; });
+    });
+
+    document.querySelectorAll(".button, .button-secondary").forEach(function (b) {
+      b.addEventListener("pointermove", function (e) {
+        var r = b.getBoundingClientRect();
+        b.style.transform = "translate(" + ((e.clientX - r.left - r.width / 2) * 0.12).toFixed(1) +
+          "px," + (((e.clientY - r.top - r.height / 2) * 0.25) - 1).toFixed(1) + "px)";
+      });
+      b.addEventListener("pointerleave", function () { b.style.transform = ""; });
+    });
+  }
+
   /* Highlight current page in nav */
   var here = location.pathname.split("/").pop() || "index.html";
   document.querySelectorAll(".nav-links a").forEach(function (a) {
