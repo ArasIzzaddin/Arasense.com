@@ -11,10 +11,10 @@
   <meta property="og:title" content="The Climate Model Trust Atlas — Arasense">
   <meta property="og:description" content="Click a European city. See which climate models earned trust there, and what they say about 2050.">
   <meta property="og:url" content="https://www.arasense.com/atlas.html">
-  <meta property="og:image" content="https://www.arasense.com/og/atlas.png?v=2">
+  <meta property="og:image" content="https://www.arasense.com/og/atlas.png?v=3">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta name="twitter:image" content="https://www.arasense.com/og/atlas.png?v=2">
+  <meta name="twitter:image" content="https://www.arasense.com/og/atlas.png?v=3">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preload" href="fonts/instrument-serif-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
@@ -650,9 +650,7 @@
       conf.textContent = CONF_LABEL[c.conf] || CONF_LABEL.moderate;
       conf.className = "conf-chip" + (c.conf === "moderate" ? " c-m" : c.conf === "weak" ? " c-w" : "");
       $("w-note").innerHTML = c.note +
-        ' <a href="mailto:arasbotan.izzaddin@poliba.it?subject=' +
-        encodeURIComponent("Arasense Atlas — " + c.name + " evidence pack") +
-        '">Commission the full ' + c.name + " evidence pack →</a>";
+        ' <a href="trust/' + c.id + '.html">Full ' + c.name + " trust profile →</a>";
     }
 
     select(W.cities[0].id);

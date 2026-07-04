@@ -93,6 +93,8 @@
     margin-left: 10px;
   }
   .dots span.r { background: rgba(240,143,132,.15); border-color: #f08f84; border-style: dashed; }
+  .dots span.m { background: rgba(244,199,125,.25); border-color: #f4c77d; }
+  .dots span.w { background: rgba(240,143,132,.25); border-color: #f08f84; }
   .cols { display: flex; align-items: flex-end; gap: 7px; height: 120px; }
   .cols i { width: 15px; border-radius: 3px; background: #34d399; opacity: .8; }
   .cols i.neg { background: #f08f84; opacity: .65; }
@@ -142,11 +144,17 @@
         "<span class='r' style='width:20px;height:20px;'></span></div>"
     },
     atlas: {
-      eyebrow: "THE CLIMATE MODEL TRUST ATLAS — EUROPE",
-      title: "24 cities. One method.<br><em>Every number earned.</em>",
-      foot: "<b>www.arasense.com/atlas</b><span class='gem'>◆</span>trust-weighted 2050 signals<span class='gem'>◆</span>agreement shown for every city",
+      eyebrow: "THE CLIMATE MODEL TRUST ATLAS",
+      title: "Europe ranked.<br><em>The world previewed.</em>",
+      foot: "<b>www.arasense.com/atlas</b><span class='gem'>◆</span>24 ranked + 11 world previews<span class='gem'>◆</span>the reference data is trust-scored too",
       motif: "<div class='dots'>" +
-        [18,24,18,30,18,22].map(function(s){ return "<span style='width:"+s+"px;height:"+s+"px;'></span>"; }).join("") + "</div>"
+        "<span style='width:22px;height:22px;'></span>" +
+        "<span style='width:28px;height:28px;'></span>" +
+        "<span class='m' style='width:20px;height:20px;'></span>" +
+        "<span style='width:16px;height:16px;'></span>" +
+        "<span class='m' style='width:26px;height:26px;'></span>" +
+        "<span class='w' style='width:20px;height:20px;'></span>" +
+        "</div>"
     },
     demo: {
       eyebrow: "LIVE SESSION REPLAY",

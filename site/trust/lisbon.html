@@ -153,6 +153,23 @@
     .settings-list li:last-child { border-bottom: 0; }
     .settings-list b { font-family: var(--font-mono); font-weight: 500; color: var(--text); white-space: nowrap; }
 
+    .conf-chip {
+      display: inline-block;
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 6px 12px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: var(--accent-bright);
+      background: rgba(52, 211, 153, 0.07);
+    }
+    .conf-chip.c-m { border-color: rgba(244, 199, 125, 0.4); color: var(--amber); background: rgba(244, 199, 125, 0.07); }
+    .conf-chip.c-w { border-color: rgba(240, 143, 132, 0.4); color: var(--red); background: rgba(240, 143, 132, 0.07); }
+
     .faq details {
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -241,7 +258,7 @@
             <a class="rank-row" href="copenhagen.html"><span class="pos">#15</span><span class="cname">Copenhagen</span><span class="rval">+8.7%</span></a>
             <a class="rank-row" href="prague.html"><span class="pos">#16</span><span class="cname">Prague</span><span class="rval">+7.6%</span></a>
           </div>
-          <a class="all-link" href="/trust/">All 24 trust profiles →</a>
+          <a class="all-link" href="/trust/">All trust profiles →</a>
           <a class="all-link" href="/atlas.html">Open the interactive atlas →</a>
         </aside>
       </div>
