@@ -213,7 +213,7 @@
       <!-- ============ HERO ============ -->
       <section class="hero">
         <span class="eyebrow">Model-trust intelligence for climate risk</span>
-        <h1>Climate models disagree.<br><em>Know which to trust.</em></h1>
+        <h1 data-word-reveal>Climate models disagree.<br><em>Know which to trust.</em></h1>
         <p class="lead">
           Every 2050 risk number depends on which climate models you believe. Arasense scores each model against decades of observed weather at your location, then builds projections only from the models that earn their place — transparently, so a technical reviewer can audit every step.
         </p>
@@ -245,6 +245,25 @@
             <span class="lab-note">Hover any model. Full detail in the <a href="case-studies.html">Bologna case study</a>.</span>
           </div>
           <div class="lab-tip" id="lab-tip"></div>
+        </div>
+
+        <div class="ticker-wrap" aria-hidden="true">
+          <div class="ticker">
+            <span><b>34</b> CMIP6 models screened per location</span><span class="tick-gem">◆</span>
+            <span><b>24</b> European cities ranked in the Trust Atlas</span><span class="tick-gem">◆</span>
+            <span>ERA5-Land — <b>20-year</b> observed baseline</span><span class="tick-gem">◆</span>
+            <span>peer-reviewed method — Izzaddin et al. <b>2024</b></span><span class="tick-gem">◆</span>
+            <span>bias · variability · phase — decomposed, not averaged</span><span class="tick-gem">◆</span>
+            <span>SSP2-4.5 / SSP5-8.5 scenario comparison</span><span class="tick-gem">◆</span>
+            <span>every weight published, every rejection explained</span><span class="tick-gem">◆</span>
+            <span><b>34</b> CMIP6 models screened per location</span><span class="tick-gem">◆</span>
+            <span><b>24</b> European cities ranked in the Trust Atlas</span><span class="tick-gem">◆</span>
+            <span>ERA5-Land — <b>20-year</b> observed baseline</span><span class="tick-gem">◆</span>
+            <span>peer-reviewed method — Izzaddin et al. <b>2024</b></span><span class="tick-gem">◆</span>
+            <span>bias · variability · phase — decomposed, not averaged</span><span class="tick-gem">◆</span>
+            <span>SSP2-4.5 / SSP5-8.5 scenario comparison</span><span class="tick-gem">◆</span>
+            <span>every weight published, every rejection explained</span><span class="tick-gem">◆</span>
+          </div>
         </div>
       </section>
 
@@ -328,7 +347,7 @@
           <div style="max-width:640px;">
             <span class="label">New — interactive</span>
             <h3 style="font-size:24px; margin-bottom:6px;">The Climate Model Trust Atlas — Europe</h3>
-            <p style="margin:0;">Cities across Europe, one consistent method: click any pin and see its trust-weighted 2050 signal, model agreement, and how the number was earned.</p>
+            <p style="margin:0;">Cities across Europe, one consistent method: click any pin and see its trust-weighted 2050 signal, model agreement, and how the number was earned — each city with its own full trust profile.</p>
           </div>
           <span class="button" style="pointer-events:none;">Open the Atlas →</span>
         </a>
@@ -386,6 +405,35 @@
 
       <hr class="hr">
 
+      <!-- ============ SCIENCE ============ -->
+      <section class="section" id="science">
+        <div class="section-head reveal">
+          <span class="eyebrow">Science</span>
+          <h2>The Aras Diagram — <em>try the method yourself</em></h2>
+          <p class="lead">
+            The model-trust method behind Arasense is peer-reviewed and open. Aras&rsquo; Diagram Studio runs it live in your browser: paste observations and model series, and watch each model&rsquo;s bias, variability, and correlation error resolve into one auditable picture.
+          </p>
+        </div>
+        <div class="grid-2">
+          <div class="card reveal">
+            <span class="label">Interactive instrument</span>
+            <h3>Aras&rsquo; Diagram Studio</h3>
+            <p>The full KGE decomposition — correlation, bias ratio, variability ratio, and total error — computed instantly from your own CSV, with model ranking and publication-ready export. No installation, and your data never leaves the browser.</p>
+          </div>
+          <div class="card reveal">
+            <span class="label">Publication &amp; code</span>
+            <h3>Peer-reviewed and open source</h3>
+            <p>Izzaddin et&nbsp;al. (2024), <em>Stochastic Environmental Research and Risk Assessment</em> 38, 2261&ndash;2281 — with an MIT-licensed reference implementation on <a href="https://github.com/ArasIzzaddin/Aras_diagram">GitHub</a>.</p>
+          </div>
+        </div>
+        <div class="actions reveal" style="margin-top:20px;">
+          <a class="button" href="aras-diagram.html">Open the Studio</a>
+          <a class="button-secondary" href="https://doi.org/10.1007/s00477-024-02678-3">Read the paper</a>
+        </div>
+      </section>
+
+      <hr class="hr">
+
       <!-- ============ WHO ============ -->
       <section class="section" id="institutions">
         <div class="section-head reveal">
@@ -435,7 +483,9 @@
           </div>
           <div>
             <span class="eyebrow">Explore</span>
+            <p><a href="trust/">City trust profiles</a></p>
             <p><a href="demo.html">Demo console</a></p>
+            <p><a href="aras-diagram.html">Aras&rsquo; Diagram Studio</a></p>
             <p><a href="case-studies.html">Case studies</a></p>
             <p><a href="evidence.html">Sample evidence</a></p>
             <p><a href="bari-puglia.html">Bari / Puglia regional brief</a></p>

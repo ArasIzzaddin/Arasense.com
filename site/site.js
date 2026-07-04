@@ -4,6 +4,63 @@
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* Ambient aurora backdrop (behind everything, pure decoration) */
+  var aurora = document.createElement("div");
+  aurora.className = "aurora";
+  aurora.setAttribute("aria-hidden", "true");
+  document.body.prepend(aurora);
+
+  /* Scroll progress hairline */
+  var progress = document.createElement("div");
+  progress.className = "progress";
+  progress.setAttribute("aria-hidden", "true");
+  document.body.prepend(progress);
+  var ticking = false;
+  function paintProgress() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.transform = "scaleX(" + (max > 0 ? window.scrollY / max : 0) + ")";
+    ticking = false;
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(paintProgress); }
+  }, { passive: true });
+  paintProgress();
+
+  /* Cursor spotlight on surfaces (drives --mx/--my in CSS) */
+  document.addEventListener("pointermove", function (e) {
+    var t = e.target.closest ? e.target.closest(".card, .kpi, .step, .panel") : null;
+    if (!t) return;
+    var r = t.getBoundingClientRect();
+    t.style.setProperty("--mx", (e.clientX - r.left) + "px");
+    t.style.setProperty("--my", (e.clientY - r.top) + "px");
+  }, { passive: true });
+
+  /* Word-by-word headline reveal: <h1 data-word-reveal> */
+  document.querySelectorAll("[data-word-reveal]").forEach(function (h) {
+    if (reduced) return;
+    var i = 0;
+    function split(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (child) {
+        if (child.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          child.textContent.split(/(\s+)/).forEach(function (part) {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            var w = document.createElement("span");
+            w.className = "wr";
+            w.style.setProperty("--wi", i++);
+            w.textContent = part;
+            frag.appendChild(w);
+          });
+          node.replaceChild(frag, child);
+        } else if (child.nodeType === 1 && child.tagName !== "BR") {
+          split(child);
+        }
+      });
+    }
+    split(h);
+  });
+
   /* Scroll reveal */
   var revealed = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window && !reduced) {
@@ -66,6 +123,47 @@
       toggle.setAttribute("aria-expanded", links.classList.contains("open") ? "true" : "false");
     });
   }
+
+  /* Lead capture forms → POST /api/lead, mailto fallback */
+  document.querySelectorAll("form.lead-form").forEach(function (form) {
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      var msg = form.querySelector(".lf-msg");
+      var btn = form.querySelector("button");
+      var data = {
+        email: (form.email.value || "").trim(),
+        org: form.org ? (form.org.value || "").trim() : "",
+        city: form.getAttribute("data-city") || "",
+        page: location.pathname,
+        website: form.website ? form.website.value : ""
+      };
+      if (!data.email) return;
+      btn.disabled = true;
+      msg.className = "lf-msg";
+      msg.textContent = "Sending…";
+      fetch("/api/lead", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(data)
+      }).then(function (r) {
+        if (!r.ok) throw new Error("lead endpoint " + r.status);
+        return r.json();
+      }).then(function () {
+        form.classList.add("sent");
+        msg.className = "lf-msg ok";
+        msg.textContent = "Request received — the " + (data.city ? data.city + " " : "") +
+          "brief will come from arasbotan.izzaddin@poliba.it.";
+      }).catch(function () {
+        btn.disabled = false;
+        msg.className = "lf-msg err";
+        msg.innerHTML = 'That didn’t go through — please email ' +
+          '<a href="mailto:arasbotan.izzaddin@poliba.it?subject=' +
+          encodeURIComponent("Trust brief request: " + (data.city || "my region")) +
+          '&body=' + encodeURIComponent("Please send the " + (data.city || "") +
+          " trust brief to: " + data.email) + '">arasbotan.izzaddin@poliba.it</a> directly.';
+      });
+    });
+  });
 
   /* Highlight current page in nav */
   var here = location.pathname.split("/").pop() || "index.html";

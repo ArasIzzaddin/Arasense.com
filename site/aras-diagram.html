@@ -1,0 +1,670 @@
+<title>Aras' Diagram Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --surface: #fcfcfb;
+    --plane: #f6f7f5;
+    --card: #ffffff;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11, 11, 11, 0.10);
+    --accent: #2a78d6;
+    --accent-ink: #1c5cab;
+    --meter-track: #cde2fb;
+    --chip: #f0f1ee;
+    --good: #006300;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #1a1a19;
+      --plane: #0d0d0d;
+      --card: #212120;
+      --ink: #ffffff;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --border: rgba(255, 255, 255, 0.10);
+      --accent: #3987e5;
+      --accent-ink: #86b6ef;
+      --meter-track: #22354d;
+      --chip: #2a2a28;
+      --good: #0ca30c;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--plane);
+    color: var(--ink);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 64px; }
+
+  /* ---------- header ---------- */
+  header { margin-bottom: 22px; }
+  .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent-ink); margin-bottom: 6px;
+  }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
+  .cite { color: var(--ink-2); font-size: 13.5px; max-width: 72ch; }
+  .cite a { color: var(--accent-ink); text-decoration: none; border-bottom: 1px solid var(--border); }
+  .headrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  button, label.btn {
+    font: 600 13px/1 system-ui, sans-serif; color: var(--ink);
+    background: var(--card); border: 1px solid var(--border); border-radius: 7px;
+    padding: 9px 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+  }
+  button:hover, label.btn:hover { border-color: var(--accent); }
+  button:focus-visible, label.btn:focus-within, a:focus-visible, input:focus-visible, textarea:focus-visible, th:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ---------- layout ---------- */
+  .grid { display: grid; grid-template-columns: 296px minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; margin-bottom: 14px;
+  }
+  .card h2 {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 12px;
+  }
+  textarea {
+    width: 100%; min-height: 130px; resize: vertical;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 7px; padding: 9px; font: 12px/1.5 ui-monospace, Consolas, monospace;
+  }
+  input[type="file"] { display: none; }
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .status { font-size: 13px; color: var(--ink-2); margin-top: 10px; }
+  .status.err { color: #d03b3b; }
+  .toggle { display: flex; align-items: center; gap: 9px; padding: 5px 0; font-size: 14px; color: var(--ink-2); cursor: pointer; }
+  .toggle input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ---------- diagram ---------- */
+  .plot-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  #legend { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-bottom: 10px; }
+  .lg-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--chip); border: 1px solid transparent; border-radius: 999px;
+    padding: 4px 11px 4px 7px; font-size: 12.5px; color: var(--ink-2); cursor: pointer; user-select: none;
+  }
+  .lg-chip:hover { border-color: var(--accent); }
+  .lg-chip.solo { border-color: var(--accent); color: var(--ink); }
+  .lg-chip.dim { opacity: 0.38; }
+  .lg-chip svg { display: block; }
+  #chartbox { position: relative; }
+  #chart { display: block; width: 100%; height: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  #tooltip {
+    position: absolute; pointer-events: none; z-index: 5; display: none;
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 12.5px; min-width: 210px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  }
+  #tooltip h4 { margin: 0 0 7px; font-size: 13px; display: flex; align-items: center; gap: 7px; }
+  #tooltip table { border-collapse: collapse; width: 100%; }
+  #tooltip td { padding: 1.5px 0; color: var(--ink-2); }
+  #tooltip td:last-child { text-align: right; color: var(--ink); font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  /* ---------- table ---------- */
+  .tbl-scroll { overflow-x: auto; }
+  table.rank { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  table.rank th {
+    text-align: right; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); padding: 7px 10px; border-bottom: 1px solid var(--grid);
+    cursor: pointer; white-space: nowrap; user-select: none;
+  }
+  table.rank th:first-child { text-align: left; }
+  table.rank th.on { color: var(--accent-ink); }
+  table.rank td {
+    padding: 7px 10px; border-bottom: 1px solid var(--grid); text-align: right;
+    font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; font-size: 12.5px;
+    white-space: nowrap; color: var(--ink);
+  }
+  table.rank td.name { text-align: left; font-family: system-ui, sans-serif; font-size: 13.5px; }
+  table.rank td.name span.key { display: inline-block; vertical-align: -1px; margin-right: 8px; }
+  table.rank tr:hover td { background: var(--chip); }
+  .badge {
+    display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px;
+    font: 600 10.5px/1.7 system-ui, sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--good); border: 1px solid currentColor;
+  }
+  .meter { display: inline-flex; align-items: center; gap: 8px; }
+  .meter .track { width: 84px; height: 6px; border-radius: 3px; background: var(--meter-track); overflow: hidden; }
+  .meter .fill { height: 100%; border-radius: 3px; background: var(--accent); }
+
+  /* ---------- how to read ---------- */
+  details { border-top: 1px solid var(--grid); padding-top: 10px; margin-top: 4px; }
+  details summary { cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--ink-2); }
+  details[open] summary { margin-bottom: 8px; }
+  .howto { font-size: 13px; color: var(--ink-2); }
+  .howto p { margin: 7px 0; }
+  .howto .eq {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 7px 9px; margin: 7px 0; overflow-x: auto; white-space: nowrap;
+  }
+  .howto i { font-style: italic; }
+  @media (prefers-reduced-motion: no-preference) {
+    .lg-chip, button, label.btn { transition: border-color .12s ease, opacity .12s ease; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="headrow">
+      <div>
+        <div class="eyebrow">KGE decomposition · model performance evaluation</div>
+        <h1>Aras&rsquo; Diagram Studio</h1>
+        <div class="cite">
+          Interactive companion to <a href="https://doi.org/10.1007/s00477-024-02678-3" target="_blank" rel="noopener">Izzaddin, Langousis, Totaro, Yaseen &amp; Iacobellis (2024), <i>A new diagram for performance evaluation of complex models</i>, Stoch Environ Res Risk Assess 38:2261&ndash;2281</a>.
+          Numerically verified against the <a href="https://github.com/ArasIzzaddin/Aras_diagram" target="_blank" rel="noopener">reference implementation (github.com/ArasIzzaddin/Aras_diagram, MIT)</a>.
+          Paste your observations and model series &mdash; the diagram, the KGE decomposition and the ranking update instantly.
+        </div>
+      </div>
+      <div class="actions">
+        <button id="dl-svg">Export SVG</button>
+        <button id="dl-png">Export PNG</button>
+        <button id="dl-csv">Metrics CSV</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <aside>
+      <div class="card">
+        <h2>Data</h2>
+        <div class="stack">
+          <button class="primary" id="demo-btn">Load demo dataset</button>
+          <label class="btn" for="file-in">Upload CSV file<input type="file" id="file-in" accept=".csv,.txt,.tsv"></label>
+          <textarea id="paste-in" spellcheck="false" placeholder="year,obs,Model-A,Model-B&#10;1991,742,801,695&#10;1992,688,747,651&#10;…"></textarea>
+          <button id="apply-btn">Apply pasted data</button>
+        </div>
+        <div class="hint">First row: names. A column named <span class="mono">obs / observed / reference</span> (else the first numeric column) is the reference; every other numeric column is a model. Comma, semicolon or tab separated; <span class="mono">year/date</span> columns are ignored.</div>
+        <div class="status" id="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Display</h2>
+        <label class="toggle"><input type="checkbox" id="opt-whisker" checked> Correlation-error segments</label>
+        <label class="toggle"><input type="checkbox" id="opt-circles" checked> Iso-error circles</label>
+        <label class="toggle"><input type="checkbox" id="opt-quad" checked> Quadrant guide</label>
+        <label class="toggle"><input type="checkbox" id="opt-labels"> Label points directly</label>
+      </div>
+
+      <div class="card">
+        <h2>How to read the diagram</h2>
+        <div class="howto">
+          <p>Each model is placed at (<i>&beta;</i>&thinsp;&minus;&thinsp;1, <i>&alpha;</i>&thinsp;&minus;&thinsp;1), where <i>&beta;</i> = &mu;<sub>m</sub>/&mu;<sub>o</sub> is the bias ratio and <i>&alpha;</i> = &sigma;<sub>m</sub>/&sigma;<sub>o</sub> the variability ratio. The origin is the perfect model.</p>
+          <div class="eq">E&alpha;&beta; = &radic;[ (&alpha;&minus;1)&sup2; + (&beta;&minus;1)&sup2; ]</div>
+          <div class="eq">E = 1 &minus; KGE = &radic;[ (&rho;&minus;1)&sup2; + (&alpha;&minus;1)&sup2; + (&beta;&minus;1)&sup2; ]</div>
+          <p>Each model appears as a <b>circle</b> at (<i>&beta;</i>&minus;1, <i>&alpha;</i>&minus;1) &mdash; filled when &rho;&thinsp;&ge;&thinsp;0, hollow when &rho;&thinsp;&lt;&thinsp;0 &mdash; whose distance from the origin is <i>E&alpha;&beta;</i>, the error induced by bias and variability. A <b>triangle</b> sits on the same ray at distance <i>E</i>: the connecting segment&rsquo;s length <i>E&thinsp;&minus;&thinsp;E&alpha;&beta;</i> is the error contributed by imperfect correlation.</p>
+          <p>Circles mark constant total-error levels (a mark inside the 10% circle has error below 0.10). Quadrants tell you at a glance whether a model over- or under-estimates the mean (left&ndash;right) and the variability (down&ndash;up).</p>
+          <details>
+            <summary>Demo dataset</summary>
+            <p>Thirty synthetic years of total annual precipitation for a Southern-Italy-like climate (E-OBS-style reference, &mu; &asymp; 750&nbsp;mm), with six model series constructed to hit exact bias, variability and correlation targets &mdash; including one negatively correlated model so you can see the hollow endpoint marker. Replace it with your own EURO-CORDEX / CMIP / hydrological series.</p>
+          </details>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="plot-card">
+        <div id="legend" role="list" aria-label="Models"></div>
+        <div id="chartbox">
+          <svg id="chart" viewBox="0 0 760 720" role="img" aria-label="Aras' diagram: bias ratio versus variability ratio with correlation-error segments"></svg>
+          <div id="tooltip"></div>
+        </div>
+        <div class="hint" id="marker-key" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <h2>Model ranking</h2>
+        <div class="tbl-scroll">
+          <table class="rank" id="rank"></table>
+        </div>
+        <div class="hint">Click a column to sort. E = 1 &minus; KGE is the total percentage error; E&alpha;&beta; the bias&ndash;variability part; &phi; the polar angle of the mark. This table is the accessible, copy-friendly view of the diagram.</div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ---------------- palette (validated, light+dark) ---------------- */
+const SERIES = {
+  light: ["#2a78d6","#1baf7a","#eda100","#008300","#4a3aa7","#e34948","#e87ba4","#eb6834"],
+  dark:  ["#3987e5","#199e70","#c98500","#008300","#9085e9","#e66767","#d55181","#d95926"]
+};
+const darkMq = window.matchMedia("(prefers-color-scheme: dark)");
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const seriesColor = i => (darkMq.matches ? SERIES.dark : SERIES.light)[i % 8];
+
+/* ---------------- stats ---------------- */
+function pairs(obs, mod) {
+  const o = [], m = [];
+  for (let i = 0; i < obs.length; i++) {
+    if (Number.isFinite(obs[i]) && Number.isFinite(mod[i])) { o.push(obs[i]); m.push(mod[i]); }
+  }
+  return [o, m];
+}
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+function sd(a, mu) { let s = 0; for (const v of a) s += (v - mu) * (v - mu); return Math.sqrt(s / (a.length - 1)); }
+function pearson(a, b, ma, mb) {
+  let num = 0, da = 0, db = 0;
+  for (let i = 0; i < a.length; i++) { const x = a[i] - ma, y = b[i] - mb; num += x * y; da += x * x; db += y * y; }
+  const den = Math.sqrt(da * db);
+  return den > 0 ? num / den : NaN;
+}
+function metrics(obs, mod) {
+  const [o, m] = pairs(obs, mod);
+  if (o.length < 3) return null;
+  const mo = mean(o), mm = mean(m), so = sd(o, mo), sm = sd(m, mm);
+  const r = pearson(o, m, mo, mm);
+  const beta = mo !== 0 ? mm / mo : NaN, alpha = so > 0 ? sm / so : NaN;
+  const x = beta - 1, y = alpha - 1;
+  const eab = Math.hypot(x, y);
+  const E = Number.isFinite(r) ? Math.hypot(r - 1, x, y) : NaN;
+  const kge = Number.isFinite(E) ? 1 - E : NaN;
+  const phi = Math.atan2(y, x) * 180 / Math.PI;
+  return { n: o.length, r, alpha, beta, x, y, eab, E, corrErr: Number.isFinite(E) ? E - eab : NaN, kge, phi };
+}
+
+/* ---------------- demo data (seeded, exact-target construction) ---------------- */
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function gaussians(n, rng) {
+  const out = [];
+  while (out.length < n) {
+    const u = Math.max(rng(), 1e-9), v = rng();
+    out.push(Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v));
+    if (out.length < n) out.push(Math.sqrt(-2 * Math.log(u)) * Math.sin(2 * Math.PI * v));
+  }
+  return out;
+}
+function standardize(a) { const mu = mean(a), s = sd(a, mu); return a.map(v => (v - mu) / s); }
+function demoDataset() {
+  const rng = mulberry32(20240302);
+  const n = 30;
+  const zo = standardize(gaussians(n, rng));
+  const obs = zo.map(z => Math.round(750 + 130 * z));
+  const zObs = standardize(obs);
+  // name, target r, alpha (sd ratio), beta (mean ratio)
+  const spec = [
+    ["CNRM-CM5 · ALADIN63",   0.86, 1.05, 1.06],
+    ["MPI-ESM-LR · REMO2015", 0.78, 0.83, 0.93],
+    ["EC-EARTH · RACMO22E",   0.91, 1.18, 1.22],
+    ["HadGEM2-ES · RCA4",     0.55, 1.42, 0.78],
+    ["IPSL-CM5A · WRF381P",   0.70, 0.68, 1.31],
+    ["NorESM1-M · HIRHAM5",  -0.18, 1.10, 0.88]
+  ];
+  const cols = { obs };
+  for (const [name, r, a, b] of spec) {
+    const e = gaussians(n, rng);
+    const me = mean(e);
+    let dot = 0, oss = 0;
+    for (let i = 0; i < n; i++) { dot += (e[i] - me) * zObs[i]; oss += zObs[i] * zObs[i]; }
+    const perp = standardize(e.map((v, i) => (v - me) - (dot / oss) * zObs[i]));
+    const muM = 750 * b, sdM = 130 * a;
+    cols[name] = zObs.map((z, i) => Math.round(muM + sdM * (r * z + Math.sqrt(1 - r * r) * perp[i])));
+  }
+  const years = Array.from({ length: n }, (_, i) => 1991 + i);
+  return { years, cols };
+}
+
+/* ---------------- CSV parsing ---------------- */
+function parseCSV(text) {
+  const lines = text.replace(/\r/g, "").split("\n").filter(l => l.trim().length);
+  if (lines.length < 4) throw "Need a header row plus at least 3 data rows.";
+  const head = lines[0];
+  const delim = [["\t", (head.match(/\t/g) || []).length], [";", (head.match(/;/g) || []).length], [",", (head.match(/,/g) || []).length]]
+    .sort((p, q) => q[1] - p[1])[0][0];
+  const rows = lines.map(l => l.split(delim).map(c => c.trim().replace(/^"|"$/g, "")));
+  const names = rows[0];
+  const body = rows.slice(1);
+  const toNum = s => {
+    if (s === "" || /^(na|nan|null|-999+.*)$/i.test(s)) return NaN;
+    return parseFloat(delim === ";" ? s.replace(",", ".") : s);
+  };
+  const numeric = names.map((_, c) => body.some(rw => Number.isFinite(toNum(rw[c] ?? ""))));
+  const isTime = nm => /^(year|yr|date|time|month|day|index|id)$/i.test(nm);
+  const usable = names.map((nm, c) => ({ nm, c })).filter(({ nm, c }) => numeric[c] && !isTime(nm));
+  if (usable.length < 2) throw "Need one reference column and at least one model column.";
+  let obsIdx = usable.findIndex(({ nm }) => /^(obs.*|ref.*|e-?obs|gauge|station|measured)$/i.test(nm));
+  if (obsIdx < 0) obsIdx = 0;
+  const obsCol = usable[obsIdx];
+  const cols = { obs: body.map(rw => toNum(rw[obsCol.c] ?? "")) };
+  for (const u of usable) if (u !== obsCol) cols[u.nm || "model"] = body.map(rw => toNum(rw[u.c] ?? ""));
+  return { years: null, cols, obsName: obsCol.nm };
+}
+
+/* ---------------- state ---------------- */
+let data = demoDataset();
+let models = [];          // [{name, i, m: metrics}]
+let solo = null;          // model index isolated by click, or null
+let sortKey = "kge", sortDir = -1;
+const $ = id => document.getElementById(id);
+
+function recompute() {
+  models = [];
+  let i = 0;
+  for (const name of Object.keys(data.cols)) {
+    if (name === "obs") continue;
+    const m = metrics(data.cols.obs, data.cols[name]);
+    if (m) models.push({ name, i: i++, m });
+  }
+  solo = null;
+  renderAll();
+}
+
+/* ---------------- SVG helpers ---------------- */
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function markPath(shape, cx, cy, r) {
+  if (shape === "square") return `M${cx - r},${cy - r}h${2 * r}v${2 * r}h${-2 * r}Z`;
+  if (shape === "triangle") { const h = r * 1.25; return `M${cx},${cy - h}L${cx + h * 0.95},${cy + h * 0.72}L${cx - h * 0.95},${cy + h * 0.72}Z`; }
+  return `M${cx},${cy}m${-r},0a${r},${r} 0 1,0 ${2 * r},0a${r},${r} 0 1,0 ${-2 * r},0`;
+}
+function fmt(v, d = 3) { return Number.isFinite(v) ? v.toFixed(d) : "—"; }
+function niceStep(range, target) {
+  const raw = range / target, p = Math.pow(10, Math.floor(Math.log10(raw)));
+  for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= raw) return m * p;
+  return 10 * p;
+}
+
+/* ---------------- diagram ---------------- */
+const W = 760, H = 720, PAD = { l: 64, r: 24, t: 20, b: 58 };
+function renderChart() {
+  const svg = $("chart");
+  svg.innerHTML = "";
+  const surface = cssVar("--surface"), grid = cssVar("--grid"), base = cssVar("--baseline"),
+        muted = cssVar("--muted"), ink2 = cssVar("--ink-2");
+  const showW = $("opt-whisker").checked, showC = $("opt-circles").checked,
+        showQ = $("opt-quad").checked, showL = $("opt-labels").checked || models.length > 8;
+
+  // symmetric range covering points and whisker endpoints
+  let R = 0.3;
+  for (const { m } of models) {
+    if (!Number.isFinite(m.x) || !Number.isFinite(m.y)) continue;
+    R = Math.max(R, Math.abs(m.x), Math.abs(m.y));
+    if (Number.isFinite(m.E)) R = Math.max(R, m.eab > 1e-9 ? (m.E / m.eab) * Math.max(Math.abs(m.x), Math.abs(m.y)) : m.E);
+  }
+  R *= 1.12;
+  const plotW = W - PAD.l - PAD.r, plotH = H - PAD.t - PAD.b, S = Math.min(plotW, plotH);
+  const ox = PAD.l + plotW / 2, oy = PAD.t + plotH / 2, k = (S / 2) / R;
+  const X = v => ox + v * k, Y = v => oy - v * k;
+  const font = 'system-ui, -apple-system, "Segoe UI", sans-serif';
+  const monoF = 'ui-monospace, "Cascadia Code", Consolas, monospace';
+
+  el("rect", { x: 0, y: 0, width: W, height: H, fill: surface }, svg);
+
+  // grid + ticks
+  const step = niceStep(R, 3.2);
+  const gGrid = el("g", {}, svg);
+  for (let v = step; v <= R; v += step) {
+    for (const s of [v, -v]) {
+      el("line", { x1: X(s), y1: Y(-R), x2: X(s), y2: Y(R), stroke: grid, "stroke-width": 1 }, gGrid);
+      el("line", { x1: X(-R), y1: Y(s), x2: X(R), y2: Y(s), stroke: grid, "stroke-width": 1 }, gGrid);
+      const tx = el("text", { x: X(s), y: Y(-R) + 18, "text-anchor": "middle", fill: muted, "font-size": 11.5, "font-family": monoF }, svg);
+      tx.textContent = (s > 0 ? "+" : "") + parseFloat(s.toFixed(4));
+      const ty = el("text", { x: X(-R) - 8, y: Y(s) + 4, "text-anchor": "end", fill: muted, "font-size": 11.5, "font-family": monoF }, svg);
+      ty.textContent = (s > 0 ? "+" : "") + parseFloat(s.toFixed(4));
+    }
+  }
+  const z0 = el("text", { x: X(0), y: Y(-R) + 18, "text-anchor": "middle", fill: muted, "font-size": 11.5, "font-family": monoF }, svg);
+  z0.textContent = "0";
+
+  // iso-error circles
+  if (showC) {
+    const cand = [0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3].filter(r => r < R * 0.97 && r > R / 12).slice(-4);
+    for (const r of cand) {
+      el("circle", { cx: ox, cy: oy, r: r * k, fill: "none", stroke: base, "stroke-width": 1 }, svg);
+      const lb = el("text", { x: ox, y: Y(r) + 13, "text-anchor": "middle", fill: muted, "font-size": 11, "font-family": font }, svg);
+      lb.textContent = Math.round(r * 100) + "% error";
+    }
+  }
+
+  // zero axes
+  el("line", { x1: X(-R), y1: oy, x2: X(R), y2: oy, stroke: base, "stroke-width": 1.5 }, svg);
+  el("line", { x1: ox, y1: Y(-R), x2: ox, y2: Y(R), stroke: base, "stroke-width": 1.5 }, svg);
+
+  // quadrant guide
+  if (showQ) {
+    const qs = [
+      [X(R) - 8, Y(R) + 16, "end", "overestimates mean", "overestimates variability"],
+      [X(-R) + 8, Y(R) + 16, "start", "underestimates mean", "overestimates variability"],
+      [X(-R) + 8, Y(-R) - 22, "start", "underestimates mean", "underestimates variability"],
+      [X(R) - 8, Y(-R) - 22, "end", "overestimates mean", "underestimates variability"]
+    ];
+    for (const [x, y, anchor, l1, l2] of qs) {
+      const t = el("text", { x, y, "text-anchor": anchor, fill: muted, "font-size": 10.5, "font-family": font, "letter-spacing": "0.08em" }, svg);
+      const s1 = el("tspan", { x, dy: 0 }, t); s1.textContent = l1.toUpperCase();
+      const s2 = el("tspan", { x, dy: 13 }, t); s2.textContent = l2.toUpperCase();
+    }
+  }
+
+  // axis titles
+  const xt = el("text", { x: ox, y: H - 14, "text-anchor": "middle", fill: ink2, "font-size": 14.5, "font-weight": 600, "font-family": font }, svg);
+  xt.textContent = "Bias ratio  β − 1";
+  const yt = el("text", { x: 18, y: oy, "text-anchor": "middle", fill: ink2, "font-size": 14.5, "font-weight": 600, "font-family": font, transform: `rotate(-90 18 ${oy})` }, svg);
+  yt.textContent = "Variability ratio  α − 1";
+
+  // model marks
+  const gM = el("g", {}, svg);
+  models.forEach((mod, idx) => {
+    const { m } = mod;
+    if (!Number.isFinite(m.x) || !Number.isFinite(m.y)) return;
+    const color = seriesColor(idx);
+    const dim = solo !== null && solo !== idx;
+    const g = el("g", { opacity: dim ? 0.15 : 1, "data-i": idx, cursor: "pointer" }, gM);
+    const px = X(m.x), py = Y(m.y);
+
+    if (showW && Number.isFinite(m.E)) {
+      if (m.eab > 1e-9) {
+        const ux = m.x / m.eab, uy = m.y / m.eab;
+        const ex = X(m.x + m.corrErr * ux), ey = Y(m.y + m.corrErr * uy);
+        el("line", { x1: px, y1: py, x2: ex, y2: ey, stroke: color, "stroke-width": 2, "stroke-linecap": "round" }, g);
+        // triangle at total error E (reference-implementation convention)
+        el("path", { d: markPath("triangle", ex, ey, 7), fill: surface }, g);
+        el("path", { d: markPath("triangle", ex, ey, 5), fill: color }, g);
+      } else {
+        el("circle", { cx: ox, cy: oy, r: m.E * k, fill: "none", stroke: color, "stroke-width": 1.5, "stroke-dasharray": "4 4" }, g);
+      }
+    }
+    // circle at Eαβ: filled if ρ >= 0, hollow if ρ < 0 (reference-implementation convention)
+    el("circle", { cx: px, cy: py, r: 8, fill: surface }, g);
+    el("circle", { cx: px, cy: py, r: 5.5, fill: m.r >= 0 ? color : surface, stroke: color, "stroke-width": 2 }, g);
+    if (showL) {
+      const t = el("text", { x: px + 10, y: py - 9, fill: ink2, "font-size": 11.5, "font-family": font, "paint-order": "stroke", stroke: surface, "stroke-width": 3 }, g);
+      t.textContent = mod.name;
+    }
+    // generous hit target
+    const hit = el("circle", { cx: px, cy: py, r: 14, fill: "transparent" }, g);
+    hit.addEventListener("mousemove", ev => showTip(ev, mod, color, "circle"));
+    hit.addEventListener("mouseleave", hideTip);
+    hit.addEventListener("click", () => { solo = solo === idx ? null : idx; renderAll(); });
+  });
+}
+
+/* ---------------- tooltip ---------------- */
+function keySVG(color, shape, size = 14, hollow = false) {
+  const r = size * 0.32;
+  const fill = hollow ? `fill="none" stroke="${color}" stroke-width="2"` : `fill="${color}"`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="vertical-align:-2px"><path d="${markPath(shape, size / 2, size / 2, r)}" ${fill}/></svg>`;
+}
+function showTip(ev, mod, color, shape) {
+  const tip = $("tooltip"), box = $("chartbox").getBoundingClientRect();
+  const { m } = mod;
+  tip.innerHTML = `<h4>${keySVG(color, shape)} ${mod.name}</h4><table>
+    <tr><td>KGE</td><td>${fmt(m.kge)}</td></tr>
+    <tr><td>Total error E = 1−KGE</td><td>${fmt(m.E)}</td></tr>
+    <tr><td>Bias–variability Eαβ</td><td>${fmt(m.eab)}</td></tr>
+    <tr><td>Correlation error E−Eαβ</td><td>${fmt(m.corrErr)}</td></tr>
+    <tr><td>Correlation ρ</td><td>${fmt(m.r)}</td></tr>
+    <tr><td>Bias ratio β</td><td>${fmt(m.beta)}</td></tr>
+    <tr><td>Variability ratio α</td><td>${fmt(m.alpha)}</td></tr>
+    <tr><td>Angle φ</td><td>${fmt(m.phi, 1)}°</td></tr>
+    <tr><td>n pairs</td><td>${m.n}</td></tr></table>`;
+  tip.style.display = "block";
+  const x = ev.clientX - box.left + 16, y = ev.clientY - box.top + 8;
+  const maxX = box.width - tip.offsetWidth - 8, maxY = box.height - tip.offsetHeight - 8;
+  tip.style.left = Math.min(x, Math.max(8, maxX)) + "px";
+  tip.style.top = Math.min(y, Math.max(8, maxY)) + "px";
+}
+function hideTip() { $("tooltip").style.display = "none"; }
+
+/* ---------------- legend ---------------- */
+function renderLegend() {
+  const lg = $("legend");
+  lg.innerHTML = "";
+  models.forEach((mod, idx) => {
+    const chip = document.createElement("button");
+    chip.className = "lg-chip" + (solo === idx ? " solo" : solo !== null ? " dim" : "");
+    chip.setAttribute("role", "listitem");
+    chip.innerHTML = keySVG(seriesColor(idx), "circle", 14, mod.m.r < 0) + `<span>${mod.name}</span>`;
+    chip.title = "Click to isolate this model";
+    chip.addEventListener("click", () => { solo = solo === idx ? null : idx; renderAll(); });
+    lg.appendChild(chip);
+  });
+}
+
+/* ---------------- ranking table ---------------- */
+const COLS = [
+  ["name", "Model"], ["r", "ρ"], ["beta", "β"], ["alpha", "α"],
+  ["eab", "Eαβ"], ["corrErr", "E−Eαβ"], ["E", "E"], ["phi", "φ°"], ["kge", "KGE"]
+];
+function renderTable() {
+  const tbl = $("rank");
+  const sorted = [...models].sort((a, b) => {
+    const va = sortKey === "name" ? a.name : a.m[sortKey], vb = sortKey === "name" ? b.name : b.m[sortKey];
+    if (typeof va === "string") return sortDir * va.localeCompare(vb);
+    const fa = Number.isFinite(va) ? va : -Infinity, fb = Number.isFinite(vb) ? vb : -Infinity;
+    return sortDir * (fa - fb);
+  });
+  const bestKGE = Math.max(...models.map(m => Number.isFinite(m.m.kge) ? m.m.kge : -Infinity));
+  let html = "<thead><tr>" + COLS.map(([key, lab]) =>
+    `<th class="${key === sortKey ? "on" : ""}" data-k="${key}" tabindex="0">${lab}${key === sortKey ? (sortDir > 0 ? " ↑" : " ↓") : ""}</th>`
+  ).join("") + "</tr></thead><tbody>";
+  for (const mod of sorted) {
+    const { m } = mod, idx = mod.i;
+    const kgeBar = Number.isFinite(m.kge) ? Math.max(0, Math.min(1, m.kge)) : 0;
+    html += `<tr><td class="name"><span class="key">${keySVG(seriesColor(idx), "circle", 13, m.r < 0)}</span>${mod.name}${m.kge === bestKGE ? '<span class="badge">best</span>' : ""}</td>` +
+      `<td>${fmt(m.r)}</td><td>${fmt(m.beta)}</td><td>${fmt(m.alpha)}</td><td>${fmt(m.eab)}</td>` +
+      `<td>${fmt(m.corrErr)}</td><td>${fmt(m.E)}</td><td>${fmt(m.phi, 1)}</td>` +
+      `<td><span class="meter"><span class="track"><span class="fill" style="width:${(kgeBar * 100).toFixed(0)}%"></span></span>${fmt(m.kge)}</span></td></tr>`;
+  }
+  tbl.innerHTML = html + "</tbody>";
+  tbl.querySelectorAll("th").forEach(th => {
+    const activate = () => {
+      const k = th.dataset.k;
+      if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = k === "name" ? 1 : -1; }
+      renderTable();
+    };
+    th.addEventListener("click", activate);
+    th.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
+  });
+}
+
+function renderMarkerKey() {
+  const ink = cssVar("--ink-2");
+  $("marker-key").innerHTML =
+    `${keySVG(ink, "circle", 13)} <b>E&alpha;&beta;</b> (bias&ndash;variability error; filled &rho;&thinsp;&ge;&thinsp;0, ` +
+    `${keySVG(ink, "circle", 13, true)} hollow &rho;&thinsp;&lt;&thinsp;0) &nbsp;&mdash;&nbsp; ` +
+    `${keySVG(ink, "triangle", 13)} <b>E</b> (total error, incl. correlation); segment length = correlation error. Hover a point for all metrics; click to isolate.`;
+}
+function renderAll() { renderChart(); renderLegend(); renderTable(); renderMarkerKey(); }
+
+/* ---------------- data wiring ---------------- */
+function setStatus(msg, err) {
+  const s = $("status");
+  s.textContent = msg;
+  s.className = "status" + (err ? " err" : "");
+}
+$("demo-btn").addEventListener("click", () => {
+  data = demoDataset();
+  recompute();
+  setStatus(`Demo loaded — ${models.length} models × 30 years of annual precipitation.`);
+});
+$("apply-btn").addEventListener("click", () => {
+  try {
+    const d = parseCSV($("paste-in").value);
+    data = d; recompute();
+    setStatus(`Parsed — reference “${d.obsName}”, ${models.length} model(s).`);
+  } catch (e) { setStatus(String(e), true); }
+});
+$("file-in").addEventListener("change", ev => {
+  const f = ev.target.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const d = parseCSV(rd.result);
+      data = d; recompute();
+      setStatus(`${f.name} — reference “${d.obsName}”, ${models.length} model(s).`);
+    } catch (e) { setStatus(String(e), true); }
+  };
+  rd.readAsText(f);
+});
+for (const id of ["opt-whisker", "opt-circles", "opt-quad", "opt-labels"]) $(id).addEventListener("change", renderChart);
+darkMq.addEventListener("change", renderAll);
+
+/* ---------------- exports ---------------- */
+function download(name, blob) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+$("dl-svg").addEventListener("click", () => {
+  const src = new XMLSerializer().serializeToString($("chart"));
+  download("aras-diagram.svg", new Blob(['<?xml version="1.0" encoding="UTF-8"?>' + src], { type: "image/svg+xml" }));
+});
+$("dl-png").addEventListener("click", () => {
+  const src = new XMLSerializer().serializeToString($("chart"));
+  const img = new Image();
+  img.onload = () => {
+    const scale = 3, c = document.createElement("canvas");
+    c.width = W * scale; c.height = H * scale;
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = cssVar("--surface");
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    c.toBlob(b => download("aras-diagram.png", b), "image/png");
+  };
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(src);
+});
+$("dl-csv").addEventListener("click", () => {
+  let csv = "model,n,r,beta_bias_ratio,alpha_variability_ratio,E_alpha_beta,correlation_error,E_total,KGE,phi_deg\n";
+  for (const mod of models) {
+    const { m } = mod;
+    csv += `"${mod.name}",${m.n},${fmt(m.r, 5)},${fmt(m.beta, 5)},${fmt(m.alpha, 5)},${fmt(m.eab, 5)},${fmt(m.corrErr, 5)},${fmt(m.E, 5)},${fmt(m.kge, 5)},${fmt(m.phi, 2)}\n`;
+  }
+  download("aras-diagram-metrics.csv", new Blob([csv], { type: "text/csv" }));
+});
+
+/* ---------------- boot ---------------- */
+recompute();
+setStatus(`Demo loaded — ${models.length} models × 30 years of annual precipitation.`);
+</script>
