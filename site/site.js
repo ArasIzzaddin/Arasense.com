@@ -156,15 +156,15 @@
         form.classList.add("sent");
         msg.className = "lf-msg ok";
         msg.textContent = "Request received. The " + (data.city ? data.city + " " : "") +
-          "brief will come from arasbotan.izzaddin@poliba.it.";
+          "brief will come from aras@arasense.com.";
       }).catch(function () {
         btn.disabled = false;
         msg.className = "lf-msg err";
         msg.innerHTML = 'That didn’t go through. Please email ' +
-          '<a href="mailto:arasbotan.izzaddin@poliba.it?subject=' +
+          '<a href="mailto:aras@arasense.com?subject=' +
           encodeURIComponent("Trust brief request: " + (data.city || "my region")) +
           '&body=' + encodeURIComponent("Please send the " + (data.city || "") +
-          " trust brief to: " + data.email) + '">arasbotan.izzaddin@poliba.it</a> directly.';
+          " trust brief to: " + data.email) + '">aras@arasense.com</a> directly.';
       });
     });
   });

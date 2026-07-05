@@ -533,7 +533,7 @@ $faq_html
             <span class="eyebrow">Founder</span>
             <h3>Aras Izzaddin</h3>
             <p>Founder &amp; Lead Researcher · Politecnico di Bari</p>
-            <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
+            <p><a href="mailto:aras@arasense.com">aras@arasense.com</a></p>
           </div>
           <div>
             <span class="eyebrow">Explore</span>
@@ -552,7 +552,7 @@ $faq_html
     </main>
   </div>
 
-  <script src="/site.js?v=7" defer></script>
+  <script src="/site.js?v=8" defer></script>
 </body>
 </html>
 """)
@@ -685,7 +685,7 @@ curl https://www.arasense.com/trust/lagos.json</pre>
             <span class="eyebrow">Founder</span>
             <h3>Aras Izzaddin</h3>
             <p>Founder &amp; Lead Researcher · Politecnico di Bari</p>
-            <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
+            <p><a href="mailto:aras@arasense.com">aras@arasense.com</a></p>
           </div>
           <div>
             <span class="eyebrow">Explore</span>
@@ -703,7 +703,7 @@ curl https://www.arasense.com/trust/lagos.json</pre>
     </main>
   </div>
 
-  <script src="/site.js?v=7" defer></script>
+  <script src="/site.js?v=8" defer></script>
 </body>
 </html>
 """)
