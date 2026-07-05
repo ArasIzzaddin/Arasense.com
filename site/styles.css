@@ -954,6 +954,36 @@ body { counter-reset: chapter; }
               0 34px 90px -42px rgba(0, 0, 0, 0.65);
 }
 
+/* ---- Photo bands: imagery under brand-tint overlays ----
+   contours.jpg is generated in-house; europe-night.jpg is NASA Black
+   Marble (public domain), cropped to Europe. Set the image per element
+   with --pb: url('bg/....jpg'). */
+
+.photo-band {
+  position: relative;
+  border-color: var(--line-strong);
+  background-image:
+    radial-gradient(760px 380px at 82% 18%, rgba(52, 211, 153, 0.14), transparent 62%),
+    linear-gradient(160deg, rgba(5, 13, 11, 0.88) 0%, rgba(6, 18, 14, 0.66) 55%, rgba(5, 13, 11, 0.9) 100%),
+    var(--pb);
+  background-size: auto, auto, cover;
+  background-position: 0 0, 0 0, center;
+  background-repeat: no-repeat;
+}
+
+.photo-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: radial-gradient(rgba(110, 231, 183, 0.16) 1.2px, transparent 1.2px);
+  background-size: 40px 40px;
+  -webkit-mask-image: radial-gradient(640px 340px at 78% 38%, #000, transparent 75%);
+  mask-image: radial-gradient(640px 340px at 78% 38%, #000, transparent 75%);
+  pointer-events: none;
+  opacity: 1;
+}
+
 /* ---- Trust command palette (Ctrl/Cmd+K) ---- */
 
 .pal-overlay {
