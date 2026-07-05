@@ -15,10 +15,14 @@
   progress.className = "progress";
   progress.setAttribute("aria-hidden", "true");
   document.body.prepend(progress);
+  var navWrap = document.querySelector(".nav-wrap");
   var ticking = false;
   function paintProgress() {
     var max = document.documentElement.scrollHeight - window.innerHeight;
-    progress.style.transform = "scaleX(" + (max > 0 ? window.scrollY / max : 0) + ")";
+    var y = window.scrollY;
+    progress.style.transform = "scaleX(" + (max > 0 ? y / max : 0) + ")";
+    if (!reduced) aurora.style.transform = "translateY(" + (y * 0.06).toFixed(1) + "px)";
+    if (navWrap) navWrap.classList.toggle("scrolled", y > 10);
     ticking = false;
   }
   window.addEventListener("scroll", function () {
@@ -187,6 +191,16 @@
       });
       b.addEventListener("pointerleave", function () { b.style.transform = ""; });
     });
+
+    /* hero headline drifts gently against the cursor */
+    var heroH1 = document.querySelector(".hero h1");
+    if (heroH1) {
+      document.addEventListener("pointermove", function (e) {
+        var dx = e.clientX / window.innerWidth - 0.5;
+        var dy = e.clientY / window.innerHeight - 0.5;
+        heroH1.style.transform = "translate(" + (dx * -7).toFixed(1) + "px," + (dy * -5).toFixed(1) + "px)";
+      }, { passive: true });
+    }
   }
 
   /* ---- Trust command palette (Ctrl/Cmd+K or /) ---- */
