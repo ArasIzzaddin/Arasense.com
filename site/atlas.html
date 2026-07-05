@@ -384,7 +384,7 @@
         </div>
 
         <div class="notice reveal" style="margin-top:16px;">
-          <strong>Preview tier.</strong> Global cities are screening-level, unranked, and deliberately few. The confidence flag is qualitative: it reflects how densely long-record ground observations constrain the ERA5-Land baseline in each region. Where it reads <em>weak</em>, the trust scores inherit that uncertainty; publishing the flag is the point. One computed city (Mexico City) is withheld, and we can tell you exactly why: several downscaled models produce physically impossible worst-rain-day baselines (up to 1,513&nbsp;mm) over its high-relief terrain, an artifact that mean-climate skill screening doesn't catch. It stays withheld until our pipeline screens extremes as strictly as means. Withholding a number we don't believe is also honesty.
+          <strong>Preview tier.</strong> Global cities are screening-level, unranked, and deliberately few. The confidence flag is qualitative: it reflects how densely long-record ground observations constrain the ERA5-Land baseline in each region. Where it reads <em>weak</em>, the trust scores inherit that uncertainty; publishing the flag is the point. Mexico City is this tier's proof of process: first published as <em>withheld</em>, because one downscaled model carried a physically impossible 1,513&nbsp;mm worst-rain-day baseline over its high-relief terrain. So we built an extreme-plausibility screen into the pipeline (any model beyond 5x the observed ERA5-Land level is excluded and named), re-ran the city, and published the honest result: a contested signal at 50% agreement. The pipeline now screens extremes as strictly as means.
         </div>
       </section>
 
@@ -457,7 +457,7 @@
     </main>
   </div>
 
-  <script src="atlas-data.js?v=3"></script>
+  <script src="atlas-data.js?v=4"></script>
   <script src="site.js?v=4" defer></script>
   <script>
   /* ================================================================

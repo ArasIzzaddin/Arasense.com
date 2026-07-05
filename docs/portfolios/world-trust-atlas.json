@@ -1,6 +1,6 @@
 {
  "case": "World Trust Atlas \u2014 global preview",
- "notes": "rx1day, SSP2-4.5, 1995-2014 vs 2040-2059, 50 km radius, fast_mode 5-model screening ensemble (same method as the European Trust Atlas). Each city carries a qualitative reference-data confidence tier.",
+ "notes": "rx1day, SSP2-4.5, 1995-2014 vs 2040-2059, 50 km radius, fast_mode 5-model screening ensemble (same method as the European Trust Atlas). Each city carries a qualitative reference-data confidence tier. Mexico City re-run 2026-07-05 with the extreme-plausibility screen after the corrupted-baseline diagnosis.",
  "cities": {
   "New York": {
    "lat": 40.713,
@@ -28,12 +28,13 @@
    "lat": 19.433,
    "lon": -99.133,
    "confidence": "moderate",
-   "historical": 262.9791876967681,
-   "future": 80.95094229418783,
-   "change": -182.0282454025803,
-   "pct_change": -69.21773810194841,
-   "agreement": 0.43018028173501155,
-   "n_trusted": 5
+   "historical": 71.51749621898583,
+   "future": 68.26155825286862,
+   "change": -3.255937966117206,
+   "pct_change": -4.552645350093854,
+   "agreement": 0.49608154420739753,
+   "n_trusted": 4,
+   "note_pipeline": "run with extreme-plausibility screen v1 (ratio bound 5x observed); BCC-CSM2-MR excluded at 1512.8 mm baseline"
   },
   "Sao Paulo": {
    "lat": -23.551,

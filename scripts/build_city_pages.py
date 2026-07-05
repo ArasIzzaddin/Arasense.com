@@ -37,6 +37,7 @@ COUNTRIES = {
     "Sao Paulo": "Brazil", "Lagos": "Nigeria", "Nairobi": "Kenya",
     "Cape Town": "South Africa", "Mumbai": "India", "Singapore": "Singapore",
     "Jakarta": "Indonesia", "Tokyo": "Japan", "Sydney": "Australia",
+    "Mexico City": "Mexico",
 }
 
 CONF_LABEL = {"strong": "strong", "moderate": "moderate", "weak": "weak · read with care"}

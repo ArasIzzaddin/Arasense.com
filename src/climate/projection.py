@@ -26,6 +26,9 @@ from __future__ import annotations
 
 import numpy as np
 
+from climate.adaptation import adaptation_options
+from climate.bias_correction import scalar_bias_correction
+from climate.confidence import projection_confidence
 from climate.trust_engine import ModelTrustEngine
 
 
@@ -80,9 +83,43 @@ METRICS = {
     "cdd":               _cdd,               # max consecutive dry days (drought)
 }
 
+# ── extreme-plausibility screen ────────────────────────────────────────
+# Mean-climate trust does not certify extreme-value sanity: statistically
+# downscaled models can track the monthly climatology well while producing
+# physically impossible daily extremes over complex terrain (Mexico City,
+# July 2026: baselines up to 1,513 mm/day rx1day in NEX-GDDP-CMIP6; see
+# docs/mexico-city-rx1day-investigation.md). Before weighting, any model
+# whose window-level value strays beyond PLAUSIBILITY_RATIO x the observed
+# reference level, in either window and either direction, is excluded and
+# reported. Applies to precipitation level metrics only: ratios to an
+# observed level are meaningless for Kelvin temperatures and unnecessary
+# for bounded day-fraction metrics.
+PLAUSIBILITY_RATIO = 5.0
+_PLAUSIBILITY_METRICS = {"mean", "p95", "rx1day"}
+
+
+def _plausibility_screen(per_model, metric, variable, reference_level):
+    """Split per_model into (kept, excluded) using the observed level."""
+    if (metric not in _PLAUSIBILITY_METRICS or variable != "precipitation"
+            or reference_level is None or not np.isfinite(reference_level)
+            or reference_level <= 0):
+        return per_model, []
+    lo = reference_level / PLAUSIBILITY_RATIO
+    hi = reference_level * PLAUSIBILITY_RATIO
+    kept, excluded = [], []
+    for m in per_model:
+        h, f = float(m["historical"]), float(m["future"])
+        if lo <= h <= hi and lo <= f <= hi:
+            kept.append(m)
+        else:
+            excluded.append({"name": m["name"], "historical": h, "future": f})
+    return kept, excluded
+
 
 def weighted_projection(per_model: list[dict], metric: str, n_total: int,
-                        trust_summary: dict | None = None) -> dict:
+                        trust_summary: dict | None = None,
+                        variable: str = "precipitation",
+                        reference_historical_level: float | None = None) -> dict:
     """
     Aggregate per-model (historical, future) hazard-metric values into a
     skill-weighted projected change with an uncertainty band.
@@ -101,6 +138,16 @@ def weighted_projection(per_model: list[dict], metric: str, n_total: int,
             "project from an out-of-skill ensemble."
         )
 
+    per_model, implausible = _plausibility_screen(
+        per_model, metric, variable, reference_historical_level)
+    if not per_model:
+        raise ValueError(
+            f"Every trusted model fails the extreme-plausibility screen for "
+            f"'{metric}' (values beyond {PLAUSIBILITY_RATIO:g}x the observed "
+            f"level of {reference_historical_level:.1f}); refusing to project "
+            f"from an ensemble with corrupted extremes."
+        )
+
     weights = np.array([m["weight"] for m in per_model], dtype=float)
     weights = weights / weights.sum()
     hist = np.array([float(m["historical"]) for m in per_model])
@@ -116,8 +163,9 @@ def weighted_projection(per_model: list[dict], metric: str, n_total: int,
     pct_change = (change / hist_level * 100.0) if abs(hist_level) > 1e-12 else None
     share_increase = float(np.average((deltas > 0).astype(float), weights=weights))
 
-    return {
+    result = {
         "metric": metric,
+        "variable": variable,
         "n_models_trusted": len(per_model),
         "n_models_total": n_total,
         "models_used": [m["name"] for m in per_model],
@@ -133,6 +181,25 @@ def weighted_projection(per_model: list[dict], metric: str, n_total: int,
         "per_model": per_model,
         "trust_summary": trust_summary,
     }
+    if implausible:
+        result["plausibility_screen"] = {
+            "reference_level": float(reference_historical_level),
+            "ratio_bound": PLAUSIBILITY_RATIO,
+            "n_excluded": len(implausible),
+            "excluded_models": implausible,
+        }
+    corrected = scalar_bias_correction(
+        per_model=per_model,
+        weights=weights,
+        metric=metric,
+        variable=variable,
+        historical_reference_level=reference_historical_level,
+    )
+    if corrected is not None:
+        result["bias_correction"] = corrected
+    result["confidence"] = projection_confidence(result)
+    result["adaptation_options"] = adaptation_options(metric, variable, result)
+    return result
 
 
 class ClimateProjection:
@@ -178,8 +245,16 @@ class ClimateProjection:
             }
             for r in self.engine.reports if r["weight"] > 0
         ]
-        return weighted_projection(per_model, metric, len(self.engine.reports),
-                                   self.engine.summary())
+        reference_metric = fn(self.engine.aras.ref, **metric_kwargs)
+        variable = "temperature" if metric in {"tx_max", "hot_day_frac"} else "precipitation"
+        return weighted_projection(
+            per_model,
+            metric,
+            len(self.engine.reports),
+            self.engine.summary(),
+            variable=variable,
+            reference_historical_level=reference_metric,
+        )
 
 
 if __name__ == "__main__":

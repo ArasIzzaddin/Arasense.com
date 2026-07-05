@@ -2106,7 +2106,7 @@ Venice,45.438,12.327</textarea>
       const metric = document.getElementById('proj-metric').value;
       const fastMode = document.getElementById('proj-fast').value === 'true';
       const locations = [];
-      for (const line of document.getElementById('proj-portfolio-input').value.trim().split('\n')) {
+      for (const line of document.getElementById('proj-portfolio-input').value.trim().split('\\n')) {
         const p = line.split(',').map((s) => s.trim());
         const lat = Number(p[1]), lon = Number(p[2]);
         if (p.length >= 3 && p[0] && !isNaN(lat) && !isNaN(lon)) locations.push({ name: p[0], lat, lon });
@@ -2567,7 +2567,29 @@ def _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, sce
         scenario=(scenario if is_future else None), loc_key=_loc_key(payload))
 
 
-def _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val):
+def _projection_reference_level(fetcher, roi, payload, hist_df):
+    """Observed (ERA5-Land) level of the requested metric over the historical
+    window and ROI. Feeds the extreme-plausibility screen and bias correction;
+    None (screen disabled) if the reference cannot be computed."""
+    try:
+        if payload.metric == "mean":
+            return float(hist_df["reference"].mean())
+        return fetcher.get_reference_extreme_stat(
+            geometry=roi,
+            start_date=payload.hist_start.isoformat(),
+            end_date=payload.hist_end.isoformat(),
+            variable=payload.variable,
+            stat=_STAT_BY_METRIC[payload.metric],
+            threshold=_THRESHOLD_BY_METRIC.get(payload.metric, 20.0),
+            loc_key=_loc_key(payload),
+        )
+    except Exception as exc:  # the screen is a safety net, not a hard dependency
+        print(f"  [reference level] unavailable, plausibility screen off: {exc}")
+        return None
+
+
+def _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val,
+                         reference_level=None):
     per_model = [
         {"name": n, "weight": report_by[n]["weight"], "trust_tier": report_by[n]["trust_tier"],
          "historical": hist_val[n], "future": fut_val[n]}
@@ -2575,7 +2597,9 @@ def _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fu
     ]
     if not per_model:
         raise HTTPException(status_code=404, detail="No trusted models present in both windows.")
-    return weighted_projection(per_model, payload.metric, len(engine.reports), engine.summary())
+    return weighted_projection(per_model, payload.metric, len(engine.reports), engine.summary(),
+                               variable=payload.variable,
+                               reference_historical_level=reference_level)
 
 
 @app.post("/api/climate/projection")
@@ -2598,7 +2622,9 @@ def climate_projection(payload: ClimateProjectionRequest) -> dict:
         engine, hist_df, trusted_names, report_by = _projection_score_trust(fetcher, roi, payload)
         hist_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, payload.scenario, "historical")
         fut_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, payload.scenario, "future")
-        proj = _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val)
+        ref_level = _projection_reference_level(fetcher, roi, payload, hist_df)
+        proj = _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val,
+                                    reference_level=ref_level)
 
         response = {
             "project_id": project_id,
@@ -2641,11 +2667,13 @@ def climate_projection_compare(payload: ClimateScenarioCompareRequest) -> dict:
 
         engine, hist_df, trusted_names, report_by = _projection_score_trust(fetcher, roi, payload)
         hist_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, None, "historical")
+        ref_level = _projection_reference_level(fetcher, roi, payload, hist_df)
 
         scenarios = {}
         for scen in payload.scenarios:
             fut_val = _projection_metric_values(fetcher, roi, payload, hist_df, trusted_names, scen, "future")
-            scenarios[scen] = _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val)
+            scenarios[scen] = _projection_assemble(payload, engine, report_by, trusted_names, hist_val, fut_val,
+                                                   reference_level=ref_level)
 
         response = {
             "project_id": project_id,
@@ -2710,7 +2738,9 @@ def climate_hazard_profile(payload: HazardProfileRequest) -> dict:
                 n_scored = len(engine.reports)
                 hist_val = _projection_metric_values(fetcher, roi, mp, hist_df, trusted_names, None, "historical")
                 fut_val = _projection_metric_values(fetcher, roi, mp, hist_df, trusted_names, payload.scenario, "future")
-                hazards[metric] = _projection_assemble(mp, engine, report_by, trusted_names, hist_val, fut_val)
+                ref_level = _projection_reference_level(fetcher, roi, mp, hist_df)
+                hazards[metric] = _projection_assemble(mp, engine, report_by, trusted_names, hist_val, fut_val,
+                                                       reference_level=ref_level)
             except HTTPException as exc:
                 hazards[metric] = {"error": exc.detail}
 
@@ -2769,7 +2799,9 @@ def climate_portfolio(payload: ClimatePortfolioRequest) -> dict:
                 engine, hist_df, trusted_names, report_by = _projection_score_trust(fetcher, roi, sub)
                 hist_val = _projection_metric_values(fetcher, roi, sub, hist_df, trusted_names, None, "historical")
                 fut_val = _projection_metric_values(fetcher, roi, sub, hist_df, trusted_names, payload.scenario, "future")
-                proj = _projection_assemble(sub, engine, report_by, trusted_names, hist_val, fut_val)
+                ref_level = _projection_reference_level(fetcher, roi, sub, hist_df)
+                proj = _projection_assemble(sub, engine, report_by, trusted_names, hist_val, fut_val,
+                                            reference_level=ref_level)
                 results.append((loc.name, {"projection": proj}))
             except HTTPException as exc:
                 results.append((loc.name, {"detail": exc.detail}))

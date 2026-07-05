@@ -221,7 +221,7 @@
     function ensureData(cb) {
       if (window.ATLAS) { cb(); return; }
       var s = document.createElement("script");
-      s.src = "/atlas-data.js?v=3";
+      s.src = "/atlas-data.js?v=4";
       s.onload = cb;
       s.onerror = cb;
       document.head.appendChild(s);

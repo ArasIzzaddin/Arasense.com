@@ -38,16 +38,31 @@ models track monthly climatology well enough to stay "usable" (weights 0.020 to
 0.033 — barely below the sane models), while their **daily extremes** are
 unphysical. Mean-climate trust does not certify extreme-value sanity.
 
-## Consequence and fix (roadmap)
+## Resolution (2026-07-05): extreme-plausibility screen shipped
 
-1. **Published stance:** Mexico City stays withheld in the Trust Atlas, with the
-   diagnosed reason stated publicly. Withholding a number we don't believe is
-   part of the method.
-2. **Pipeline fix (planned):** add a physical-plausibility screen on the hazard
-   metric itself before trust weighting — e.g. reject any model whose
-   window-level rx1day exceeds a sane multiple of the observed ERA5-Land value
-   for the same footprint (both windows). Trust must be earned on the extremes
-   being projected, not only on the means.
-3. **Paper relevance:** this is a concrete, demonstrable case for
-   metric-specific trust screening — a strong honest-methods exhibit for the
-   trust-weighting paper and for technical reviewers.
+The screen is now part of the pipeline (`src/climate/projection.py`,
+`PLAUSIBILITY_RATIO = 5.0`): before trust weighting, any model whose
+window-level value strays beyond 5x the observed ERA5-Land level for the same
+footprint (either window, either direction) is excluded and reported in the
+response under `plausibility_screen`. It applies to precipitation level
+metrics (mean, p95, rx1day); Kelvin temperatures and bounded day-fraction
+metrics are out of scope by construction. All API projection paths
+(projection, scenario compare, hazard profile, portfolio) now pass the
+observed reference level. Unit-tested in `tests/test_plausibility_screen.py`.
+
+**Mexico City re-run (fast mode, atlas settings), screen active:**
+
+- Observed ERA5-Land rx1day baseline: **67.0 mm**.
+- BCC-CSM2-MR excluded at 1,512.8 mm (22.6x observed); 4 of 5 screening
+  models kept.
+- Published signal: **-4.6%**, 71.5 to 68.3 mm, **50% agreement**: a genuinely
+  contested direction, published with the doubt attached.
+
+Cities with sane ensembles are untouched by the screen (it no-ops), so
+previously published atlas numbers are unchanged by construction; a full
+re-verification sweep of all atlas cities under the screen is the remaining
+follow-up.
+
+**Paper relevance:** a concrete, demonstrable case for metric-specific trust
+screening: mean-climate skill does not certify extreme-value sanity, and the
+fix is a one-parameter physical screen anchored to observations.
