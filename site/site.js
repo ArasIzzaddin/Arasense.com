@@ -206,7 +206,7 @@
   /* ---- Trust command palette (Ctrl/Cmd+K or /) ---- */
   (function () {
     var PAGES = [
-      ["Home", "/"], ["Trust Atlas", "/atlas.html"], ["Demo console", "/demo.html"],
+      ["Home", "/"], ["Why not just average?", "/why.html"], ["Trust Atlas", "/atlas.html"], ["Demo console", "/demo.html"],
       ["Case studies", "/case-studies.html"], ["Sample evidence", "/evidence.html"],
       ["Bari / Puglia pilot", "/bari-puglia.html"], ["Aras' Diagram Studio", "/aras-diagram.html"],
       ["All trust profiles", "/trust/"]

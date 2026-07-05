@@ -143,6 +143,15 @@
         [16,26,20,34,24].map(function(s,i){ return "<span style='width:"+s+"px;height:"+s+"px;" + (i===1?"":"") + "'></span>"; }).join("") +
         "<span class='r' style='width:20px;height:20px;'></span></div>"
     },
+    why: {
+      eyebrow: "THE SKEPTIC'S QUESTION",
+      title: "Why not just<br><em>average the models?</em>",
+      foot: "<b>www.arasense.com/why</b><span class='gem'>&#9670;</span>one broken model = 64 points<span class='gem'>&#9670;</span>the average believes everything",
+      motif: "<div class='cols'>" +
+        [-95,-14,-10,10,14,18,22].map(function(h){
+          return "<i class='" + (h<0?"neg":"") + "' style='height:" + Math.abs(h) + "px'></i>";
+        }).join("") + "</div>"
+    },
     atlas: {
       eyebrow: "THE CLIMATE MODEL TRUST ATLAS",
       title: "Europe ranked.<br><em>The world previewed.</em>",
