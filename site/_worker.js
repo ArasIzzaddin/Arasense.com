@@ -41,6 +41,9 @@ async function handleLead(request, env) {
     org: String(body.org || "").slice(0, 200),
     city: String(body.city || "").slice(0, 80),
     page: String(body.page || "").slice(0, 200),
+    name: String(body.name || "").slice(0, 120),
+    msg: String(body.msg || "").slice(0, 1000),
+    slots: String(body.slots || "").slice(0, 300),
     country: (request.cf && request.cf.country) || "",
     ts: new Date().toISOString(),
   };

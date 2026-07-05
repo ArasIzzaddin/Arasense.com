@@ -391,7 +391,7 @@ PAGE = Template("""<!doctype html>
         <a href="/case-studies.html">Case studies</a>
         <a href="/evidence.html">Evidence</a>
         <a href="/bari-puglia.html">Bari / Puglia</a>
-        <a class="nav-cta" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing">Request briefing</a>
+        <a class="nav-cta" href="/briefing.html">Request briefing</a>
       </nav>
     </header>
   </div>
@@ -552,7 +552,7 @@ $faq_html
     </main>
   </div>
 
-  <script src="/site.js?v=6" defer></script>
+  <script src="/site.js?v=7" defer></script>
 </body>
 </html>
 """)
@@ -633,7 +633,7 @@ HUB = Template("""<!doctype html>
         <a href="/case-studies.html">Case studies</a>
         <a href="/evidence.html">Evidence</a>
         <a href="/bari-puglia.html">Bari / Puglia</a>
-        <a class="nav-cta" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing">Request briefing</a>
+        <a class="nav-cta" href="/briefing.html">Request briefing</a>
       </nav>
     </header>
   </div>
@@ -673,7 +673,7 @@ curl https://www.arasense.com/trust/lagos.json</pre>
             trust-scored, projected, and defensible.
           </p>
           <div class="actions" style="justify-content:center;">
-            <a class="button" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20trust%20profile%20pilot">Put your region on the map</a>
+            <a class="button" href="/briefing.html">Put your region on the map</a>
             <a class="button-secondary" href="/atlas.html">Open the interactive atlas</a>
           </div>
         </div>
@@ -703,7 +703,7 @@ curl https://www.arasense.com/trust/lagos.json</pre>
     </main>
   </div>
 
-  <script src="/site.js?v=6" defer></script>
+  <script src="/site.js?v=7" defer></script>
 </body>
 </html>
 """)
@@ -891,6 +891,7 @@ def build_sitemap(cities, world):
     today = datetime.date.today().isoformat()
     static = [
         ("/", "1.0"), ("/why", "0.9"), ("/atlas", "0.9"), ("/trust/", "0.9"),
+        ("/briefing", "0.8"),
         ("/case-studies", "0.8"), ("/evidence", "0.8"),
         ("/demo", "0.7"), ("/bari-puglia", "0.7"),
     ]

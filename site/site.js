@@ -212,7 +212,7 @@
       ["All trust profiles", "/trust/"]
     ];
     var ACTIONS = [
-      ["Request a briefing", "mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing"],
+      ["Book a briefing", "/briefing.html"],
       ["Download the Bari / Puglia brief (PDF)", "/bari-puglia-climate-risk-brief.pdf"]
     ];
 
