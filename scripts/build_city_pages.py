@@ -195,7 +195,7 @@ PAGE = Template("""<!doctype html>
   <link rel="preload" href="/fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/styles.css?v=6">
+  <link rel="stylesheet" href="/styles.css?v=7">
   <script type="application/ld+json">$jsonld</script>
   <style>
     .page-hero { padding: 64px 0 0; }
@@ -552,7 +552,7 @@ $faq_html
     </main>
   </div>
 
-  <script src="/site.js?v=5" defer></script>
+  <script src="/site.js?v=6" defer></script>
 </body>
 </html>
 """)
@@ -579,7 +579,7 @@ HUB = Template("""<!doctype html>
   <link rel="preload" href="/fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/styles.css?v=6">
+  <link rel="stylesheet" href="/styles.css?v=7">
   <style>
     .page-hero { padding: 64px 0 0; }
     .page-hero h1 { max-width: 880px; margin: 0 0 22px; }
@@ -703,7 +703,7 @@ curl https://www.arasense.com/trust/lagos.json</pre>
     </main>
   </div>
 
-  <script src="/site.js?v=5" defer></script>
+  <script src="/site.js?v=6" defer></script>
 </body>
 </html>
 """)

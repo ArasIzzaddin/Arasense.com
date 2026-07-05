@@ -338,6 +338,40 @@
     }
   })();
 
+  /* Chapter rail: fixed dot nav built from .section[data-chapter] */
+  (function () {
+    var chapters = document.querySelectorAll(".section[data-chapter]");
+    if (chapters.length < 3) return;
+    var rail = document.createElement("nav");
+    rail.className = "rail";
+    rail.setAttribute("aria-label", "Page chapters");
+    var dots = [];
+    chapters.forEach(function (s) {
+      var a = document.createElement("a");
+      a.href = "#" + s.id;
+      a.setAttribute("aria-label", s.getAttribute("data-chapter"));
+      var label = document.createElement("span");
+      label.textContent = s.getAttribute("data-chapter");
+      a.appendChild(label);
+      rail.appendChild(a);
+      dots.push(a);
+    });
+    document.body.appendChild(rail);
+    if ("IntersectionObserver" in window) {
+      var active = null;
+      var cio = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            if (active) active.classList.remove("on");
+            active = dots[Array.prototype.indexOf.call(chapters, e.target)];
+            if (active) active.classList.add("on");
+          }
+        });
+      }, { rootMargin: "-40% 0px -50% 0px" });
+      chapters.forEach(function (s) { cio.observe(s); });
+    }
+  })();
+
   /* Highlight current page in nav */
   var here = location.pathname.split("/").pop() || "index.html";
   document.querySelectorAll(".nav-links a").forEach(function (a) {
