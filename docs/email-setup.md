@@ -47,4 +47,5 @@ windows) in the LEADS KV namespace. Read them with:
     npx wrangler kv key list --namespace-id <ID> --prefix lead: | ConvertFrom-Json | ForEach-Object name
     npx wrangler kv key get "<key>" --namespace-id <ID>
 
-(`npx wrangler kv namespace list` shows the ID.)
+The namespace is `arasense-leads`, ID `f263b2f4939543a9ada03bc2db1db395`
+(bound to the Pages project as LEADS on 2026-07-05; funnel verified end to end).
