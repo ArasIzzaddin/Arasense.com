@@ -213,7 +213,7 @@
 <div class="sitebar">
   <div class="sitebar-in">
     <a href="index.html">← Arasense</a>
-    <span>The model-trust method behind arasense.com — peer-reviewed, open source, runs entirely in your browser.</span>
+    <span>The model-trust method behind arasense.com: peer-reviewed, open source, runs entirely in your browser.</span>
   </div>
 </div>
 
@@ -226,7 +226,7 @@
         <div class="cite">
           Interactive companion to <a href="https://doi.org/10.1007/s00477-024-02678-3" target="_blank" rel="noopener">Izzaddin, Langousis, Totaro, Yaseen &amp; Iacobellis (2024), <i>A new diagram for performance evaluation of complex models</i>, Stoch Environ Res Risk Assess 38:2261&ndash;2281</a>.
           Numerically verified against the <a href="https://github.com/ArasIzzaddin/Aras_diagram" target="_blank" rel="noopener">reference implementation (github.com/ArasIzzaddin/Aras_diagram, MIT)</a>.
-          Paste your observations and model series &mdash; the diagram, the KGE decomposition and the ranking update instantly.
+          Paste your observations and model series; the diagram, the KGE decomposition and the ranking update instantly.
         </div>
       </div>
       <div class="actions">
@@ -265,11 +265,11 @@
           <p>Each model is placed at (<i>&beta;</i>&thinsp;&minus;&thinsp;1, <i>&alpha;</i>&thinsp;&minus;&thinsp;1), where <i>&beta;</i> = &mu;<sub>m</sub>/&mu;<sub>o</sub> is the bias ratio and <i>&alpha;</i> = &sigma;<sub>m</sub>/&sigma;<sub>o</sub> the variability ratio. The origin is the perfect model.</p>
           <div class="eq">E&alpha;&beta; = &radic;[ (&alpha;&minus;1)&sup2; + (&beta;&minus;1)&sup2; ]</div>
           <div class="eq">E = 1 &minus; KGE = &radic;[ (&rho;&minus;1)&sup2; + (&alpha;&minus;1)&sup2; + (&beta;&minus;1)&sup2; ]</div>
-          <p>Each model appears as a <b>circle</b> at (<i>&beta;</i>&minus;1, <i>&alpha;</i>&minus;1) &mdash; filled when &rho;&thinsp;&ge;&thinsp;0, hollow when &rho;&thinsp;&lt;&thinsp;0 &mdash; whose distance from the origin is <i>E&alpha;&beta;</i>, the error induced by bias and variability. A <b>triangle</b> sits on the same ray at distance <i>E</i>: the connecting segment&rsquo;s length <i>E&thinsp;&minus;&thinsp;E&alpha;&beta;</i> is the error contributed by imperfect correlation.</p>
+          <p>Each model appears as a <b>circle</b> at (<i>&beta;</i>&minus;1, <i>&alpha;</i>&minus;1) , filled when &rho;&thinsp;&ge;&thinsp;0 and hollow when &rho;&thinsp;&lt;&thinsp;0, whose distance from the origin is <i>E&alpha;&beta;</i>, the error induced by bias and variability. A <b>triangle</b> sits on the same ray at distance <i>E</i>: the connecting segment&rsquo;s length <i>E&thinsp;&minus;&thinsp;E&alpha;&beta;</i> is the error contributed by imperfect correlation.</p>
           <p>Circles mark constant total-error levels (a mark inside the 10% circle has error below 0.10). Quadrants tell you at a glance whether a model over- or under-estimates the mean (left&ndash;right) and the variability (down&ndash;up).</p>
           <details>
             <summary>Demo dataset</summary>
-            <p>Thirty synthetic years of total annual precipitation for a Southern-Italy-like climate (E-OBS-style reference, &mu; &asymp; 750&nbsp;mm), with six model series constructed to hit exact bias, variability and correlation targets &mdash; including one negatively correlated model so you can see the hollow endpoint marker. Replace it with your own EURO-CORDEX / CMIP / hydrological series.</p>
+            <p>Thirty synthetic years of total annual precipitation for a Southern-Italy-like climate (E-OBS-style reference, &mu; &asymp; 750&nbsp;mm), with six model series constructed to hit exact bias, variability and correlation targets, including one negatively correlated model so you can see the hollow endpoint marker. Replace it with your own EURO-CORDEX / CMIP / hydrological series.</p>
           </details>
         </div>
       </div>
@@ -443,7 +443,7 @@ function markPath(shape, cx, cy, r) {
   if (shape === "triangle") { const h = r * 1.25; return `M${cx},${cy - h}L${cx + h * 0.95},${cy + h * 0.72}L${cx - h * 0.95},${cy + h * 0.72}Z`; }
   return `M${cx},${cy}m${-r},0a${r},${r} 0 1,0 ${2 * r},0a${r},${r} 0 1,0 ${-2 * r},0`;
 }
-function fmt(v, d = 3) { return Number.isFinite(v) ? v.toFixed(d) : "—"; }
+function fmt(v, d = 3) { return Number.isFinite(v) ? v.toFixed(d) : "···"; }
 function niceStep(range, target) {
   const raw = range / target, p = Math.pow(10, Math.floor(Math.log10(raw)));
   for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= raw) return m * p;
@@ -647,7 +647,7 @@ function renderMarkerKey() {
   const ink = cssVar("--ink-2");
   $("marker-key").innerHTML =
     `${keySVG(ink, "circle", 13)} <b>E&alpha;&beta;</b> (bias&ndash;variability error; filled &rho;&thinsp;&ge;&thinsp;0, ` +
-    `${keySVG(ink, "circle", 13, true)} hollow &rho;&thinsp;&lt;&thinsp;0) &nbsp;&mdash;&nbsp; ` +
+    `${keySVG(ink, "circle", 13, true)} hollow &rho;&thinsp;&lt;&thinsp;0) &nbsp;,&nbsp; ` +
     `${keySVG(ink, "triangle", 13)} <b>E</b> (total error, incl. correlation); segment length = correlation error. Hover a point for all metrics; click to isolate.`;
 }
 function renderAll() { renderChart(); renderLegend(); renderTable(); renderMarkerKey(); }
@@ -661,13 +661,13 @@ function setStatus(msg, err) {
 $("demo-btn").addEventListener("click", () => {
   data = demoDataset();
   recompute();
-  setStatus(`Demo loaded — ${models.length} models × 30 years of annual precipitation.`);
+  setStatus(`Demo loaded: ${models.length} models × 30 years of annual precipitation.`);
 });
 $("apply-btn").addEventListener("click", () => {
   try {
     const d = parseCSV($("paste-in").value);
     data = d; recompute();
-    setStatus(`Parsed — reference “${d.obsName}”, ${models.length} model(s).`);
+    setStatus(`Parsed: reference “${d.obsName}”, ${models.length} model(s).`);
   } catch (e) { setStatus(String(e), true); }
 });
 $("file-in").addEventListener("change", ev => {
@@ -678,7 +678,7 @@ $("file-in").addEventListener("change", ev => {
     try {
       const d = parseCSV(rd.result);
       data = d; recompute();
-      setStatus(`${f.name} — reference “${d.obsName}”, ${models.length} model(s).`);
+      setStatus(`${f.name}: reference “${d.obsName}”, ${models.length} model(s).`);
     } catch (e) { setStatus(String(e), true); }
   };
   rd.readAsText(f);
@@ -723,5 +723,5 @@ $("dl-csv").addEventListener("click", () => {
 
 /* ---------------- boot ---------------- */
 recompute();
-setStatus(`Demo loaded — ${models.length} models × 30 years of annual precipitation.`);
+setStatus(`Demo loaded: ${models.length} models × 30 years of annual precipitation.`);
 </script>

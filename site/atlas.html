@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>The Climate Model Trust Atlas — Arasense</title>
+  <title>The Climate Model Trust Atlas · Arasense</title>
   <meta name="description" content="An interactive atlas of climate-model trust across Europe: click a city to see its trust-weighted 2050 rainfall signal, model agreement, and how the projection earned its number.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://www.arasense.com/atlas.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="The Climate Model Trust Atlas — Arasense">
+  <meta property="og:title" content="The Climate Model Trust Atlas · Arasense">
   <meta property="og:description" content="Click a European city. See which climate models earned trust there, and what they say about 2050.">
   <meta property="og:url" content="https://www.arasense.com/atlas.html">
   <meta property="og:image" content="https://www.arasense.com/og/atlas.png?v=3">
@@ -20,7 +20,7 @@
   <link rel="preload" href="fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <style>
     .page-hero { padding: 72px 0 0; }
     .page-hero h1 { max-width: 880px; margin: 0 0 22px; }
@@ -305,7 +305,7 @@
         <span class="eyebrow">The Climate Model Trust Atlas · Europe + global preview</span>
         <h1>Click a city. See who <em>earned</em> the projection.</h1>
         <p class="lead">
-          Every pin is a real Arasense run — one consistent method across Europe. Climate models are scored against observed local climate, then trust-weighted into a mid-century flood-driving-rainfall signal. Model agreement is shown for every number, because a projection without it is just a guess with confidence.
+          Every pin is a real Arasense run: one consistent method across Europe. Climate models are scored against observed local climate, then trust-weighted into a mid-century flood-driving-rainfall signal. Model agreement is shown for every number, because a projection without it is just a guess with confidence.
         </p>
       </section>
 
@@ -328,7 +328,7 @@
             <div class="agree-bar"><i id="d-agree-bar"></i></div>
           </div>
           <div class="deep-dive" id="d-deep">
-            Full 34-model deep dive available for this city: <b>+14.2%</b> with 32 of 34 CMIP6 models passing skill screening — see the <a href="case-studies.html#bologna">Bologna case study</a> or the <a href="index.html#lab">live trust visual</a>.
+            Full 34-model deep dive available for this city: <b>+14.2%</b> with 32 of 34 CMIP6 models passing skill screening; see the <a href="case-studies.html#bologna">Bologna case study</a> or the <a href="index.html#lab">live trust visual</a>.
           </div>
           <p class="detail-note" id="d-note"></p>
         </aside>
@@ -337,7 +337,7 @@
       <section class="section">
         <div class="section-head reveal">
           <span class="eyebrow">Side by side</span>
-          <h2>Same method, every city — <em>ranked</em></h2>
+          <h2>Same method, every city. <em>Ranked.</em></h2>
           <p>Trust-weighted mid-century change in maximum 1-day precipitation, SSP2-4.5. Click a row to inspect the city.</p>
         </div>
         <div class="panel compare reveal" id="compare"></div>
@@ -348,10 +348,10 @@
       <!-- ============ GLOBAL PREVIEW ============ -->
       <section class="section world-section" id="world">
         <div class="section-head reveal">
-          <span class="eyebrow">Global preview — new</span>
+          <span class="eyebrow">Global preview · new</span>
           <h2>The method is global. <em>The honesty travels with it.</em></h2>
           <p class="lead">
-            World cities, run through the exact same pipeline as Europe. One thing changes outside Europe: how strongly ground observations constrain the reference data. So every pin carries a <b style="color:var(--text); font-weight:600;">reference-data confidence flag</b> — we trust-score our own baseline, not just the models.
+            World cities, run through the exact same pipeline as Europe. One thing changes outside Europe: how strongly ground observations constrain the reference data. So every pin carries a <b style="color:var(--text); font-weight:600;">reference-data confidence flag</b>: we trust-score our own baseline, not just the models.
           </p>
         </div>
 
@@ -361,7 +361,7 @@
             <div class="conf-legend" aria-hidden="true">
               <span>STRONG REFERENCE DATA</span>
               <span class="c-m">MODERATE</span>
-              <span class="c-w">WEAK — READ WITH CARE</span>
+              <span class="c-w">WEAK · READ WITH CARE</span>
             </div>
             <div class="city-chips" id="world-chips" role="tablist" aria-label="Select a preview city"></div>
           </div>
@@ -384,7 +384,7 @@
         </div>
 
         <div class="notice reveal" style="margin-top:16px;">
-          <strong>Preview tier.</strong> Global cities are screening-level, unranked, and deliberately few. The confidence flag is qualitative: it reflects how densely long-record ground observations constrain the ERA5-Land baseline in each region. Where it reads <em>weak</em>, the trust scores inherit that uncertainty — publishing the flag is the point. One computed city (Mexico City) is withheld — and we can tell you exactly why: several downscaled models produce physically impossible worst-rain-day baselines (up to 1,513&nbsp;mm) over its high-relief terrain, an artifact that mean-climate skill screening doesn't catch. It stays withheld until our pipeline screens extremes as strictly as means. Withholding a number we don't believe is also honesty.
+          <strong>Preview tier.</strong> Global cities are screening-level, unranked, and deliberately few. The confidence flag is qualitative: it reflects how densely long-record ground observations constrain the ERA5-Land baseline in each region. Where it reads <em>weak</em>, the trust scores inherit that uncertainty; publishing the flag is the point. One computed city (Mexico City) is withheld, and we can tell you exactly why: several downscaled models produce physically impossible worst-rain-day baselines (up to 1,513&nbsp;mm) over its high-relief terrain, an artifact that mean-climate skill screening doesn't catch. It stays withheld until our pipeline screens extremes as strictly as means. Withholding a number we don't believe is also honesty.
         </div>
       </section>
 
@@ -399,7 +399,7 @@
           <div class="card reveal">
             <span class="label">Ensembles</span>
             <h3>Two depths of analysis</h3>
-            <p>Atlas cities are screened with a 5-model trust ensemble. Bologna additionally has a full 34-model CMIP6 deep dive — which is why its two numbers (+10.8% screening, +14.2% full ensemble) differ. Both are shown, on purpose.</p>
+            <p>Atlas cities are screened with a 5-model trust ensemble. Bologna additionally has a full 34-model CMIP6 deep dive, which is why its two numbers (+10.8% screening, +14.2% full ensemble) differ. Both are shown, on purpose.</p>
           </div>
           <div class="card reveal">
             <span class="label">Data</span>
@@ -409,11 +409,11 @@
           <div class="card reveal">
             <span class="label">Coverage</span>
             <h3 id="coverage-title">Cities across Europe, more with every pilot</h3>
-            <p>Every ranked pin was computed with the same pipeline on the same settings — the ranking is comparable by construction. Each city also has a <a href="trust/">full trust profile page</a>. Bari / Puglia is the current pilot region; its evidence pack is in preparation.</p>
+            <p>Every ranked pin was computed with the same pipeline on the same settings, so the ranking is comparable by construction. Each city also has a <a href="trust/">full trust profile page</a>. Bari / Puglia is the current pilot region; its evidence pack is in preparation.</p>
           </div>
         </div>
         <div class="notice reveal" style="margin-top:16px;">
-          <strong>Scope note.</strong> Atlas signals are screening-level evidence for prioritization and planning conversations — not a substitute for site-specific engineering studies. Screening ensembles are small by design; a full-ensemble deep dive is how a pin becomes decision evidence.
+          <strong>Scope note.</strong> Atlas signals are screening-level evidence for prioritization and planning conversations, not a substitute for site-specific engineering studies. Screening ensembles are small by design; a full-ensemble deep dive is how a pin becomes decision evidence.
         </div>
       </section>
 
@@ -424,7 +424,7 @@
           <span class="eyebrow" style="justify-content:center;">Your geography</span>
           <h2 style="max-width:620px; margin:0 auto 14px;">Your region isn't on this map. <em>That's the point.</em></h2>
           <p style="max-width:520px; margin:0 auto 26px;">
-            A pilot engagement starts with your locations and ends with them pinned here — trust-scored, projected, and defensible.
+            A pilot engagement starts with your locations and ends with them pinned here: trust-scored, projected, and defensible.
           </p>
           <div class="actions" style="justify-content:center;">
             <a class="button" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20Atlas%20pilot">Put your region on the map</a>
@@ -438,7 +438,7 @@
           <div>
             <span class="eyebrow">Founder</span>
             <h3>Aras Izzaddin</h3>
-            <p>Founder &amp; Lead Researcher — Politecnico di Bari</p>
+            <p>Founder &amp; Lead Researcher · Politecnico di Bari</p>
             <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
           </div>
           <div>
@@ -450,18 +450,18 @@
           </div>
         </div>
         <div class="footer-meta">
-          <span>© 2026 Arasense — www.arasense.com</span>
+          <span>© 2026 Arasense · www.arasense.com</span>
           <span>Guided demos, pilot studies, and selected collaborations</span>
         </div>
       </footer>
     </main>
   </div>
 
-  <script src="atlas-data.js?v=2"></script>
-  <script src="site.js?v=3" defer></script>
+  <script src="atlas-data.js?v=3"></script>
+  <script src="site.js?v=4" defer></script>
   <script>
   /* ================================================================
-     Trust Atlas (Europe) — geometry and per-city numbers come from
+     Trust Atlas (Europe): geometry and per-city numbers come from
      atlas-data.js, generated by scripts/build_atlas_data.py from the
      portfolio JSONs in docs/portfolios/. No hand-edited numbers.
      ================================================================ */
@@ -484,7 +484,7 @@
 
     A.paths.forEach(function (d) { el("path", { d: d, "class": "country" }); });
 
-    /* pins — label side flips for cities near the right edge */
+    /* pins: label side flips for cities near the right edge */
     var pins = {};
     A.cities.forEach(function (c) {
       var g = el("g", { "class": "pin" + (c.pilot ? " pilot" : ""), transform: "translate(" + c.x + "," + c.y + ")", tabindex: "0", role: "button", "aria-label": c.name });
@@ -564,7 +564,7 @@
       if (c.pilot) {
         $("d-rank").textContent = "PILOT REGION";
         $("d-metric").textContent = "Bari / Puglia · evidence pack in preparation";
-        $("d-change").textContent = "—";
+        $("d-change").textContent = "···";
         $("d-change").classList.remove("negative");
         $("d-values").textContent = "trust-scored atlas numbers follow the pilot";
         $("d-agree-row").style.visibility = "hidden";
@@ -585,7 +585,7 @@
   })();
 
   /* ================================================================
-     Global preview tier — same generated data file; the section stays
+     Global preview tier: same generated data file; the section stays
      hidden unless atlas-data.js carries a world payload.
      ================================================================ */
   (function () {

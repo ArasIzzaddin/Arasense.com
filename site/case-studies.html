@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Case Studies — Arasense</title>
+  <title>Case Studies · Arasense</title>
   <meta name="description" content="Arasense case studies: trust-weighted climate projections for Bologna, an Italian portfolio ranking, and the Bari / Puglia regional application.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://www.arasense.com/case-studies.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Case Studies — Arasense">
+  <meta property="og:title" content="Case Studies · Arasense">
   <meta property="og:description" content="Trust-weighted climate projections with every model, weight, and uncertainty range shown.">
   <meta property="og:url" content="https://www.arasense.com/case-studies.html">
   <meta property="og:image" content="https://www.arasense.com/og/case-studies.png?v=2">
@@ -20,7 +20,7 @@
   <link rel="preload" href="fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <style>
     .page-hero { padding: 72px 0 0; }
     .page-hero h1 { max-width: 820px; margin: 0 0 22px; }
@@ -125,7 +125,7 @@
       <section class="section" id="bologna">
         <div class="section-head reveal">
           <span class="eyebrow">Case 01</span>
-          <h2>Bologna — flood-driving rainfall</h2>
+          <h2>Bologna · flood-driving rainfall</h2>
           <div class="case-meta">
             <span>METRIC · MAX 1-DAY PRECIPITATION (RX1DAY)</span>
             <span>BASELINE · 1995–2014</span>
@@ -142,9 +142,9 @@
           <div class="kpi"><strong class="num">78%</strong><span>Trusted-model weight agreeing on an increase.</span></div>
         </div>
         <div class="panel reveal" style="margin-top:16px;">
-          <h3>The full trusted ensemble — every model, every vote</h3>
+          <h3>The full trusted ensemble: every model, every vote</h3>
           <p style="font-size:14px; margin-top:6px;">
-            Each column is one trusted model's projected change in Bologna's maximum 1-day rainfall. Most vote for heavier rain; a handful disagree — and the disagreement is shown, not averaged away. Hover any column.
+            Each column is one trusted model's projected change in Bologna's maximum 1-day rainfall. Most vote for heavier rain; a handful disagree, and the disagreement is shown, not averaged away. Hover any column.
           </p>
           <div class="ens" id="ens">
             <svg id="ens-svg" viewBox="0 0 900 250" role="img" aria-label="Column chart of all 32 trusted CMIP6 models' projected change in Bologna maximum 1-day rainfall; most project an increase, a few a decrease; the trust-weighted mean is +5.7 mm."></svg>
@@ -165,7 +165,7 @@
             </table>
           </div>
           <p style="margin-top:14px; font-size:14px;">
-            The full report lists every trusted and rejected model with its weight — see the <a href="index.html#lab" style="color:var(--accent-bright);">live visual on the homepage</a> for all 32 trusted models, or <a href="evidence.html" style="color:var(--accent-bright);">sample evidence</a> for the scenario comparison.
+            The full report lists every trusted and rejected model with its weight; see the <a href="index.html#lab" style="color:var(--accent-bright);">live visual on the homepage</a> for all 32 trusted models, or <a href="evidence.html" style="color:var(--accent-bright);">sample evidence</a> for the scenario comparison.
           </p>
         </div>
       </section>
@@ -197,7 +197,7 @@
             </table>
           </div>
           <p style="margin-top:14px; font-size:14px;">
-            Note how the agreement column changes the story: Venice's +3% carries only 56% model agreement — a signal to treat with caution, and exactly the kind of nuance a single ranking score would bury.
+            Note how the agreement column changes the story: Venice's +3% carries only 56% model agreement, a signal to treat with caution, and exactly the kind of nuance a single ranking score would bury.
           </p>
         </div>
       </section>
@@ -208,7 +208,7 @@
       <section class="section" id="bari">
         <div class="section-head reveal">
           <span class="eyebrow">Case 03</span>
-          <h2>Bari / Puglia — regional application</h2>
+          <h2>Bari / Puglia · regional application</h2>
           <p>
             The workflow applied to Bari and selected Puglia locations for adaptation planning, infrastructure resilience, and climate-risk communication.
           </p>
@@ -256,7 +256,7 @@
           <div>
             <span class="eyebrow">Founder</span>
             <h3>Aras Izzaddin</h3>
-            <p>Founder &amp; Lead Researcher — Politecnico di Bari</p>
+            <p>Founder &amp; Lead Researcher · Politecnico di Bari</p>
             <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
           </div>
           <div>
@@ -267,16 +267,16 @@
           </div>
         </div>
         <div class="footer-meta">
-          <span>© 2026 Arasense — www.arasense.com</span>
+          <span>© 2026 Arasense · www.arasense.com</span>
           <span>Guided demos, pilot studies, and selected collaborations</span>
         </div>
       </footer>
     </main>
   </div>
 
-  <script src="site.js?v=3" defer></script>
+  <script src="site.js?v=4" defer></script>
   <script defer>
-  /* Full-ensemble column chart — the same real per-model output used by
+  /* Full-ensemble column chart: the same real per-model output used by
      the homepage visual (Bologna rx1day projection, 32 trusted models). */
   window.addEventListener("DOMContentLoaded", function () {
     "use strict";

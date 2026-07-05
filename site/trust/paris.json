@@ -1,0 +1,21 @@
+{
+ "city": "Paris",
+ "country": "France",
+ "tier": "ranked",
+ "metric": "maximum 1-day precipitation (rx1day)",
+ "scenario": "SSP2-4.5",
+ "baseline_window": "1995-2014",
+ "future_window": "2040-2059",
+ "spatial_footprint_km": 50,
+ "baseline_mm": 30.82,
+ "projected_mm": 29.22,
+ "change_mm": -1.61,
+ "change_pct": -5.2,
+ "model_agreement_pct": 46,
+ "evidence_level": "screening (5-model trust ensemble)",
+ "method": "Aras Diagram trust screening vs ERA5-Land observations (Izzaddin et al. 2024, SERRA 38:2261-2281)",
+ "profile_html": "https://www.arasense.com/trust/paris.html",
+ "source": "Arasense, www.arasense.com",
+ "atlas_rank": 23,
+ "atlas_rank_of": 24
+}

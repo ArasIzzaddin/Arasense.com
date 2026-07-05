@@ -3,7 +3,7 @@ Build the per-city Trust Profile pages under site/trust/.
 
 Reads the same generated atlas data the Trust Atlas uses (site/atlas-data.js,
 built by scripts/build_atlas_data.py from the portfolio JSONs) so every page
-carries exactly the numbers the atlas shows — no hand-edited values.
+carries exactly the numbers the atlas shows; no hand-edited values.
 
 Outputs:
 - site/trust/<city>.html   one profile page per ranked atlas city (24)
@@ -39,12 +39,12 @@ COUNTRIES = {
     "Jakarta": "Indonesia", "Tokyo": "Japan", "Sydney": "Australia",
 }
 
-CONF_LABEL = {"strong": "strong", "moderate": "moderate", "weak": "weak — read with care"}
+CONF_LABEL = {"strong": "strong", "moderate": "moderate", "weak": "weak · read with care"}
 CONF_TEXT = {
     "strong": "Long-record ground observations strongly constrain the ERA5-Land "
               "baseline here, so the trust scores rest on solid reference data.",
     "moderate": "Ground observations moderately constrain the ERA5-Land baseline "
-                "here — solid for screening, worth deepening for decisions.",
+                "here: solid for screening, worth deepening for decisions.",
     "weak": "Sparse ground observations only weakly constrain the ERA5-Land "
             "baseline here; the trust scores inherit that uncertainty and "
             "should be read with the care the flag implies.",
@@ -80,15 +80,15 @@ def verdict_paragraphs(c, n_ranked, prev_c, next_c):
                    f"one of the more consistent signals in the atlas. The models that earned trust "
                    f"in {c['name']} broadly agree: the worst rain day gets {direction}.")
     elif support >= 70:
-        reading = (f"{support}% of trusted-model weight backs this direction — a solid signal, "
+        reading = (f"{support}% of trusted-model weight backs this direction: a solid signal, "
                    f"but not a unanimous one. The full spread is part of the evidence, "
                    f"not a footnote.")
     elif support >= 50:
         reading = (f"Only {support}% of trusted-model weight backs this direction. The number is "
-                   f"reported with its doubt attached — if a decision hangs on {c['name']}, "
+                   f"reported with its doubt attached; if a decision hangs on {c['name']}, "
                    f"this is a signal to deepen, not to quote alone.")
     else:
-        reading = (f"The trusted-model weight is split — {c['agree']}% points up, the rest down — "
+        reading = (f"The trusted-model weight is split ({c['agree']}% points up, the rest down), "
                    f"so the direction itself is contested here. Most tools would still print one "
                    f"confident number; the honest reading is that {c['name']} needs a full-ensemble "
                    f"deep dive before any number is quoted.")
@@ -103,7 +103,7 @@ def verdict_paragraphs(c, n_ranked, prev_c, next_c):
     else:
         position = f"just below {link(prev_c)}"
     rank_line = (f"{c['name']} ranks <strong>#{c['rank']} of {n_ranked}</strong> in the European "
-                 f"Trust Atlas — {position} — computed with the same method and settings "
+                 f"Trust Atlas, {position}, computed with the same method and settings "
                  f"as every other city, so the ranking is comparable by construction.")
 
     return (f"<p>The trust-weighted screening signal for {c['name']} is <strong>{pct}</strong> "
@@ -124,19 +124,19 @@ def world_verdict_paragraphs(c):
     sign = "+" if c["pct"] >= 0 else ""
     pct = f"{sign}{c['pct']:.1f}%"
     if support >= 90:
-        reading = (f"{support}% of trusted-model weight points the same way — an unusually "
+        reading = (f"{support}% of trusted-model weight points the same way: an unusually "
                    f"consistent screening signal: the worst rain day gets {direction}.")
     elif support >= 70:
-        reading = (f"{support}% of trusted-model weight backs this direction — a solid signal, "
+        reading = (f"{support}% of trusted-model weight backs this direction: a solid signal, "
                    f"but not a unanimous one.")
     else:
         reading = (f"Only {support}% of trusted-model weight backs this direction. The number is "
-                   f"reported with its doubt attached — a signal to deepen, not to quote alone.")
+                   f"reported with its doubt attached: a signal to deepen, not to quote alone.")
     return (f"<p>The trust-weighted screening signal for {c['name']} is <strong>{pct}</strong> "
             f"change in maximum 1-day precipitation by 2040–2059 under SSP2-4.5: "
             f"{c['hist']:.2f}&nbsp;mm → {c['fut']:.2f}&nbsp;mm on the baseline worst rain day. "
             f"{reading}</p>\n          <p>{c['name']} is part of the atlas's <strong>global "
-            f"preview tier</strong> — the same pipeline as the ranked European cities, published "
+            f"preview tier</strong>: the same pipeline as the ranked European cities, published "
             f"unranked while coverage grows. One thing changes outside Europe: "
             f"{CONF_TEXT[c['conf']]}</p>")
 
@@ -152,20 +152,20 @@ def faq_items(c):
          f"local reality earn weight in the projection; models that fail screening are rejected. "
          f"The weights and rejections are reported, never hidden."),
         (f"Can I use the {pct} figure in a report?",
-         f"As screening-level evidence, yes — always alongside its {c['agree']}% model-agreement "
+         f"As screening-level evidence, yes, always alongside its {c['agree']}% model-agreement "
          f"figure. It is built for prioritisation and planning conversations. For site-specific or "
          f"engineering-grade decisions, the next step is a full-ensemble deep dive for {c['name']}, "
          f"which names every trusted and rejected model with its weight."),
         ("Why not just average all climate models?",
          f"Averaging treats a model that mistracks {c['name']}’s observed climate the same as one "
          f"that nails it, and it buries how much credible models disagree. Trust-weighting measures "
-         f"each model’s local skill first, then lets the skilful ones carry the projection — and "
+         f"each model’s local skill first, then lets the skilful ones carry the projection, and "
          f"reports the remaining disagreement as part of the answer."),
         ("What exactly was computed?",
          "Maximum 1-day precipitation (rx1day) within a 50 km radius of the city, baseline "
          "1995–2014 versus future 2040–2059, scenario SSP2-4.5, using the 5-model trust-screening "
          "ensemble shared by every Trust Atlas city. Bologna additionally has a 34-model deep "
-         "dive, which is why its two published numbers differ — on purpose."),
+         "dive, which is why its two published numbers differ, on purpose."),
     ]
 
 
@@ -184,16 +184,17 @@ PAGE = Template("""<!doctype html>
   <meta property="og:title" content="$title">
   <meta property="og:description" content="$og_description">
   <meta property="og:url" content="$canonical">
-  <meta property="og:image" content="https://www.arasense.com/og/atlas.png">
+  <meta property="og:image" content="$og_image">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta name="twitter:image" content="https://www.arasense.com/og/atlas.png">
+  <meta name="twitter:image" content="$og_image">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="alternate" type="application/json" href="/trust/$cid.json" title="$city trust signal (JSON)">
   <link rel="preload" href="/fonts/instrument-serif-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=5">
   <script type="application/ld+json">$jsonld</script>
   <style>
     .page-hero { padding: 64px 0 0; }
@@ -401,7 +402,7 @@ PAGE = Template("""<!doctype html>
         <p class="lead">
           This page is a real Arasense run, not a brochure: climate models scored against observed
           climate near $city, the skilful ones trust-weighted into a mid-century signal for the
-          city&rsquo;s worst rain day — with model agreement reported, because a projection without
+          city&rsquo;s worst rain day, with model agreement reported, because a projection without
           it is just a guess with confidence.
         </p>
       </section>
@@ -443,24 +444,24 @@ $rank_rows
             <article class="step reveal">
               <h3>Score model trust at $city</h3>
               <p>Each climate model is compared against observed climate behaviour near $city and
-              decomposed with the Aras Diagram — bias, variability, and phase alignment, not one
+              decomposed with the Aras Diagram: bias, variability, and phase alignment, not one
               opaque score. Models that fail screening are rejected, and you see why.</p>
             </article>
             <article class="step reveal">
               <h3>Project with the models that earned it</h3>
               <p>Skill-weighted models estimate the mid-century change in $city&rsquo;s maximum
-              1-day rainfall — with the spread and the $agree% directional agreement reported,
+              1-day rainfall, with the spread and the $agree% directional agreement reported,
               never hidden.</p>
             </article>
             <article class="step reveal">
               <h3>Escalate where it matters</h3>
               <p>Atlas signals are screening-level evidence. Where a decision depends on $city,
-              the same pipeline runs the full CMIP6 ensemble — every trusted and rejected model
+              the same pipeline runs the full CMIP6 ensemble: every trusted and rejected model
               named, weighted, and auditable.</p>
             </article>
           </div>
           <div class="card reveal">
-            <span class="label">Run settings — identical for every atlas city</span>
+            <span class="label">Run settings · identical for every atlas city</span>
             <h3>What was computed</h3>
             <ul class="settings-list">
               <li><span>Metric</span><b>rx1day (max 1-day precipitation)</b></li>
@@ -476,7 +477,7 @@ $rank_rows
         </div>
         <div class="notice reveal" style="margin-top:16px;">
           <strong>Scope note.</strong> This is screening-level evidence for prioritisation and
-          planning conversations — not a substitute for site-specific engineering studies. The
+          planning conversations, not a substitute for site-specific engineering studies. The
           screening ensemble is small by design; a full-ensemble deep dive is how this number
           becomes decision evidence.
         </div>
@@ -492,7 +493,7 @@ $rank_rows
             <p style="max-width:560px;">
               The brief behind this page: the screening run in full, what a 34-model deep dive
               would add for $city, and how the evidence holds up in front of a technical reviewer.
-              Prepared per request from the same pipeline — tell us where to send it.
+              Prepared per request from the same pipeline; tell us where to send it.
             </p>
           </div>
           <form class="lead-form" data-city="$city">
@@ -515,12 +516,21 @@ $rank_rows
 $faq_html
       </section>
 
+      <section class="section">
+        <div class="card reveal">
+          <span class="label">Machine-readable</span>
+          <h3>This evidence is also an API</h3>
+          <p>Every trust profile publishes its signal as JSON, so risk platforms, notebooks, and reviewers can pull the number with its uncertainty attached:</p>
+          <pre style="background:#050f0c; border:1px solid var(--line); border-radius:10px; padding:16px 18px; overflow-x:auto; font-family:var(--font-mono); font-size:13px; color:#bfe8da; margin-top:12px;">curl https://www.arasense.com/trust/$cid.json</pre>
+        </div>
+      </section>
+
       <footer class="footer">
         <div class="footer-grid">
           <div>
             <span class="eyebrow">Founder</span>
             <h3>Aras Izzaddin</h3>
-            <p>Founder &amp; Lead Researcher — Politecnico di Bari</p>
+            <p>Founder &amp; Lead Researcher · Politecnico di Bari</p>
             <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
           </div>
           <div>
@@ -533,14 +543,14 @@ $faq_html
           </div>
         </div>
         <div class="footer-meta">
-          <span>© 2026 Arasense — www.arasense.com</span>
+          <span>© 2026 Arasense · www.arasense.com</span>
           <span>Guided demos, pilot studies, and selected collaborations</span>
         </div>
       </footer>
     </main>
   </div>
 
-  <script src="/site.js" defer></script>
+  <script src="/site.js?v=4" defer></script>
 </body>
 </html>
 """)
@@ -550,12 +560,12 @@ HUB = Template("""<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>City Trust Profiles — Which climate models to trust, city by city — Arasense</title>
+  <title>City Trust Profiles · Which climate models to trust, city by city · Arasense</title>
   <meta name="description" content="Trust-weighted mid-century rainfall signals for $n_ranked European cities, one consistent peer-reviewed method. Open any city to see which climate models earned trust there.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://www.arasense.com/trust/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="City Trust Profiles — Arasense">
+  <meta property="og:title" content="City Trust Profiles · Arasense">
   <meta property="og:description" content="Which climate models can you trust in each European city? $n_ranked profiles, one method.">
   <meta property="og:url" content="https://www.arasense.com/trust/">
   <meta property="og:image" content="https://www.arasense.com/og/atlas.png">
@@ -567,7 +577,7 @@ HUB = Template("""<!doctype html>
   <link rel="preload" href="/fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=5">
   <style>
     .page-hero { padding: 64px 0 0; }
     .page-hero h1 { max-width: 880px; margin: 0 0 22px; }
@@ -633,7 +643,7 @@ HUB = Template("""<!doctype html>
         <p class="lead">
           $n_ranked European cities, one consistent peer-reviewed method: models scored against
           observed local climate, trust-weighted into a mid-century signal for each city&rsquo;s
-          worst rain day. Open a city to see its full profile — including the doubt.
+          worst rain day. Open a city to see its full profile, including the doubt.
         </p>
       </section>
 
@@ -642,11 +652,21 @@ $rows
       </div>
 
       <section class="section">
+        <div class="card reveal">
+          <span class="label">Machine-readable</span>
+          <h3>The atlas is also an API</h3>
+          <p>Every profile publishes its trust signal as JSON with agreement and uncertainty attached. One index, one file per city, no key required:</p>
+          <pre style="background:#050f0c; border:1px solid var(--line); border-radius:10px; padding:16px 18px; overflow-x:auto; font-family:var(--font-mono); font-size:13px; color:#bfe8da; margin-top:12px;">curl https://www.arasense.com/trust/index.json
+curl https://www.arasense.com/trust/lagos.json</pre>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="panel reveal" style="padding:44px; text-align:center;">
           <span class="eyebrow" style="justify-content:center;">Your geography</span>
           <h2 style="max-width:620px; margin:0 auto 14px;">Your city isn&rsquo;t listed. <em>That&rsquo;s the point.</em></h2>
           <p style="max-width:520px; margin:0 auto 26px;">
-            A pilot engagement starts with your locations and ends with them profiled here —
+            A pilot engagement starts with your locations and ends with them profiled here,
             trust-scored, projected, and defensible.
           </p>
           <div class="actions" style="justify-content:center;">
@@ -661,7 +681,7 @@ $rows
           <div>
             <span class="eyebrow">Founder</span>
             <h3>Aras Izzaddin</h3>
-            <p>Founder &amp; Lead Researcher — Politecnico di Bari</p>
+            <p>Founder &amp; Lead Researcher · Politecnico di Bari</p>
             <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
           </div>
           <div>
@@ -673,14 +693,14 @@ $rows
           </div>
         </div>
         <div class="footer-meta">
-          <span>© 2026 Arasense — www.arasense.com</span>
+          <span>© 2026 Arasense · www.arasense.com</span>
           <span>Guided demos, pilot studies, and selected collaborations</span>
         </div>
       </footer>
     </main>
   </div>
 
-  <script src="/site.js" defer></script>
+  <script src="/site.js?v=4" defer></script>
 </body>
 </html>
 """)
@@ -757,7 +777,7 @@ def build_deep_dive(c):
     return ('\n          <p><strong style="color:var(--accent-bright);">Deep dive available.</strong> '
             'Bologna also has a full 34-model CMIP6 run: <strong>+14.2%</strong> with 32 of 34 '
             'models passing skill screening. Comparing it with the +10.8% screening signal above '
-            'is exactly the transparency this method exists for — see the '
+            'is exactly the transparency this method exists for; see the '
             '<a href="/case-studies.html#bologna">Bologna case study</a>.</p>')
 
 
@@ -766,7 +786,7 @@ def build_city_page(c, cities, n_ranked, world=None):
     country = COUNTRIES[c["name"]]
     sign = "+" if c["pct"] >= 0 else ""
     canonical = f"{BASE}/trust/{c['id']}"
-    title = f"Which climate models can you trust in {c['name']}? — Arasense"
+    title = f"Which climate models can you trust in {c['name']}? · Arasense"
     faqs = faq_items(c)
 
     if world is None:
@@ -796,8 +816,8 @@ def build_city_page(c, cities, n_ranked, world=None):
             f"Trust scores are only as good as the observations behind them. The flag is a "
             f"qualitative tier for how densely long-record ground observations constrain the "
             f"ERA5-Land baseline in each region. For {c['name']} it reads "
-            f"“{CONF_LABEL[c['conf']]}”. {CONF_TEXT[c['conf']]} Publishing the flag — instead of "
-            f"pretending every baseline is equally solid — is part of the method."))
+            f"“{CONF_LABEL[c['conf']]}”. {CONF_TEXT[c['conf']]} Publishing the flag, instead of "
+            f"pretending every baseline is equally solid, is part of the method."))
 
     faq_html = "\n".join(
         f'        <details class="reveal">\n          <summary>{q}</summary>\n'
@@ -805,10 +825,12 @@ def build_city_page(c, cities, n_ranked, world=None):
         for q, a in faqs)
 
     return PAGE.substitute(
+        cid=c["id"],
+        og_image=f"{BASE}/og/trust/{c['id']}.png?v=1",
         title=esc(title),
         description=esc(meta_description(c) + og_extra),
         og_description=esc(f"Trust-weighted signal for {c['name']}: {sign}{c['pct']:.1f}% change in "
-                           f"max 1-day rainfall by 2050, {c['agree']}% model agreement — see how "
+                           f"max 1-day rainfall by 2050, {c['agree']}% model agreement; see how "
                            f"the number was earned." + og_extra),
         canonical=canonical,
         jsonld=build_jsonld(c, canonical, faqs),
@@ -853,7 +875,7 @@ def build_hub(cities, n_ranked, world):
     if world:
         wmax = max(abs(c["pct"]) for c in world)
         rows.append('        <div style="padding:22px 8px 10px;">'
-                    '<span class="eyebrow">Global preview — unranked, '
+                    '<span class="eyebrow">Global preview · unranked, '
                     'reference-data confidence flagged</span></div>')
         for c in world:
             c["_w"] = abs(c["pct"]) / wmax * 100
@@ -878,25 +900,72 @@ def build_sitemap(cities, world):
             + "\n".join(urls) + "\n</urlset>\n")
 
 
+def build_city_json(c, n_ranked, world=False):
+    d = {
+        "city": c["name"],
+        "country": COUNTRIES[c["name"]],
+        "tier": "global-preview" if world else "ranked",
+        "metric": "maximum 1-day precipitation (rx1day)",
+        "scenario": "SSP2-4.5",
+        "baseline_window": "1995-2014",
+        "future_window": "2040-2059",
+        "spatial_footprint_km": 50,
+        "baseline_mm": c["hist"],
+        "projected_mm": c["fut"],
+        "change_mm": c["chg"],
+        "change_pct": c["pct"],
+        "model_agreement_pct": c["agree"],
+        "evidence_level": "screening (5-model trust ensemble)",
+        "method": "Aras Diagram trust screening vs ERA5-Land observations "
+                  "(Izzaddin et al. 2024, SERRA 38:2261-2281)",
+        "profile_html": f"{BASE}/trust/{c['id']}.html",
+        "source": "Arasense, www.arasense.com",
+    }
+    if world:
+        d["reference_data_confidence"] = c["conf"]
+    else:
+        d["atlas_rank"] = c["rank"]
+        d["atlas_rank_of"] = n_ranked
+    return d
+
+
 def main():
     import os
     cities, n_ranked, world = load_cities()
     os.makedirs(OUT_DIR, exist_ok=True)
 
+    index_json = []
     for c in cities:
-        path = f"{OUT_DIR}/{c['id']}.html"
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
+        with open(f"{OUT_DIR}/{c['id']}.html", "w", encoding="utf-8", newline="\n") as f:
             f.write(build_city_page(c, cities, n_ranked))
+        d = build_city_json(c, n_ranked)
+        d["json"] = f"{BASE}/trust/{c['id']}.json"
+        index_json.append(d)
+        with open(f"{OUT_DIR}/{c['id']}.json", "w", encoding="utf-8", newline="\n") as f:
+            json.dump(build_city_json(c, n_ranked), f, indent=1)
     for c in world:
-        path = f"{OUT_DIR}/{c['id']}.html"
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
+        with open(f"{OUT_DIR}/{c['id']}.html", "w", encoding="utf-8", newline="\n") as f:
             f.write(build_city_page(c, cities, n_ranked, world=world))
+        d = build_city_json(c, n_ranked, world=True)
+        d["json"] = f"{BASE}/trust/{c['id']}.json"
+        index_json.append(d)
+        with open(f"{OUT_DIR}/{c['id']}.json", "w", encoding="utf-8", newline="\n") as f:
+            json.dump(build_city_json(c, n_ranked, world=True), f, indent=1)
+
+    with open(f"{OUT_DIR}/index.json", "w", encoding="utf-8", newline="\n") as f:
+        json.dump({
+            "title": "Arasense Climate Model Trust Atlas",
+            "description": "Trust-weighted mid-century rx1day signals; ranked European "
+                           "tier plus confidence-flagged global preview tier.",
+            "cities": index_json,
+        }, f, indent=1)
+
     with open(f"{OUT_DIR}/index.html", "w", encoding="utf-8", newline="\n") as f:
         f.write(build_hub(cities, n_ranked, world))
     with open(SITEMAP, "w", encoding="utf-8", newline="\n") as f:
         f.write(build_sitemap(cities, world))
-    print(f"{OUT_DIR}: {len(cities)} ranked + {len(world)} preview profiles + index.html; "
-          f"{SITEMAP} regenerated")
+    print(f"{OUT_DIR}: {len(cities)} ranked + {len(world)} preview profiles, "
+          f"{len(index_json)} JSON signals + index.json; {SITEMAP} regenerated")
 
 
 if __name__ == "__main__":

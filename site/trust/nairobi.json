@@ -1,0 +1,20 @@
+{
+ "city": "Nairobi",
+ "country": "Kenya",
+ "tier": "global-preview",
+ "metric": "maximum 1-day precipitation (rx1day)",
+ "scenario": "SSP2-4.5",
+ "baseline_window": "1995-2014",
+ "future_window": "2040-2059",
+ "spatial_footprint_km": 50,
+ "baseline_mm": 58.86,
+ "projected_mm": 70.03,
+ "change_mm": 11.17,
+ "change_pct": 19.0,
+ "model_agreement_pct": 82,
+ "evidence_level": "screening (5-model trust ensemble)",
+ "method": "Aras Diagram trust screening vs ERA5-Land observations (Izzaddin et al. 2024, SERRA 38:2261-2281)",
+ "profile_html": "https://www.arasense.com/trust/nairobi.html",
+ "source": "Arasense, www.arasense.com",
+ "reference_data_confidence": "weak"
+}

@@ -151,12 +151,12 @@
       }).then(function () {
         form.classList.add("sent");
         msg.className = "lf-msg ok";
-        msg.textContent = "Request received — the " + (data.city ? data.city + " " : "") +
+        msg.textContent = "Request received. The " + (data.city ? data.city + " " : "") +
           "brief will come from arasbotan.izzaddin@poliba.it.";
       }).catch(function () {
         btn.disabled = false;
         msg.className = "lf-msg err";
-        msg.innerHTML = 'That didn’t go through — please email ' +
+        msg.innerHTML = 'That didn’t go through. Please email ' +
           '<a href="mailto:arasbotan.izzaddin@poliba.it?subject=' +
           encodeURIComponent("Trust brief request: " + (data.city || "my region")) +
           '&body=' + encodeURIComponent("Please send the " + (data.city || "") +
@@ -188,6 +188,141 @@
       b.addEventListener("pointerleave", function () { b.style.transform = ""; });
     });
   }
+
+  /* ---- Trust command palette (Ctrl/Cmd+K or /) ---- */
+  (function () {
+    var PAGES = [
+      ["Home", "/"], ["Trust Atlas", "/atlas.html"], ["Demo console", "/demo.html"],
+      ["Case studies", "/case-studies.html"], ["Sample evidence", "/evidence.html"],
+      ["Bari / Puglia pilot", "/bari-puglia.html"], ["Aras' Diagram Studio", "/aras-diagram.html"],
+      ["All trust profiles", "/trust/"]
+    ];
+    var ACTIONS = [
+      ["Request a briefing", "mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing"],
+      ["Download the Bari / Puglia brief (PDF)", "/bari-puglia-climate-risk-brief.pdf"]
+    ];
+
+    var overlay, input, list, items, sel;
+
+    function cities() {
+      if (!window.ATLAS) return [];
+      var out = [];
+      (window.ATLAS.cities || []).forEach(function (c) {
+        if (c.pilot) return;
+        out.push({ name: c.name, url: "/trust/" + c.id + ".html", pct: c.pct, agree: c.agree, dot: "" });
+      });
+      ((window.ATLAS.world || {}).cities || []).forEach(function (c) {
+        out.push({ name: c.name, url: "/trust/" + c.id + ".html", pct: c.pct, agree: c.agree,
+                   dot: c.conf === "weak" ? "w" : c.conf === "moderate" ? "m" : "" });
+      });
+      return out;
+    }
+
+    function ensureData(cb) {
+      if (window.ATLAS) { cb(); return; }
+      var s = document.createElement("script");
+      s.src = "/atlas-data.js?v=3";
+      s.onload = cb;
+      s.onerror = cb;
+      document.head.appendChild(s);
+    }
+
+    function build() {
+      if (overlay) return;
+      overlay = document.createElement("div");
+      overlay.className = "pal-overlay";
+      overlay.innerHTML =
+        '<div class="pal" role="dialog" aria-label="Site search">' +
+        '<input type="text" placeholder="Search a city, a page, an action…" aria-label="Search">' +
+        '<div class="pal-list"></div>' +
+        '<div class="pal-hint"><span><b>↑↓</b> navigate</span><span><b>↵</b> open</span><span><b>esc</b> close</span></div>' +
+        "</div>";
+      document.body.appendChild(overlay);
+      input = overlay.querySelector("input");
+      list = overlay.querySelector(".pal-list");
+      overlay.addEventListener("mousedown", function (e) { if (e.target === overlay) close(); });
+      input.addEventListener("input", function () { render(input.value); });
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
+        else if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
+        else if (e.key === "Enter" && items[sel]) { location.href = items[sel].getAttribute("href"); }
+        else if (e.key === "Escape") { close(); }
+      });
+    }
+
+    function fmt(pct) { return (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%"; }
+
+    function render(q) {
+      q = (q || "").trim().toLowerCase();
+      var html = "";
+      var cs = cities().filter(function (c) { return !q || c.name.toLowerCase().indexOf(q) !== -1; });
+      if (cs.length) {
+        html += '<div class="pal-group">City trust profiles</div>';
+        cs.slice(0, q ? 24 : 6).forEach(function (c) {
+          html += '<a class="pal-item" href="' + c.url + '"><span class="pdot ' + c.dot + '"></span>' +
+            c.name + '<span class="meta' + (c.pct < 0 ? " neg" : "") + '">' + fmt(c.pct) +
+            " · " + c.agree + "%</span></a>";
+        });
+      }
+      var ps = PAGES.filter(function (p) { return !q || p[0].toLowerCase().indexOf(q) !== -1; });
+      if (ps.length) {
+        html += '<div class="pal-group">Pages</div>';
+        ps.forEach(function (p) {
+          html += '<a class="pal-item" href="' + p[1] + '"><span class="pdot page"></span>' + p[0] + "</a>";
+        });
+      }
+      var as = ACTIONS.filter(function (a) { return !q || a[0].toLowerCase().indexOf(q) !== -1; });
+      if (as.length) {
+        html += '<div class="pal-group">Actions</div>';
+        as.forEach(function (a) {
+          html += '<a class="pal-item" href="' + a[1] + '"><span class="pdot page"></span>' + a[0] + "</a>";
+        });
+      }
+      if (!html) html = '<div class="pal-empty">Nothing matches. Try a city name, e.g. Lagos or Bologna.</div>';
+      list.innerHTML = html;
+      items = list.querySelectorAll(".pal-item");
+      sel = 0;
+      if (items[0]) items[0].classList.add("sel");
+    }
+
+    function move(d) {
+      if (!items || !items.length) return;
+      items[sel].classList.remove("sel");
+      sel = (sel + d + items.length) % items.length;
+      items[sel].classList.add("sel");
+      items[sel].scrollIntoView({ block: "nearest" });
+    }
+
+    function open() {
+      build();
+      ensureData(function () {
+        overlay.classList.add("open");
+        input.value = "";
+        render("");
+        input.focus();
+      });
+    }
+
+    function close() { if (overlay) overlay.classList.remove("open"); }
+
+    document.addEventListener("keydown", function (e) {
+      if ((e.key === "k" || e.key === "K") && (e.ctrlKey || e.metaKey)) { e.preventDefault(); open(); }
+      else if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) {
+        e.preventDefault(); open();
+      }
+    });
+
+    var navLinks = document.querySelector(".nav-links");
+    if (navLinks) {
+      var k = document.createElement("button");
+      k.className = "nav-k";
+      k.type = "button";
+      k.innerHTML = "⌘K";
+      k.setAttribute("aria-label", "Search the site");
+      k.addEventListener("click", open);
+      navLinks.insertBefore(k, navLinks.querySelector(".nav-cta"));
+    }
+  })();
 
   /* Highlight current page in nav */
   var here = location.pathname.split("/").pop() || "index.html";

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Demo Console — Arasense</title>
+  <title>Demo Console · Arasense</title>
   <meta name="description" content="Watch the Arasense console run a real projection: pick a European city, see models scored for trust, and leave with the same numbers published on its trust profile.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://www.arasense.com/demo.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Demo Console — Arasense">
-  <meta property="og:description" content="A live session replay: pick a European city, watch climate models earn trust, and see the 2050 number materialize — every figure a real atlas output.">
+  <meta property="og:title" content="Demo Console · Arasense">
+  <meta property="og:description" content="A live session replay: pick a European city, watch climate models earn trust, and see the 2050 number materialize, every figure a real atlas output.">
   <meta property="og:url" content="https://www.arasense.com/demo.html">
   <meta property="og:image" content="https://www.arasense.com/og/demo.png?v=2">
   <meta property="og:image:width" content="1200">
@@ -20,7 +20,7 @@
   <link rel="preload" href="fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <style>
     .page-hero { padding: 72px 0 0; }
     .page-hero h1 { max-width: 880px; margin: 0 0 22px; }
@@ -364,7 +364,7 @@
         <span class="eyebrow">Product preview</span>
         <h1>Click a map. Leave with <em>defensible evidence.</em></h1>
         <p class="lead">
-          The Arasense console is map-first: one click sets a climate point, one drawn box scopes a flood-screening region, and every module downstream — trust scoring, projection, portfolio ranking — reads from those spatial inputs.
+          The Arasense console is map-first: one click sets a climate point, one drawn box scopes a flood-screening region, and every module downstream, trust scoring, projection, portfolio ranking, reads from those spatial inputs.
         </p>
         <div class="actions">
           <a class="button" href="mailto:arasbotan.izzaddin@poliba.it?subject=Arasense%20briefing">Request a guided demo</a>
@@ -377,7 +377,7 @@
         <div class="console">
           <div class="console-bar">
             <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="console-title">arasense · session replay — real atlas output</span>
+            <span class="console-title">arasense · session replay · real atlas output</span>
             <span class="console-live">REPLAY</span>
           </div>
           <div class="console-chips" id="city-chips" role="tablist" aria-label="Choose a city to replay"></div>
@@ -395,7 +395,7 @@
               </div>
               <div class="res" id="res">
                 <div class="res-top">
-                  <span class="res-pct num" id="res-pct">—</span>
+                  <span class="res-pct num" id="res-pct">···</span>
                   <span class="res-rank" id="res-rank"></span>
                 </div>
                 <div class="res-sub" id="res-sub"></div>
@@ -408,7 +408,7 @@
           </div>
         </div>
         <p style="margin-top:12px; font-size:13px; color:var(--faint);">
-          Every number in the replay is a real Arasense atlas output — the same figures published on each city's trust profile. Pick a city, or <a href="atlas.html" style="color:var(--accent-bright);">open the full Atlas</a>.
+          Every number in the replay is a real Arasense atlas output, the same figures published on each city's trust profile. Pick a city, or <a href="atlas.html" style="color:var(--accent-bright);">open the full Atlas</a>.
         </p>
       </section>
 
@@ -459,7 +459,7 @@
             <div class="kpi"><strong class="num">78%</strong><span>Trusted-model weight agreeing on increase.</span></div>
           </div>
           <p style="margin-top:14px; font-size:14px;">
-            Bologna's flood-driving rainfall sample shows maximum 1-day precipitation rising from 40.23 mm to 45.97 mm under SSP2-4.5 — with uncertainty reported rather than hidden.
+            Bologna's flood-driving rainfall sample shows maximum 1-day precipitation rising from 40.23 mm to 45.97 mm under SSP2-4.5, with uncertainty reported rather than hidden.
           </p>
         </div>
 
@@ -548,7 +548,7 @@
           <div>
             <span class="eyebrow">Founder</span>
             <h3>Aras Izzaddin</h3>
-            <p>Founder &amp; Lead Researcher — Politecnico di Bari</p>
+            <p>Founder &amp; Lead Researcher · Politecnico di Bari</p>
             <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
           </div>
           <div>
@@ -559,18 +559,18 @@
           </div>
         </div>
         <div class="footer-meta">
-          <span>© 2026 Arasense — www.arasense.com</span>
+          <span>© 2026 Arasense · www.arasense.com</span>
           <span>Guided demos, pilot studies, and selected collaborations</span>
         </div>
       </footer>
     </main>
   </div>
 
-  <script src="site.js?v=3" defer></script>
-  <script src="atlas-data.js?v=2" defer></script>
+  <script src="site.js?v=4" defer></script>
+  <script src="atlas-data.js?v=3" defer></script>
   <script defer>
   /* ================================================================
-     Live session replay — every figure is a real atlas output from
+     Live session replay: every figure is a real atlas output from
      atlas-data.js (same numbers as the published trust profiles).
      ================================================================ */
   window.addEventListener("DOMContentLoaded", function () {
@@ -772,7 +772,7 @@
         }, t += 650);
 
         later(function () {
-          addLog("→ trust weights assigned — <span class='dim'>every weight published</span>");
+          addLog("→ trust weights assigned, <span class='dim'>every weight published</span>");
         }, t += 1050);
 
         later(function () {
@@ -813,7 +813,7 @@
         }, t += 700);
 
         later(function () {
-          addLog("✓ evidence ready — spread and agreement reported, not hidden", "ok");
+          addLog("✓ evidence ready · spread and agreement reported, not hidden", "ok");
         }, t += 1300);
       });
     }

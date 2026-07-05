@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>City Trust Profiles — Which climate models to trust, city by city — Arasense</title>
+  <title>City Trust Profiles · Which climate models to trust, city by city · Arasense</title>
   <meta name="description" content="Trust-weighted mid-century rainfall signals for 24 European cities, one consistent peer-reviewed method. Open any city to see which climate models earned trust there.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://www.arasense.com/trust/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="City Trust Profiles — Arasense">
+  <meta property="og:title" content="City Trust Profiles · Arasense">
   <meta property="og:description" content="Which climate models can you trust in each European city? 24 profiles, one method.">
   <meta property="og:url" content="https://www.arasense.com/trust/">
   <meta property="og:image" content="https://www.arasense.com/og/atlas.png">
@@ -20,7 +20,7 @@
   <link rel="preload" href="/fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=5">
   <style>
     .page-hero { padding: 64px 0 0; }
     .page-hero h1 { max-width: 880px; margin: 0 0 22px; }
@@ -86,7 +86,7 @@
         <p class="lead">
           24 European cities, one consistent peer-reviewed method: models scored against
           observed local climate, trust-weighted into a mid-century signal for each city&rsquo;s
-          worst rain day. Open a city to see its full profile — including the doubt.
+          worst rain day. Open a city to see its full profile, including the doubt.
         </p>
       </section>
 
@@ -115,7 +115,7 @@
         <a class="profile-row" href="munich.html"><span class="pos">#22</span><span class="cname">Munich<small>Germany</small></span><span class="bar"><i class="" style="width:2%"></i></span><span class="rval">+0.6%</span><span class="agr">59% agree</span></a>
         <a class="profile-row" href="paris.html"><span class="pos">#23</span><span class="cname">Paris<small>France</small></span><span class="bar"><i class="negative" style="width:19%"></i></span><span class="rval negative">-5.2%</span><span class="agr">46% agree</span></a>
         <a class="profile-row" href="stockholm.html"><span class="pos">#24</span><span class="cname">Stockholm<small>Sweden</small></span><span class="bar"><i class="negative" style="width:37%"></i></span><span class="rval negative">-10.2%</span><span class="agr">21% agree</span></a>
-        <div style="padding:22px 8px 10px;"><span class="eyebrow">Global preview — unranked, reference-data confidence flagged</span></div>
+        <div style="padding:22px 8px 10px;"><span class="eyebrow">Global preview · unranked, reference-data confidence flagged</span></div>
         <a class="profile-row" href="jakarta.html"><span class="pos">GP</span><span class="cname">Jakarta<small>Indonesia</small></span><span class="bar"><i class="" style="width:100%"></i></span><span class="rval">+54.6%</span><span class="agr">100% agree · moderate data</span></a>
         <a class="profile-row" href="singapore.html"><span class="pos">GP</span><span class="cname">Singapore<small>Singapore</small></span><span class="bar"><i class="" style="width:83%"></i></span><span class="rval">+45.2%</span><span class="agr">100% agree · moderate data</span></a>
         <a class="profile-row" href="lagos.html"><span class="pos">GP</span><span class="cname">Lagos<small>Nigeria</small></span><span class="bar"><i class="" style="width:79%"></i></span><span class="rval">+43.0%</span><span class="agr">100% agree · weak data</span></a>
@@ -130,11 +130,21 @@
       </div>
 
       <section class="section">
+        <div class="card reveal">
+          <span class="label">Machine-readable</span>
+          <h3>The atlas is also an API</h3>
+          <p>Every profile publishes its trust signal as JSON with agreement and uncertainty attached. One index, one file per city, no key required:</p>
+          <pre style="background:#050f0c; border:1px solid var(--line); border-radius:10px; padding:16px 18px; overflow-x:auto; font-family:var(--font-mono); font-size:13px; color:#bfe8da; margin-top:12px;">curl https://www.arasense.com/trust/index.json
+curl https://www.arasense.com/trust/lagos.json</pre>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="panel reveal" style="padding:44px; text-align:center;">
           <span class="eyebrow" style="justify-content:center;">Your geography</span>
           <h2 style="max-width:620px; margin:0 auto 14px;">Your city isn&rsquo;t listed. <em>That&rsquo;s the point.</em></h2>
           <p style="max-width:520px; margin:0 auto 26px;">
-            A pilot engagement starts with your locations and ends with them profiled here —
+            A pilot engagement starts with your locations and ends with them profiled here,
             trust-scored, projected, and defensible.
           </p>
           <div class="actions" style="justify-content:center;">
@@ -149,7 +159,7 @@
           <div>
             <span class="eyebrow">Founder</span>
             <h3>Aras Izzaddin</h3>
-            <p>Founder &amp; Lead Researcher — Politecnico di Bari</p>
+            <p>Founder &amp; Lead Researcher · Politecnico di Bari</p>
             <p><a href="mailto:arasbotan.izzaddin@poliba.it">arasbotan.izzaddin@poliba.it</a></p>
           </div>
           <div>
@@ -161,13 +171,13 @@
           </div>
         </div>
         <div class="footer-meta">
-          <span>© 2026 Arasense — www.arasense.com</span>
+          <span>© 2026 Arasense · www.arasense.com</span>
           <span>Guided demos, pilot studies, and selected collaborations</span>
         </div>
       </footer>
     </main>
   </div>
 
-  <script src="/site.js" defer></script>
+  <script src="/site.js?v=4" defer></script>
 </body>
 </html>
