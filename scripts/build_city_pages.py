@@ -195,7 +195,7 @@ PAGE = Template("""<!doctype html>
   <link rel="preload" href="/fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/styles.css?v=8">
+  <link rel="stylesheet" href="/styles.css?v=9">
   <script type="application/ld+json">$jsonld</script>
   <style>
     .page-hero { padding: 64px 0 0; }
@@ -579,7 +579,7 @@ HUB = Template("""<!doctype html>
   <link rel="preload" href="/fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/styles.css?v=8">
+  <link rel="stylesheet" href="/styles.css?v=9">
   <style>
     .page-hero { padding: 64px 0 0; }
     .page-hero h1 { max-width: 880px; margin: 0 0 22px; }
