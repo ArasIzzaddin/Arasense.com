@@ -1,0 +1,291 @@
+{
+  "case": "Bologna \u2014 flood-driving rainfall, mid-century",
+  "notes": "Trust-weighted CMIP6 projection over a 20-year climatology. Pilot demonstration; extremes are the forward-looking flood-risk driver.",
+  "region": {
+    "lat": 44.494,
+    "lon": 11.343,
+    "radius_km": 50
+  },
+  "variable": "precipitation",
+  "metric": "rx1day",
+  "metric_label": "Maximum 1-day precipitation",
+  "unit": "mm",
+  "windows": {
+    "historical": [
+      "1995-01-01",
+      "2014-12-31"
+    ],
+    "future": [
+      "2040-01-01",
+      "2059-12-31"
+    ]
+  },
+  "n_models_scored": 34,
+  "n_models_trusted": 32,
+  "historical_level": 40.23253608995566,
+  "future_level": 45.96532252750795,
+  "change": 5.732786437552291,
+  "change_low": -0.2632007894408144,
+  "change_high": 11.728773664545397,
+  "pct_change": 14.24913016851434,
+  "agreement_on_increase": 0.7822433417682687,
+  "best_model": "CESM2",
+  "per_model": [
+    {
+      "name": "ACCESS-CM2",
+      "weight": 0.0351516415751203,
+      "trust_tier": "weak",
+      "historical": 48.578043689014265,
+      "future": 49.80412129008658,
+      "change": 1.226077601072312
+    },
+    {
+      "name": "ACCESS-ESM1-5",
+      "weight": 0.029149827113464692,
+      "trust_tier": "weak",
+      "historical": 38.18549031055819,
+      "future": 45.697887533540374,
+      "change": 7.512397222982187
+    },
+    {
+      "name": "BCC-CSM2-MR",
+      "weight": 0.029530096240130935,
+      "trust_tier": "weak",
+      "historical": 40.53261831870364,
+      "future": 50.388632501190045,
+      "change": 9.856014182486405
+    },
+    {
+      "name": "CESM2-WACCM",
+      "weight": 0.032420294134378386,
+      "trust_tier": "weak",
+      "historical": 43.56373056787676,
+      "future": 48.52395342342819,
+      "change": 4.960222855551429
+    },
+    {
+      "name": "CESM2",
+      "weight": 0.036563190686917546,
+      "trust_tier": "weak",
+      "historical": 48.29520949167224,
+      "future": 49.93410011006093,
+      "change": 1.638890618388693
+    },
+    {
+      "name": "CMCC-CM2-SR5",
+      "weight": 0.03516981337612997,
+      "trust_tier": "weak",
+      "historical": 44.74741869169797,
+      "future": 54.12173409837375,
+      "change": 9.374315406675777
+    },
+    {
+      "name": "CMCC-ESM2",
+      "weight": 0.034470049284989944,
+      "trust_tier": "weak",
+      "historical": 42.687195780555484,
+      "future": 42.07472202912315,
+      "change": -0.6124737514323328
+    },
+    {
+      "name": "CNRM-CM6-1",
+      "weight": 0.027280213581301244,
+      "trust_tier": "weak",
+      "historical": 38.37415816276717,
+      "future": 40.58998324310628,
+      "change": 2.2158250803391084
+    },
+    {
+      "name": "CNRM-ESM2-1",
+      "weight": 0.028753862665739486,
+      "trust_tier": "weak",
+      "historical": 39.419226883377604,
+      "future": 45.49619102691021,
+      "change": 6.0769641435326065
+    },
+    {
+      "name": "CanESM5",
+      "weight": 0.03027413356730919,
+      "trust_tier": "weak",
+      "historical": 32.30018203262508,
+      "future": 29.139208026334337,
+      "change": -3.1609740062907434
+    },
+    {
+      "name": "EC-Earth3",
+      "weight": 0.0292196307852952,
+      "trust_tier": "weak",
+      "historical": 46.12240488658333,
+      "future": 41.21519725912447,
+      "change": -4.90720762745886
+    },
+    {
+      "name": "FGOALS-g3",
+      "weight": 0.03279728664817009,
+      "trust_tier": "weak",
+      "historical": 30.411565928669496,
+      "future": 36.001367452888765,
+      "change": 5.5898015242192685
+    },
+    {
+      "name": "GFDL-CM4",
+      "weight": 0.03312223679901044,
+      "trust_tier": "weak",
+      "historical": 39.50020780515432,
+      "future": 51.11545790326722,
+      "change": 11.615250098112902
+    },
+    {
+      "name": "GFDL-ESM4",
+      "weight": 0.034479654325776335,
+      "trust_tier": "weak",
+      "historical": 46.58361556235805,
+      "future": 56.31963136461046,
+      "change": 9.73601580225241
+    },
+    {
+      "name": "GISS-E2-1-G",
+      "weight": 0.03354548529999525,
+      "trust_tier": "weak",
+      "historical": 35.57026444248219,
+      "future": 34.958381740691486,
+      "change": -0.6118827017907051
+    },
+    {
+      "name": "HadGEM3-GC31-LL",
+      "weight": 0.02923666684226439,
+      "trust_tier": "weak",
+      "historical": 40.18042571101357,
+      "future": 49.20765774320586,
+      "change": 9.027232032192288
+    },
+    {
+      "name": "IITM-ESM",
+      "weight": 0.02506138165303965,
+      "trust_tier": "weak",
+      "historical": 41.365915844787914,
+      "future": 43.155777716623355,
+      "change": 1.7898618718354413
+    },
+    {
+      "name": "INM-CM4-8",
+      "weight": 0.027187744556253238,
+      "trust_tier": "weak",
+      "historical": 44.16792941346374,
+      "future": 39.57094610822327,
+      "change": -4.596983305240471
+    },
+    {
+      "name": "INM-CM5-0",
+      "weight": 0.02744117365132657,
+      "trust_tier": "weak",
+      "historical": 40.06523228170884,
+      "future": 49.163220130285694,
+      "change": 9.097987848576857
+    },
+    {
+      "name": "IPSL-CM6A-LR",
+      "weight": 0.03030043107723013,
+      "trust_tier": "weak",
+      "historical": 33.02548792054706,
+      "future": 44.39711156575658,
+      "change": 11.371623645209525
+    },
+    {
+      "name": "KACE-1-0-G",
+      "weight": 0.029667589842429544,
+      "trust_tier": "weak",
+      "historical": 20.40787455091791,
+      "future": 31.85116224645704,
+      "change": 11.44328769553913
+    },
+    {
+      "name": "KIOST-ESM",
+      "weight": 0.02800120551046828,
+      "trust_tier": "weak",
+      "historical": 42.94634505931657,
+      "future": 53.21172954915025,
+      "change": 10.265384489833679
+    },
+    {
+      "name": "MIROC-ES2L",
+      "weight": 0.02905108080972838,
+      "trust_tier": "weak",
+      "historical": 40.85655872040392,
+      "future": 35.52003677300007,
+      "change": -5.3365219474038454
+    },
+    {
+      "name": "MIROC6",
+      "weight": 0.02484032829270177,
+      "trust_tier": "weak",
+      "historical": 37.01238595354431,
+      "future": 54.687797517632724,
+      "change": 17.675411564088414
+    },
+    {
+      "name": "MPI-ESM1-2-HR",
+      "weight": 0.03225182839330406,
+      "trust_tier": "weak",
+      "historical": 41.708185971215876,
+      "future": 49.292903191946145,
+      "change": 7.584717220730269
+    },
+    {
+      "name": "MPI-ESM1-2-LR",
+      "weight": 0.029896249511397154,
+      "trust_tier": "weak",
+      "historical": 35.01414538255157,
+      "future": 40.17501000064103,
+      "change": 5.160864618089462
+    },
+    {
+      "name": "MRI-ESM2-0",
+      "weight": 0.02792083337348227,
+      "trust_tier": "weak",
+      "historical": 50.823267172595635,
+      "future": 52.90350934022769,
+      "change": 2.0802421676320577
+    },
+    {
+      "name": "NESM3",
+      "weight": 0.027601845290864145,
+      "trust_tier": "weak",
+      "historical": 43.995967618983805,
+      "future": 41.82322669548405,
+      "change": -2.1727409234997523
+    },
+    {
+      "name": "NorESM2-LM",
+      "weight": 0.03254530895718218,
+      "trust_tier": "weak",
+      "historical": 39.61751428813924,
+      "future": 55.669776860060885,
+      "change": 16.052262571921645
+    },
+    {
+      "name": "NorESM2-MM",
+      "weight": 0.027113901808528726,
+      "trust_tier": "weak",
+      "historical": 37.26205588531921,
+      "future": 47.96086191532001,
+      "change": 10.698806030000803
+    },
+    {
+      "name": "TaiESM1",
+      "weight": 0.0282134962012128,
+      "trust_tier": "weak",
+      "historical": 44.76760168091536,
+      "future": 55.727871691960985,
+      "change": 10.960270011045623
+    },
+    {
+      "name": "UKESM1-0-LL",
+      "weight": 0.03232019670595912,
+      "trust_tier": "weak",
+      "historical": 36.57278484235857,
+      "future": 48.78160391274541,
+      "change": 12.208819070386838
+    }
+  ]
+}

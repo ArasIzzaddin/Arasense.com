@@ -20,7 +20,7 @@
   <link rel="preload" href="fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=9">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -255,6 +255,7 @@
             <span>bias · variability · phase · decomposed, not averaged</span><span class="tick-gem">◆</span>
             <span>SSP2-4.5 / SSP5-8.5 scenario comparison</span><span class="tick-gem">◆</span>
             <span>every weight published, every rejection explained</span><span class="tick-gem">◆</span>
+            <span><b>◈</b> every number on this site carries a receipt</span><span class="tick-gem">◆</span>
           </div>
         </div>
       </section>
@@ -273,12 +274,12 @@
         <div class="disagree">
           <div class="card reveal">
             <span class="label">MIROC-ES2L says</span>
-            <strong class="big num">−5.3 mm</strong>
+            <strong class="big num">−5.3 mm<button class="receipt-tag" data-receipt="miroc">◈</button></strong>
             <p>Bologna's most extreme rain day gets <em>lighter</em> by 2050.</p>
           </div>
           <div class="card reveal">
             <span class="label">MIROC6 says</span>
-            <strong class="big num">+17.7 mm</strong>
+            <strong class="big num">+17.7 mm<button class="receipt-tag" data-receipt="miroc">◈</button></strong>
             <p>The same rain day gets over 40% <em>heavier</em>. Both models sit in the same CMIP6 ensemble.</p>
           </div>
           <div class="card reveal">
@@ -326,15 +327,15 @@
         </div>
         <div class="kpis reveal">
           <div class="kpi">
-            <strong><span data-count="14.2" data-decimals="1" data-prefix="+" data-suffix="%">+14.2%</span></strong>
+            <strong><span data-count="14.2" data-decimals="1" data-prefix="+" data-suffix="%">+14.2%</span><button class="receipt-tag" data-receipt="bologna-pct">◈</button></strong>
             <span>Bologna max 1-day rainfall by mid-century · trust-weighted, 78% model agreement.</span>
           </div>
           <div class="kpi">
-            <strong><span class="num">32 / 34</span></strong>
+            <strong><span class="num">32 / 34</span><button class="receipt-tag" data-receipt="bologna-models">◈</button></strong>
             <span>CMIP6 models passing skill screening in the full Bologna projection.</span>
           </div>
           <div class="kpi">
-            <strong><span data-count="19" data-decimals="0" data-prefix="+" data-suffix="%">+19%</span></strong>
+            <strong><span data-count="19" data-decimals="0" data-prefix="+" data-suffix="%">+19%</span><button class="receipt-tag" data-receipt="rome-pct">◈</button></strong>
             <span>Rome: highest worsening rainfall signal in a five-city Italian portfolio ranking.</span>
           </div>
         </div>
@@ -492,6 +493,7 @@
   </div>
 
   <script src="site.js?v=8" defer></script>
+  <script src="receipts.js?v=1" defer></script>
   <script>
   /* ================================================================
      Live trust visual: real per-model output from the Bologna

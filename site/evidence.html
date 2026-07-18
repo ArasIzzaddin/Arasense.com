@@ -20,7 +20,7 @@
   <link rel="preload" href="fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=9">
   <style>
     .page-hero { padding: 72px 0 0; }
     .page-hero h1 { max-width: 860px; margin: 0 0 22px; }
@@ -162,9 +162,9 @@
             <h3 style="font-size:24px;">Flood-driving rainfall, mid-century</h3>
             <p>Maximum 1-day precipitation, historical 1995–2014 vs future 2040–2059. Trust-weighted CMIP6 projection using models that pass Aras Diagram skill screening.</p>
             <div class="kpis" style="margin:16px 0;">
-              <div class="kpi"><strong class="num">+5.73 mm</strong><span>Projected max 1-day precipitation change.</span></div>
-              <div class="kpi"><strong class="num">+14.2%</strong><span>Relative increase from the historical baseline.</span></div>
-              <div class="kpi"><strong class="num">78%</strong><span>Trusted-model weight agreeing on increase.</span></div>
+              <div class="kpi"><strong class="num">+5.73 mm<button class="receipt-tag" data-receipt="bologna-levels">◈</button></strong><span>Projected max 1-day precipitation change.</span></div>
+              <div class="kpi"><strong class="num">+14.2%<button class="receipt-tag" data-receipt="bologna-pct">◈</button></strong><span>Relative increase from the historical baseline.</span></div>
+              <div class="kpi"><strong class="num">78%<button class="receipt-tag" data-receipt="bologna-agree">◈</button></strong><span>Trusted-model weight agreeing on increase.</span></div>
             </div>
             <div class="table-wrap">
               <table>
@@ -190,7 +190,7 @@
 
           <article class="panel reveal">
             <span class="eyebrow">Scenario comparison</span>
-            <h3 style="font-size:24px;">SSP2-4.5 vs SSP5-8.5</h3>
+            <h3 style="font-size:24px;">SSP2-4.5 vs SSP5-8.5<button class="receipt-tag" data-receipt="scenario">◈</button></h3>
             <p>The historical baseline and model trust are held constant; only the emissions scenario changes.</p>
             <div class="duel">
               <div class="duel-row">
@@ -296,5 +296,6 @@
   </div>
 
   <script src="site.js?v=8" defer></script>
+  <script src="receipts.js?v=1" defer></script>
 </body>
 </html>

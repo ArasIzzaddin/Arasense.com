@@ -20,7 +20,7 @@
   <link rel="preload" href="fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=9">
   <style>
     .page-hero { padding: 72px 0 0; }
     .page-hero h1 { max-width: 820px; margin: 0 0 22px; }
@@ -138,9 +138,9 @@
           </p>
         </div>
         <div class="kpis reveal">
-          <div class="kpi"><strong class="num">40.2 → 46.0 mm</strong><span>Historical vs mid-century maximum 1-day precipitation.</span></div>
-          <div class="kpi"><strong class="num">+5.7 mm (+14.2%)</strong><span>Trust-weighted change, spread −0.3 to +11.7 mm.</span></div>
-          <div class="kpi"><strong class="num">78%</strong><span>Trusted-model weight agreeing on an increase.</span></div>
+          <div class="kpi"><strong class="num">40.2 → 46.0 mm<button class="receipt-tag" data-receipt="bologna-levels">◈</button></strong><span>Historical vs mid-century maximum 1-day precipitation.</span></div>
+          <div class="kpi"><strong class="num">+5.7 mm (+14.2%)<button class="receipt-tag" data-receipt="bologna-pct">◈</button></strong><span>Trust-weighted change, spread −0.3 to +11.7 mm.</span></div>
+          <div class="kpi"><strong class="num">78%<button class="receipt-tag" data-receipt="bologna-agree">◈</button></strong><span>Trusted-model weight agreeing on an increase.</span></div>
         </div>
         <div class="panel reveal" style="margin-top:16px;">
           <h3>The full trusted ensemble: every model, every vote</h3>
@@ -276,6 +276,7 @@
   </div>
 
   <script src="site.js?v=8" defer></script>
+  <script src="receipts.js?v=1" defer></script>
   <script defer>
   /* Full-ensemble column chart: the same real per-model output used by
      the homepage visual (Bologna rx1day projection, 32 trusted models). */
