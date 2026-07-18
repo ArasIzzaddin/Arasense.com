@@ -379,3 +379,32 @@
     if (href === here) a.classList.add("active");
   });
 })();
+
+
+/* Cursor aura — ambient light that follows the pointer (fine pointers only) */
+(function () {
+  "use strict";
+  if (!window.matchMedia("(pointer: fine)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var aura = document.createElement("div");
+  aura.className = "aura";
+  aura.setAttribute("aria-hidden", "true");
+  document.body.appendChild(aura);
+  var tx = 0, ty = 0, x = 0, y = 0, running = false;
+  function tick() {
+    x += (tx - x) * 0.07;
+    y += (ty - y) * 0.07;
+    aura.style.transform = "translate(" + (x - 320).toFixed(1) + "px," + (y - 320).toFixed(1) + "px)";
+    requestAnimationFrame(tick);
+  }
+  document.addEventListener("pointermove", function (e) {
+    tx = e.clientX; ty = e.clientY;
+    if (!running) { running = true; x = tx; y = ty; aura.classList.add("live"); tick(); }
+  }, { passive: true });
+  document.documentElement.addEventListener("mouseleave", function () {
+    aura.classList.remove("live");
+  });
+  document.documentElement.addEventListener("mouseenter", function () {
+    if (running) aura.classList.add("live");
+  });
+})();
