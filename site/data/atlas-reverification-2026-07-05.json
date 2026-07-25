@@ -1,0 +1,331 @@
+{
+ "case": "Atlas re-verification under extreme-plausibility screen",
+ "cities": {
+  "Rome": {
+   "published_pct": 18.76210306553979,
+   "reverified_pct": 18.86122291810884,
+   "pct_drift": 0.099,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Milan": {
+   "published_pct": 12.833180256350726,
+   "reverified_pct": 12.833180256350726,
+   "pct_drift": 0.0,
+   "published_agree": 0.7911227701108956,
+   "reverified_agree": 0.7911227701108956,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Florence": {
+   "published_pct": 11.43564614515176,
+   "reverified_pct": 11.420107889829175,
+   "pct_drift": -0.016,
+   "published_agree": 0.8013041549413543,
+   "reverified_agree": 0.8013183018204686,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Bologna": {
+   "published_pct": 10.754426583780353,
+   "reverified_pct": 10.754426583780353,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Venice": {
+   "published_pct": 3.291041523832782,
+   "reverified_pct": 3.291041523832782,
+   "pct_drift": 0.0,
+   "published_agree": 0.5647242446003806,
+   "reverified_agree": 0.5647242446003806,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "London": {
+   "published_pct": 22.47459197705859,
+   "reverified_pct": 22.47459197705859,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 4,
+   "screen_excluded": []
+  },
+  "Paris": {
+   "published_pct": -5.208688127643938,
+   "reverified_pct": -5.208688127643938,
+   "pct_drift": 0.0,
+   "published_agree": 0.46351651367979474,
+   "reverified_agree": 0.46351651367979474,
+   "n_trusted": 4,
+   "screen_excluded": []
+  },
+  "Berlin": {
+   "published_pct": 10.633487566819271,
+   "reverified_pct": 10.633487566819271,
+   "pct_drift": 0.0,
+   "published_agree": 0.7938266346879231,
+   "reverified_agree": 0.7938266346879231,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Madrid": {
+   "published_pct": 7.553717967795498,
+   "reverified_pct": 7.553717967795498,
+   "pct_drift": 0.0,
+   "published_agree": 0.8014088443572327,
+   "reverified_agree": 0.8014088443572327,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Barcelona": {
+   "published_pct": 9.57757135758836,
+   "reverified_pct": 9.57757135758836,
+   "pct_drift": 0.0,
+   "published_agree": 0.7486026755588637,
+   "reverified_agree": 0.7486026755588637,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Lisbon": {
+   "published_pct": 9.128004416571608,
+   "reverified_pct": 9.128004416571608,
+   "pct_drift": 0.0,
+   "published_agree": 0.6225938576232983,
+   "reverified_agree": 0.6225938576232983,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Amsterdam": {
+   "published_pct": 23.526195238636966,
+   "reverified_pct": 23.526195238636966,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Brussels": {
+   "published_pct": 17.40686075328602,
+   "reverified_pct": 17.40686075328602,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 4,
+   "screen_excluded": []
+  },
+  "Vienna": {
+   "published_pct": 2.3600426496655653,
+   "reverified_pct": 2.3600426496655653,
+   "pct_drift": 0.0,
+   "published_agree": 0.6182166290425911,
+   "reverified_agree": 0.6182166290425911,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Zurich": {
+   "published_pct": 13.564096669746622,
+   "reverified_pct": 13.564096669746622,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Munich": {
+   "published_pct": 0.6348807410096231,
+   "reverified_pct": 0.6348807410096231,
+   "pct_drift": 0.0,
+   "published_agree": 0.5894620448866984,
+   "reverified_agree": 0.5894620448866984,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Prague": {
+   "published_pct": 7.6147902856158955,
+   "reverified_pct": 7.6147902856158955,
+   "pct_drift": 0.0,
+   "published_agree": 0.7939031101040968,
+   "reverified_agree": 0.7939031101040968,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Warsaw": {
+   "published_pct": 23.4973262331583,
+   "reverified_pct": 23.4973262331583,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Budapest": {
+   "published_pct": 16.98135345259931,
+   "reverified_pct": 16.98135345259931,
+   "pct_drift": 0.0,
+   "published_agree": 0.8012898767965022,
+   "reverified_agree": 0.8012898767965022,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Copenhagen": {
+   "published_pct": 8.684543242495092,
+   "reverified_pct": 8.684543242495092,
+   "pct_drift": 0.0,
+   "published_agree": 0.8014985833819482,
+   "reverified_agree": 0.8014985833819482,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Stockholm": {
+   "published_pct": -10.18918191486111,
+   "reverified_pct": -10.18918191486111,
+   "pct_drift": 0.0,
+   "published_agree": 0.21086273011796242,
+   "reverified_agree": 0.21086273011796242,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Oslo": {
+   "published_pct": 27.329968330712838,
+   "reverified_pct": 27.329968330712838,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Dublin": {
+   "published_pct": 3.1088343677394,
+   "reverified_pct": 3.1088343677394,
+   "pct_drift": 0.0,
+   "published_agree": 0.6139635313598403,
+   "reverified_agree": 0.6139635313598403,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Athens": {
+   "published_pct": 6.9939636144689175,
+   "reverified_pct": 6.9939636144689175,
+   "pct_drift": 0.0,
+   "published_agree": 0.5738024716786237,
+   "reverified_agree": 0.5738024716786237,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "New York": {
+   "published_pct": 5.916297601738329,
+   "reverified_pct": 5.916297601738329,
+   "pct_drift": 0.0,
+   "published_agree": 0.6328154094677494,
+   "reverified_agree": 0.6328154094677494,
+   "n_trusted": 3,
+   "screen_excluded": []
+  },
+  "Miami": {
+   "published_pct": 20.31892010539037,
+   "reverified_pct": 20.31892010539037,
+   "pct_drift": 0.0,
+   "published_agree": 0.782714908099385,
+   "reverified_agree": 0.782714908099385,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Mexico City": {
+   "published_pct": -4.552645350093854,
+   "reverified_pct": -4.552645350093854,
+   "pct_drift": 0.0,
+   "published_agree": 0.49608154420739753,
+   "reverified_agree": 0.49608154420739753,
+   "n_trusted": 4,
+   "screen_excluded": [
+    "BCC-CSM2-MR"
+   ]
+  },
+  "Sao Paulo": {
+   "published_pct": 9.677755988307297,
+   "reverified_pct": 9.677755988307297,
+   "pct_drift": 0.0,
+   "published_agree": 0.8099325994291064,
+   "reverified_agree": 0.8099325994291064,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Lagos": {
+   "published_pct": 43.04714444366474,
+   "reverified_pct": 43.04714444366474,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Nairobi": {
+   "published_pct": 18.976366136778008,
+   "reverified_pct": 18.976366136778008,
+   "pct_drift": 0.0,
+   "published_agree": 0.8221756631584579,
+   "reverified_agree": 0.8221756631584579,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Cape Town": {
+   "published_pct": 12.536827391582836,
+   "reverified_pct": 12.536827391582836,
+   "pct_drift": 0.0,
+   "published_agree": 0.609005747022413,
+   "reverified_agree": 0.609005747022413,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Mumbai": {
+   "published_pct": 9.307732459071488,
+   "reverified_pct": 9.307732459071488,
+   "pct_drift": 0.0,
+   "published_agree": 0.8145696695961432,
+   "reverified_agree": 0.8145696695961432,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Jakarta": {
+   "published_pct": 54.59359943400539,
+   "reverified_pct": 54.59359943400539,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Tokyo": {
+   "published_pct": 18.1261416951499,
+   "reverified_pct": 18.1261416951499,
+   "pct_drift": 0.0,
+   "published_agree": 0.8213906772519128,
+   "reverified_agree": 0.8213906772519128,
+   "n_trusted": 5,
+   "screen_excluded": []
+  },
+  "Sydney": {
+   "published_pct": -2.3330490078734947,
+   "reverified_pct": -2.3330490078734947,
+   "pct_drift": 0.0,
+   "published_agree": 0.5517056305549626,
+   "reverified_agree": 0.5517056305549626,
+   "n_trusted": 4,
+   "screen_excluded": []
+  },
+  "Singapore": {
+   "published_pct": 45.18102158573863,
+   "reverified_pct": 45.18102158573863,
+   "pct_drift": 0.0,
+   "published_agree": 1.0,
+   "reverified_agree": 1.0,
+   "n_trusted": 5,
+   "screen_excluded": []
+  }
+ }
+}

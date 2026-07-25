@@ -1,0 +1,46 @@
+{
+ "case": "Arasense Screening Drift Ledger",
+ "notes": "Climate-model archives update. Reference datasets revise. Screenings therefore drift, and a trust score is only honest if it is re-earned. This ledger is the public record of every re-run of a published Arasense screening: what was checked, what moved, and what was done about it. Entries are append-only.",
+ "method": "Re-runs use the identical pipeline configuration as the published number (same metric, windows, radius, ensemble mode). Drift is the difference between the published and re-run values. Exclusions by the extreme-plausibility screen are named, never silent.",
+ "entries": [
+  {
+   "date": "2026-07-25",
+   "type": "BORDERLINE DRIFT",
+   "title": "Bologna screening re-run for the Aras Diagram publication",
+   "summary": "The trust screening behind the published +14.2% rx1day projection was re-run to draw the Aras Diagram case-study panel. All 32 trusted weights reproduced the published run to four decimal places. Of the two originally rejected models, EC-Earth3-Veg-LR failed again (negative correlation), while HadGEM3-GC31-MM drifted marginally above the rejection floor (correlation now +0.11) as the upstream archive updated. It is flagged borderline on the published diagram rather than silently promoted.",
+   "links": [
+    {"label": "diagram data", "href": "data/bologna-aras-diagram.json"},
+    {"label": "the diagram", "href": "case-studies.html#bologna"}
+   ]
+  },
+  {
+   "date": "2026-07-05",
+   "type": "RE-VERIFIED",
+   "title": "Full atlas re-verification under the extreme-plausibility screen",
+   "summary": "Every published Trust Atlas number was re-run through the pipeline with the new extreme-plausibility screen active. 36 numbers checked: 35 matched the published values within 0.02 percentage points, the largest deviation was 0.1 points (Rome), and the only exclusion was Mexico City's documented artifact. Cities with sane ensembles are untouched by the screen by construction.",
+   "links": [
+    {"label": "re-verification record", "href": "data/atlas-reverification-2026-07-05.json"},
+    {"label": "atlas", "href": "atlas.html"}
+   ]
+  },
+  {
+   "date": "2026-07-05",
+   "type": "SCREEN SHIPPED",
+   "title": "Extreme-plausibility screen added to the pipeline; Mexico City published",
+   "summary": "Root cause of the withheld Mexico City number: statistical downscaling had exploded daily rainfall extremes over high-relief terrain in several models (worst: BCC-CSM2-MR at 1,513 mm against an observed 67 mm baseline, 22.6 times observed), while their mean-climate behaviour still earned trust weights. Mean-climate skill does not certify extreme-value sanity. The fix: before trust weighting, any model whose window-level value strays beyond 5 times the observed ERA5-Land level is excluded and named. Mexico City was re-run under the screen and published honestly: -4.6%, 50% agreement, a genuinely contested signal.",
+   "links": [
+    {"label": "full investigation", "href": "why.html"},
+    {"label": "raw full-ensemble run", "href": "data/mexico-city-full-projection.json"}
+   ]
+  },
+  {
+   "date": "2026-07-04",
+   "type": "ARTIFACT CAUGHT",
+   "title": "Mexico City withheld from the World Atlas launch",
+   "summary": "At World Atlas launch, Mexico City's screening produced a 263 mm rx1day baseline and a -69.2% change: physically implausible for the Basin of Mexico. The number was withheld from publication the same day, with the raw record kept public. Withholding a number we do not believe is also honesty.",
+   "links": [
+    {"label": "world atlas raw runs", "href": "data/world-trust-atlas.json"}
+   ]
+  }
+ ]
+}

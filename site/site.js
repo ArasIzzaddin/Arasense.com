@@ -209,7 +209,7 @@
       ["Home", "/"], ["Why not just average?", "/why.html"], ["Trust Atlas", "/atlas.html"], ["Demo console", "/demo.html"],
       ["Case studies", "/case-studies.html"], ["Sample evidence", "/evidence.html"],
       ["Bari / Puglia pilot", "/bari-puglia.html"], ["Aras' Diagram Studio", "/aras-diagram.html"],
-      ["All trust profiles", "/trust/"]
+      ["All trust profiles", "/trust/"], ["Drift Ledger", "/drift.html"], ["Open run data", "/data/"]
     ];
     var ACTIONS = [
       ["Book a briefing", "/briefing.html"],
