@@ -90,6 +90,7 @@
     .adg.armed.on .mark circle.dot { transform: scale(1); }
     .adg .mark:hover circle.dot { fill: rgba(125, 240, 195, 0.55); }
     .adg .mark.rej circle.dot { fill: rgba(240, 143, 132, 0.14); stroke: var(--red); stroke-dasharray: 3 3; }
+    .adg .mark.bl circle.dot { fill: rgba(244, 199, 125, 0.16); stroke: var(--amber); }
     .adg .rej-ring { fill: none; stroke: rgba(240, 143, 132, 0.5); transform-box: fill-box; transform-origin: center; animation: adg-pulse 2.2s ease-out infinite; }
     @keyframes adg-pulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
 
@@ -196,7 +197,7 @@
         <div class="panel reveal" id="adg-panel" style="margin-top:16px; display:none;">
           <h3>The instrument that decided — Aras&rsquo; Diagram of the full screening</h3>
           <p style="font-size:14px; margin-top:6px;">
-            This is the actual verdict, drawn on the peer-reviewed instrument that made it (Izzaddin et&nbsp;al. 2024). Each mark is one CMIP6 model placed by its bias (&beta;&minus;1) and variability (&alpha;&minus;1) error against 20 years of observed Bologna climate; the faint tail shows how much imperfect timing adds. The closer to the centre, the more the model earned. Hover any mark.
+            The screening behind the +14.2%, drawn on the peer-reviewed instrument that made it (Izzaddin et&nbsp;al. 2024). Each mark is one CMIP6 model placed by its bias (&beta;&minus;1) and variability (&alpha;&minus;1) error against 20 years of observed Bologna climate; the faint tail shows how much imperfect timing adds. Re-run July 2026: the 32 trusted weights reproduce the published projection to four decimals, one model is rejected outright, and one borderline model has drifted just above the floor since the original run &mdash; shown in amber, because drift gets reported too. Hover any mark.
           </p>
           <div class="adg" id="adg">
             <svg id="adg-svg" viewBox="0 0 900 640" role="img" aria-label="Aras Diagram of all 34 CMIP6 models screened for Bologna: bias error versus variability error with iso-error circles; models failing the skill threshold are marked rejected."></svg>
@@ -394,7 +395,7 @@
         el("line", { x1: X(m.b), y1: Y(m.a), x2: X(m.xe), y2: Y(m.ye), "class": "tail" });
       });
       M.forEach(function (m, i) {
-        var g = el("g", { "class": "mark" + (m.rej ? " rej" : ""),
+        var g = el("g", { "class": "mark" + (m.rej ? " rej" : "") + (m.bl ? " bl" : ""),
                           transform: "translate(" + X(m.b) + "," + Y(m.a) + ")" });
         var rad = m.rej ? 7 : 5 + (m.w - wMin) / ((wMax - wMin) || 1) * 4.5;
         if (m.rej) el("circle", { r: 9, "class": "rej-ring" }, g);
@@ -405,8 +406,9 @@
             "<br>KGE " + m.kge.toFixed(2) + " · total error " + m.e.toFixed(0) + "%" +
             "<br>β−1 " + m.b.toFixed(2) + " · α−1 " + m.a.toFixed(2) +
             " · ρ " + m.r.toFixed(2) +
-            (m.rej ? "<br><span class='down'>below skill floor (KGE ≤ −0.41)</span>"
-                   : "<br><span class='up'>trust weight " + (m.w * 100).toFixed(1) + "%</span>");
+            (m.rej ? "<br><span class='down'>rejected by the screening</span>"
+                   : "<br><span class='up'>trust weight " + (m.w * 100).toFixed(1) + "%</span>") +
+            (m.bl ? "<br><span style='color:var(--amber)'>borderline · rejected in the original run</span>" : "");
           var box = wrap.getBoundingClientRect();
           tip.style.left = (ev.clientX - box.left) + "px";
           tip.style.top = (ev.clientY - box.top) + "px";

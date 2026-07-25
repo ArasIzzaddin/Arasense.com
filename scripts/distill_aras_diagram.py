@@ -1,12 +1,15 @@
 """
-Distill the full Bologna diagnostic run into the published diagram file.
+Distill the Bologna screening run into the published diagram file.
 
-Reads bologna_diag_full.json (output of POST /api/climate/diagnostic for
-Bologna, 34 models, 1995-2014, ERA5-Land reference) and joins each model's
-Aras Diagram coordinates with its projection trust weight from the deep-dive
-file. Writes site/data/bologna-aras-diagram.json — the raw evidence behind
-the case-study diagram. Rejection rule mirrors the engine: KGE <= -0.41
-(Knoben et al. 2019).
+Reads bologna_diag_full.json (scripts/run_bologna_diagnostic.py: the same
+monthly-climatology trust screening the published rx1day projection used)
+and writes site/data/bologna-aras-diagram.json.
+
+The 32 trusted weights reproduce the published deep dive exactly. Of the two
+models the published run rejected, EC-Earth3-Veg-LR is rejected again
+(negative correlation); HadGEM3-GC31-MM now sits marginally above the floor
+(r = +0.11) because the upstream archive has updated since the original run.
+It is flagged as borderline rather than silently promoted.
 
     python scripts/distill_aras_diagram.py
 """
@@ -14,22 +17,23 @@ the case-study diagram. Rejection rule mirrors the engine: KGE <= -0.41
 import json
 
 DIAG = "bologna_diag_full.json"
-DEEP = "docs/projections/bologna-flood-driving-rainfall-mid-century.json"
 OUT = "site/data/bologna-aras-diagram.json"
-KGE_FLOOR = -0.41
+
+BORDERLINE = {
+    "HadGEM3-GC31-MM": "rejected in the original published run; in this "
+                       "re-run it sits just above the floor (r = +0.11). "
+                       "Borderline models can flip as the archive updates — "
+                       "which is why the floor is published.",
+}
 
 
 def main() -> None:
     diag = json.load(open(DIAG, encoding="utf-8"))
-    deep = json.load(open(DEEP, encoding="utf-8"))
-
-    weights = {m["name"]: m for m in deep.get("per_model", [])}
 
     models = []
     for m in diag["metrics"]:
-        rej = m["kge"] <= KGE_FLOOR
-        w = weights.get(m["name"], {})
-        models.append({
+        rej = m["weight"] <= 0
+        row = {
             "n": m["name"],
             "b": round(m["beta"], 4),
             "a": round(m["alpha"], 4),
@@ -38,20 +42,26 @@ def main() -> None:
             "r": round(m["correlation"], 4),
             "kge": round(m["kge"], 4),
             "e": round(m["error_total_pct"], 1),
-            "w": round(w.get("weight", 0.0), 5),
-            "tier": w.get("trust_tier", "rejected" if rej else "unweighted"),
+            "w": round(m["weight"], 5),
+            "tier": m["trust_tier"],
             "rej": rej,
-        })
+        }
+        if m["name"] in BORDERLINE:
+            row["bl"] = BORDERLINE[m["name"]]
+        models.append(row)
 
     models.sort(key=lambda x: x["kge"], reverse=True)
     n_rej = sum(1 for m in models if m["rej"])
 
     out = {
-        "case": "Bologna — Aras Diagram of the full CMIP6 screening",
-        "notes": "Each model's bias (beta-1), variability (alpha-1) and "
-                 "correlation error against observed ERA5-Land climate, "
-                 "1995-2014, 50 km radius. Same run family as the deep-dive "
-                 "projection; rejection rule KGE <= -0.41.",
+        "case": "Bologna — Aras Diagram of the CMIP6 trust screening",
+        "notes": "Re-run (July 2026) of the exact screening configuration "
+                 "behind the published +14.2% rx1day projection: monthly "
+                 "climatology vs observed ERA5-Land, 1995-2014, 50 km radius. "
+                 "The 32 trusted weights reproduce the published run to four "
+                 "decimals. EC-Earth3-Veg-LR is rejected (negative "
+                 "correlation); HadGEM3-GC31-MM, rejected originally, now "
+                 "sits marginally above the floor and is flagged borderline.",
         "region": {"lat": 44.494, "lon": 11.343, "radius_km": 50},
         "reference": "ERA5-Land",
         "window": ["1995-01-01", "2014-12-31"],
@@ -61,9 +71,8 @@ def main() -> None:
     }
     with open(OUT, "w", encoding="utf-8", newline="\n") as f:
         json.dump(out, f, indent=1)
-    print(f"{OUT}: {len(models)} models, {n_rej} rejected")
-    for m in models[-4:]:
-        print(f"  tail: {m['n']} KGE {m['kge']} rej={m['rej']}")
+    print(f"{OUT}: {len(models)} models, {n_rej} rejected, "
+          f"{sum(1 for m in models if 'bl' in m)} borderline")
 
 
 if __name__ == "__main__":
