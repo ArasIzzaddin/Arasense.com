@@ -75,6 +75,63 @@
       caveat: "Screening-level ranking across a five-city Italian portfolio.",
       src: "data/italian-flood-portfolio.json"
     },
+    "lafaw-pod": {
+      title: "Lafaw · Erbil hindcast · watch level",
+      value: "POD 0.79 one day ahead",
+      items: [
+        ["probability of detection", "0.79"],
+        ["false-alarm ratio", "0.56"],
+        ["critical success index", "0.39"],
+        ["lead", "1 day"],
+        ["basins", "9 · Erbil"],
+        ["period", "2024-03 to 2026-09"]
+      ],
+      settings: "ECMWF IFS 0.25 previous runs · SCS runoff · Gumbel reference flows",
+      caveat: "Deterministic runs, reanalysis-observed rain. Half the flags came without a runoff day; we say so.",
+      src: "data/lafaw-erbil-hindcast.json"
+    },
+    "lafaw-csi": {
+      title: "Lafaw · Erbil hindcast · three days ahead",
+      value: "CSI 0.41",
+      items: [
+        ["probability of detection", "0.70"],
+        ["false-alarm ratio", "0.51"],
+        ["critical success index", "0.41"],
+        ["lead", "3 days"],
+        ["same at 1 day", "CSI 0.39"]
+      ],
+      settings: "Same pipeline and thresholds at every lead",
+      caveat: "Skill barely changes from 1 to 3 days of lead: the signal is in the synoptic situation.",
+      src: "data/lafaw-erbil-hindcast.json"
+    },
+    "lafaw-hindcast": {
+      title: "Lafaw · Erbil hindcast · scope",
+      value: "2.5 years · 9 basins · 3 models",
+      items: [
+        ["forecast archive", "2024-03 to 2026-09"],
+        ["models", "ECMWF IFS, ICON, GFS"],
+        ["multi-model majority", "CSI 0.44 at 1 day"],
+        ["warning level", "FAR 0.73 to 0.90, systematic"]
+      ],
+      settings: "Every daily issue, fair-event scoring",
+      caveat: "The warning level is published as not yet usable as a hard trigger.",
+      src: "data/lafaw-erbil-hindcast.json"
+    },
+    "gazna-peak": {
+      title: "Gazna · 2-D inundation · T20",
+      value: "111 m³/s at 8.3 h",
+      items: [
+        ["rain", "71.8 mm in 6 h"],
+        ["curve number", "83.4"],
+        ["effective runoff", "33.9 mm"],
+        ["SCS reference peak", "106 m³/s"],
+        ["flooded ≥ 0.3 m", "3.9 km²"],
+        ["mass error", "0.000%"]
+      ],
+      settings: "Local-inertial scheme · 30 m DEM · n 0.05 · 24 h",
+      caveat: "Agreement of two methods, not yet a gauge. First-season stages are the test.",
+      src: "data/lafaw-erbil-gazna-t20.json"
+    },
     "scenario": {
       title: "Bologna · scenario comparison",
       value: "SSP2-4.5 vs SSP5-8.5",

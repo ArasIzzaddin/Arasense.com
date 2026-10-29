@@ -35,7 +35,7 @@
       "affiliation": { "@type": "CollegeOrUniversity", "name": "Politecnico di Bari" }
     },
     "email": "aras@arasense.com",
-    "knowsAbout": ["climate risk", "climate model evaluation", "CMIP6", "flood risk screening", "Aras Diagram"]
+    "knowsAbout": ["climate risk", "climate model evaluation", "CMIP6", "flood risk screening", "flood early warning", "Aras Diagram"]
   }
   </script>
   <style>
@@ -191,6 +191,7 @@
       <nav class="nav-links" id="nav-links" aria-label="Main navigation">
         <a href="why.html">Why</a>
         <a href="atlas.html">Atlas</a>
+        <a href="flood-warning.html">Flood warning</a>
         <a href="demo.html">Demo</a>
         <a href="case-studies.html">Case studies</a>
         <a href="evidence.html">Evidence</a>
@@ -368,6 +369,40 @@
 
       <hr class="hr">
 
+      <!-- ============ FLOOD WARNING ============ -->
+      <section class="section" id="flood" data-chapter="Flood warning">
+        <div class="section-head reveal">
+          <span class="eyebrow">Operational · Lafaw</span>
+          <h2>Flash floods give hours. <em>Lafaw gives days.</em></h2>
+          <p class="lead">
+            The Atlas answers what the climate does to a city by 2050. Lafaw answers what the next six days do to it. The same habit applies: a 51-member weather ensemble is run through every basin that threatens the city, the result is a probability per basin and per day, and every forecast is scored against what actually fell, with the scores published to the client.
+          </p>
+        </div>
+        <div class="grid-3">
+          <a class="card reveal" href="flood-warning.html#how">
+            <span class="label">Forecast</span>
+            <h3>Probability per basin, six days out</h3>
+            <p>Catchments from the 30 m Copernicus DEM, curve numbers from land cover and soils, runoff and peak flow for all 51 ECMWF members, a 0 to 6 hour nowcast with the arrival time of the peak.</p>
+          </a>
+          <a class="card reveal" href="flood-warning.html#verification">
+            <span class="label">Verification</span>
+            <h3>Scored on 2.5 years before it is sold</h3>
+            <p>Watch level: four of five runoff days flagged one day ahead. Warning level: false alarms still too high, and we say so. Every number carries its receipt.</p>
+          </a>
+          <a class="card reveal" href="flood-warning.html#maps">
+            <span class="label">Flood maps</span>
+            <h3>Corridors and 2-D inundation</h3>
+            <p>Flood classes per reach for four return periods, and a two-dimensional model that routes a design storm over the terrain and returns depth, extent and the hydrograph at the station.</p>
+          </a>
+        </div>
+        <div class="actions reveal" style="margin-top:20px;">
+          <a class="button" href="flood-warning.html">Lafaw flood early warning</a>
+          <a class="button-secondary" href="briefing.html">Request a pilot</a>
+        </div>
+      </section>
+
+      <hr class="hr">
+
       <!-- ============ FOUNDATION ============ -->
       <section class="section" id="foundation" data-chapter="Foundation">
         <div class="section-head reveal">
@@ -392,7 +427,7 @@
           </div>
         </div>
         <div class="notice reveal" style="margin-top:16px;">
-          <strong>Validation note.</strong> Flood outputs are validation-stage screening evidence, not a replacement for hydraulic modelling, field validation, local calibration, or engineering-grade flood forecasting. We publish what works and what doesn't.
+          <strong>Validation note.</strong> Climate flood-screening outputs are validation-stage screening evidence, not a replacement for hydraulic modelling, field validation, local calibration, or engineering-grade flood forecasting. We publish what works and what doesn't. Lafaw's operational forecasts are verified separately, against observed rain, on the <a href="flood-warning.html#verification" style="color:var(--accent-bright);">flood-warning page</a>.
         </div>
       </section>
 
@@ -477,6 +512,7 @@
           <div>
             <span class="eyebrow">Explore</span>
             <p><a href="data/">Open run data</a></p>
+            <p><a href="flood-warning.html">Lafaw flood early warning</a></p>
             <p><a href="trust/">City trust profiles</a></p>
             <p><a href="demo.html">Demo console</a></p>
             <p><a href="aras-diagram.html">Aras&rsquo; Diagram Studio</a></p>

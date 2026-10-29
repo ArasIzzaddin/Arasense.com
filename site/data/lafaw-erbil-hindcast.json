@@ -1,0 +1,39 @@
+{
+ "what": "Lafaw hindcast verification, Erbil, nine wadi basins",
+ "generated": "2026-10-28",
+ "period": "2024-03 to 2026-09 (every daily issue available from the ECMWF IFS 0.25 previous-runs archive; ICON and GFS for the multi-model variants)",
+ "forecast": "Open-Meteo previous-runs API, deterministic runs of ECMWF IFS 0.25, ICON and GFS; basin rain at the catchment centroid; SCS curve-number runoff with antecedent wetness; peak flow vs Gumbel reference flows Q2/Q5/Q20",
+ "observed": "ECMWF IFS analysis daily basin rain (NASA GPM IMERG and gauges when available) scored with the same rule family (fair events)",
+ "event_definition": "a day is an event at a level when the observed basin rain and wetness, through the same runoff rule, reach that level",
+ "scores": {
+  "watch": {
+   "lead_1_day": {
+    "POD": 0.79,
+    "FAR": 0.56,
+    "CSI": 0.39
+   },
+   "lead_3_days": {
+    "POD": 0.7,
+    "FAR": 0.51,
+    "CSI": 0.41
+   }
+  },
+  "warning": {
+   "note": "POD about 0.5, FAR 0.73 to 0.90 for every model and every combination tried; systematic"
+  },
+  "multimodel_majority": {
+   "watch_lead_1_day_CSI": 0.44
+  }
+ },
+ "what_it_means": [
+  "watch level: four of five runoff days flagged one day ahead, half the flags without a runoff day",
+  "lead time from 1 to 3 days costs little skill",
+  "warning level is not yet usable as a hard trigger; thresholds and the observed product are what the first season's gauges will fix"
+ ],
+ "caveats": [
+  "deterministic runs, not the 51-member ensemble used operationally (the ensemble archive starts later)",
+  "observed rain is a reanalysis, not a gauge, for most of the period",
+  "the 12 April 2023 event lies before the archive and could not be hindcast"
+ ],
+ "source_documents": "docs/hindcast_erbil.md, docs/hindcast_multimodel_erbil.md and docs/outlook_thresholds.md in the Lafaw repository"
+}
