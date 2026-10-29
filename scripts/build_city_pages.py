@@ -387,6 +387,7 @@ PAGE = Template("""<!doctype html>
       <nav class="nav-links" id="nav-links" aria-label="Main navigation">
         <a href="/why.html">Why</a>
         <a href="/atlas.html" class="active">Atlas</a>
+        <a href="/flood-warning.html">Flood warning</a>
         <a href="/demo.html">Demo</a>
         <a href="/case-studies.html">Case studies</a>
         <a href="/evidence.html">Evidence</a>
@@ -629,6 +630,7 @@ HUB = Template("""<!doctype html>
       <nav class="nav-links" id="nav-links" aria-label="Main navigation">
         <a href="/why.html">Why</a>
         <a href="/atlas.html" class="active">Atlas</a>
+        <a href="/flood-warning.html">Flood warning</a>
         <a href="/demo.html">Demo</a>
         <a href="/case-studies.html">Case studies</a>
         <a href="/evidence.html">Evidence</a>
@@ -890,7 +892,7 @@ def build_hub(cities, n_ranked, world):
 def build_sitemap(cities, world):
     today = datetime.date.today().isoformat()
     static = [
-        ("/", "1.0"), ("/why", "0.9"), ("/atlas", "0.9"), ("/trust/", "0.9"),
+        ("/", "1.0"), ("/why", "0.9"), ("/atlas", "0.9"), ("/flood-warning", "0.9"), ("/trust/", "0.9"),
         ("/briefing", "0.8"),
         ("/case-studies", "0.8"), ("/evidence", "0.8"),
         ("/demo", "0.7"), ("/bari-puglia", "0.7"),
